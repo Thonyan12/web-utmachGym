@@ -5,6 +5,7 @@ import { Registro } from './pages/registro/registro';
 import { Terminos } from './pages/terminos/terminos';
 import { Politicas } from './pages/politicas/politicas';
 import { Contacto } from './pages/contacto/contacto';
+import { adminRoutes } from './admin/admin.routes';
 
 export const routes: Routes = [
   { path: '', component: Landing },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'terminos', component: Terminos },
   { path: 'politicas', component: Politicas },
   { path: 'contacto', component: Contacto },
-  { path: '**', redirectTo: '', pathMatch: 'full' } // Redirige a Landing
+  { path: 'admin', children: adminRoutes }, 
+  { path: '**', redirectTo: '', pathMatch: 'full' } // <-- Siempre al final
 ];
