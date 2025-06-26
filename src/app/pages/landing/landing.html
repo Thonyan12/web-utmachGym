@@ -1,0 +1,107 @@
+<header class="navbar navbar-expand-lg" style="background-color: #0a1a2e;">
+  <div class="container-fluid">
+    <span class="navbar-brand text-white fw-bold fs-3 animate__animated animate__fadeIn">
+      <img src="logomain.png" alt="Logo" width="40" class="me-2 animate__animated animate__rotateIn" /> PowerFit Gym
+    </span>
+    <div class="ms-auto">
+      <a routerLink="/login" class="btn btn-outline-light animate__animated animate__pulse animate__infinite animate__slower">Iniciar sesión</a>
+    </div>
+  </div>
+</header>
+
+<section class="text-center py-5" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+  <div class="container">
+    <img src="logomain.png" alt="Gimnasio" class="img-fluid rounded-circle mb-4 shadow-lg animate__animated animate__zoomIn" style="width: 200px; height: 200px; object-fit: cover; border: 5px solid #fca311;">
+    <h1 class="display-4 text-white fw-bold animate__animated animate__fadeInUp">Bienvenido a <span style="color: #fca311;">PowerFit Gym</span></h1>
+    <p class="lead text-white-50 animate__animated animate__fadeInUp animate__delay-1s">Transforma tu cuerpo y mente con nosotros</p>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="row justify-content-center mb-5 animate__animated animate__fadeIn">
+    <div class="col-md-6 text-center">
+      <h2 class="mb-4" style="color: #14213d;">¿Eres nuevo?</h2>
+      <a routerLink="/registro" class="btn btn-lg mb-4 w-100 animate__animated animate__pulse animate__infinite animate__slow" style="background-color: #fca311; color: #0a1a2e; font-weight: 600;">
+        Registrarse
+      </a>
+    </div>
+  </div>
+  
+  <div class="row justify-content-center animate__animated animate__fadeInUp">
+    <div class="col-md-10">
+      <h2 class="text-center mb-5" style="color: #14213d;">Nuestros Servicios</h2>
+      <div class="row g-4">
+        <div class="col-md-6 col-lg-3 animate__animated" data-animate="animate__fadeInLeft">
+          <div class="card h-100 border-0 shadow" style="transition: all 0.3s ease;">
+            <div class="card-body text-center p-4">
+              <i class="bi bi-person-arms-up" style="font-size: 2rem; color: #fca311; margin-bottom: 1rem;"></i>
+              <h5 class="card-title fw-bold" style="color: #14213d;">Entrenamiento Personal</h5>
+              <p class="card-text text-muted">Rutinas adaptadas a tus objetivos específicos.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 animate__animated" data-animate="animate__fadeInUp">
+          <div class="card h-100 border-0 shadow" style="transition: all 0.3s ease;">
+            <div class="card-body text-center p-4">
+              <i class="bi bi-egg-fried" style="font-size: 2rem; color: #fca311; margin-bottom: 1rem;"></i>
+              <h5 class="card-title fw-bold" style="color: #14213d;">Asesoría Nutricional</h5>
+              <p class="card-text text-muted">Planes alimenticios para potenciar tus resultados.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 animate__animated" data-animate="animate__fadeInUp">
+          <div class="card h-100 border-0 shadow" style="transition: all 0.3s ease;">
+            <div class="card-body text-center p-4">
+              <i class="bi bi-people" style="font-size: 2rem; color: #fca311; margin-bottom: 1rem;"></i>
+              <h5 class="card-title fw-bold" style="color: #14213d;">Clases Grupales</h5>
+              <p class="card-text text-muted">Variedad de clases para todos los niveles.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 animate__animated" data-animate="animate__fadeInRight">
+          <div class="card h-100 border-0 shadow" style="transition: all 0.3s ease;">
+            <div class="card-body text-center p-4">
+              <i class="bi bi-graph-up" style="font-size: 2rem; color: #fca311; margin-bottom: 1rem;"></i>
+              <h5 class="card-title fw-bold" style="color: #14213d;">Seguimiento</h5>
+              <p class="card-text text-muted">Monitoreo constante de tu progreso.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="text-center py-4" style="background-color: #0a1a2e; color: white;">
+  <div class="container">
+    <div class="mb-3">
+      <a href="#" class="text-decoration-none text-white me-3">Términos</a> | 
+      <a href="#" class="text-decoration-none text-white mx-3">Políticas</a> | 
+      <a href="#" class="text-decoration-none text-white ms-3">Contacto</a>
+    </div>
+    <p class="mb-0 small">&copy; 2025 Utmach Gym - Machala, Ecuador</p>
+  </div>
+</footer>
+
+<script>
+  // Script simple para animaciones al hacer scroll
+  document.addEventListener('DOMContentLoaded', function() {
+    const animateElements = document.querySelectorAll('[data-animate]');
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const animation = entry.target.getAttribute('data-animate');
+          entry.target.classList.add(animation);
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    animateElements.forEach(element => {
+      observer.observe(element);
+    });
+  });
+</script>
