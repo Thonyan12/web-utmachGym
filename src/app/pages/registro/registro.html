@@ -1,1 +1,181 @@
-<p>registro works!</p>
+<section class="d-flex align-items-center justify-content-center animate__animated animate__fadeIn" 
+         style="min-height: 90vh; background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+  <div class="card shadow-lg p-4 border-2 position-relative" style="max-width: 600px; width: 100%; border-color: #fca311 !important;">
+    
+    <!-- Botón para volver atrás -->
+    <button routerLink="/" class="btn btn-sm position-absolute" 
+            style="top: 15px; left: 15px; color: #14213d; background-color: #fca311;">
+      <i class="bi bi-arrow-left"></i> Volver
+    </button>
+    
+    <div class="text-center mb-4">
+      <img src="logomain.png" alt="Logo" width="80" class="mb-3 animate__animated animate__zoomIn">
+      <h2 class="fw-bold" style="color: #14213d; position: relative;">
+        <span style="display: inline-block; position: relative;">
+          Registro de Nuevo Miembro
+          <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #fca311; border-radius: 3px;"></span>
+        </span>
+      </h2>
+    </div>
+    
+    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <!-- Cédula -->
+        <div class="col-md-6 mb-4">
+          <label for="cedula" class="form-label fw-medium" style="color: #14213d;">Cédula</label>
+          <input type="text" class="form-control py-2 border-2" id="cedula" formControlName="cedula" 
+                 placeholder="Ej: 1234567890" style="border-color: #14213d;">
+          <div *ngIf="cedula?.touched && cedula?.invalid" class="text-danger small mt-1">
+            <div *ngIf="cedula?.errors?.['required']">La cédula es requerida</div>
+            <div *ngIf="cedula?.errors?.['pattern']">Debe tener 10 dígitos</div>
+          </div>
+        </div>
+        
+        <!-- Correo -->
+        <div class="col-md-6 mb-4">
+          <label for="correo" class="form-label fw-medium" style="color: #14213d;">Correo</label>
+          <input type="email" class="form-control py-2 border-2" id="correo" formControlName="correo" 
+                 placeholder="nombre@ejemplo.com" style="border-color: #14213d;">
+          <div *ngIf="correo?.touched && correo?.invalid" class="text-danger small mt-1">
+            <div *ngIf="correo?.errors?.['required']">El correo es requerido</div>
+            <div *ngIf="correo?.errors?.['email']">Debe ser un correo válido</div>
+          </div>
+        </div>
+        
+        <!-- Nombre -->
+        <div class="col-md-6 mb-4">
+          <label for="nombre" class="form-label fw-medium" style="color: #14213d;">Nombre</label>
+          <input type="text" class="form-control py-2 border-2" id="nombre" formControlName="nombre" 
+                 style="border-color: #14213d;">
+          <div *ngIf="nombre?.touched && nombre?.invalid" class="text-danger small mt-1">
+            <div *ngIf="nombre?.errors?.['required']">El nombre es requerido</div>
+            <div *ngIf="nombre?.errors?.['minlength']">Debe tener al menos 2 caracteres</div>
+          </div>
+        </div>
+        
+        <!-- Primer Apellido -->
+        <div class="col-md-6 mb-4">
+          <label for="apellido1" class="form-label fw-medium" style="color: #14213d;">Primer Apellido</label>
+          <input type="text" class="form-control py-2 border-2" id="apellido1" formControlName="apellido1" 
+                 style="border-color: #14213d;">
+          <div *ngIf="apellido1?.touched && apellido1?.invalid" class="text-danger small mt-1">
+            <div *ngIf="apellido1?.errors?.['required']">El primer apellido es requerido</div>
+            <div *ngIf="apellido1?.errors?.['minlength']">Debe tener al menos 2 caracteres</div>
+          </div>
+        </div>
+        
+        <!-- Segundo Apellido -->
+        <div class="col-md-6 mb-4">
+          <label for="apellido2" class="form-label fw-medium" style="color: #14213d;">Segundo Apellido</label>
+          <input type="text" class="form-control py-2 border-2" id="apellido2" formControlName="apellido2" 
+                 style="border-color: #14213d;">
+        </div>
+        
+        <!-- Edad -->
+        <div class="col-md-3 mb-4">
+          <label for="edad" class="form-label fw-medium" style="color: #14213d;">Edad</label>
+          <input type="number" class="form-control py-2 border-2" id="edad" formControlName="edad" 
+                 min="10" max="100" style="border-color: #14213d;">
+          <div *ngIf="edad?.touched && edad?.invalid" class="text-danger small mt-1">
+            <div *ngIf="edad?.errors?.['required']">La edad es requerida</div>
+            <div *ngIf="edad?.errors?.['min']">Debe ser mayor a 10 años</div>
+            <div *ngIf="edad?.errors?.['max']">Debe ser menor a 100 años</div>
+          </div>
+        </div>
+        
+        <!-- Sexo -->
+        <div class="col-md-3 mb-4">
+          <label for="sexo" class="form-label fw-medium" style="color: #14213d;">Sexo</label>
+          <select class="form-select py-2 border-2" id="sexo" formControlName="sexo" 
+                  style="border-color: #14213d;">
+            <option value="">Selecciona</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Femenino">Femenino</option>
+            <option value="Otro">Otro</option>
+          </select>
+          <div *ngIf="sexo?.touched && sexo?.invalid" class="text-danger small mt-1">
+            <div *ngIf="sexo?.errors?.['required']">El sexo es requerido</div>
+          </div>
+        </div>
+        
+        <!-- Dirección -->
+        <div class="col-md-6 mb-4">
+          <label for="direccion" class="form-label fw-medium" style="color: #14213d;">Dirección</label>
+          <input type="text" class="form-control py-2 border-2" id="direccion" formControlName="direccion" 
+                 style="border-color: #14213d;">
+          <div *ngIf="direccion?.touched && direccion?.invalid" class="text-danger small mt-1">
+            <div *ngIf="direccion?.errors?.['required']">La dirección es requerida</div>
+            <div *ngIf="direccion?.errors?.['minlength']">Debe tener al menos 5 caracteres</div>
+          </div>
+        </div>
+        
+        <!-- Altura -->
+        <div class="col-md-4 mb-4">
+          <label for="altura" class="form-label fw-medium" style="color: #14213d;">Altura (cm)</label>
+          <input type="number" class="form-control py-2 border-2" id="altura" formControlName="altura" 
+                 min="100" max="250" step="0.01" style="border-color: #14213d;">
+          <div *ngIf="altura?.touched && altura?.invalid" class="text-danger small mt-1">
+            <div *ngIf="altura?.errors?.['required']">La altura es requerida</div>
+            <div *ngIf="altura?.errors?.['min']">Mínimo 100 cm</div>
+            <div *ngIf="altura?.errors?.['max']">Máximo 250 cm</div>
+          </div>
+        </div>
+        
+        <!-- Peso -->
+        <div class="col-md-4 mb-4">
+          <label for="peso" class="form-label fw-medium" style="color: #14213d;">Peso (kg)</label>
+          <input type="number" class="form-control py-2 border-2" id="peso" formControlName="peso" 
+                 min="30" max="200" step="0.01" style="border-color: #14213d;">
+          <div *ngIf="peso?.touched && peso?.invalid" class="text-danger small mt-1">
+            <div *ngIf="peso?.errors?.['required']">El peso es requerido</div>
+            <div *ngIf="peso?.errors?.['min']">Mínimo 30 kg</div>
+            <div *ngIf="peso?.errors?.['max']">Máximo 200 kg</div>
+          </div>
+        </div>
+        
+        <!-- Contextura -->
+        <div class="col-md-4 mb-4">
+          <label for="contextura" class="form-label fw-medium" style="color: #14213d;">Contextura</label>
+          <select class="form-select py-2 border-2" id="contextura" formControlName="contextura" 
+                  style="border-color: #14213d;">
+            <option value="">Selecciona</option>
+            <option value="Mesomorfo">Mesomorfo</option>
+            <option value="Ectomorfo">Ectomorfo</option>
+            <option value="Endomorfo">Endomorfo</option>
+          </select>
+          <div *ngIf="contextura?.touched && contextura?.invalid" class="text-danger small mt-1">
+            <div *ngIf="contextura?.errors?.['required']">La contextura es requerida</div>
+          </div>
+        </div>
+        
+        <!-- Objetivo -->
+        <div class="col-12 mb-4">
+          <label for="objetivo" class="form-label fw-medium" style="color: #14213d;">Objetivo</label>
+          <textarea class="form-control py-2 border-2" id="objetivo" formControlName="objetivo" rows="3" 
+                    placeholder="Ej: Bajar de peso, ganar masa muscular, etc." 
+                    style="border-color: #14213d;"></textarea>
+          <div *ngIf="objetivo?.touched && objetivo?.invalid" class="text-danger small mt-1">
+            <div *ngIf="objetivo?.errors?.['required']">El objetivo es requerido</div>
+            <div *ngIf="objetivo?.errors?.['minlength']">Debe tener al menos 10 caracteres</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Botón de Registro -->
+      <button type="submit" class="btn w-100 py-2" 
+              [ngClass]="{'animate__animated animate__pulse animate__infinite animate__slow': registroForm.valid}"
+              [style]="registroForm.valid ? 
+                      'background-color: #fca311; color: #0a1a2e; font-weight: 600; border: none;' : 
+                      'background-color: #cccccc; color: #666666; font-weight: 600; border: none;'"
+              [disabled]="registroForm.invalid">
+        <i class="bi bi-person-plus me-2"></i> Registrarse
+      </button>
+    </form>
+    
+    <div class="mt-4 text-center">
+      <a routerLink="/login" class="text-decoration-none fw-medium" style="color: #fca311;">
+        <i class="bi bi-box-arrow-in-right me-1"></i> ¿Ya tienes cuenta? Inicia sesión
+      </a>
+    </div>
+  </div>
+</section>

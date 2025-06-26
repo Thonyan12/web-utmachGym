@@ -1,1 +1,44 @@
-<p>login works!</p>
+<section class="d-flex align-items-center justify-content-center animate__animated animate__fadeIn" 
+         style="min-height: 80vh; background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+  <div class="card shadow-lg p-4 border-2 position-relative" style="max-width: 400px; width: 100%; border-color: #fca311 !important;">
+    
+    <!-- Botón para volver atrás -->
+    <button routerLink="/" class="btn btn-sm position-absolute" 
+            style="top: 15px; left: 15px; color: #14213d; background-color: #fca311;">
+      <i class="bi bi-arrow-left"></i> Volver
+    </button>
+    
+    <div class="text-center mb-4">
+      <img src="logomain.png" alt="Logo" width="80" class="mb-3 animate__animated animate__zoomIn">
+      <h2 class="fw-bold" style="color: #14213d; position: relative;">
+        <span style="display: inline-block; position: relative;">
+          Iniciar sesión
+          <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #fca311; border-radius: 3px;"></span>
+        </span>
+      </h2>
+    </div>
+    
+    <form>
+      <div class="mb-4">
+        <label for="usuario" class="form-label fw-medium" style="color: #14213d;">Usuario</label>
+        <input type="text" class="form-control py-2 border-2" id="usuario" placeholder="Ingresa tu usuario" required 
+               style="border-color: #14213d;">
+      </div>
+      <div class="mb-4">
+        <label for="contrasenia" class="form-label fw-medium" style="color: #14213d;">Contraseña</label>
+        <input type="password" class="form-control py-2 border-2" id="contrasenia" placeholder="Contraseña" required 
+               style="border-color: #14213d;">
+      </div>
+      <button type="submit" class="btn w-100 py-2 animate__animated animate__pulse animate__infinite animate__slow" 
+              style="background-color: #fca311; color: #0a1a2e; font-weight: 600; border: none;">
+        <i class="bi bi-box-arrow-in-right me-2"></i> Ingresar
+      </button>
+    </form>
+    
+    <div class="mt-4 text-center">
+      <a routerLink="/registro" class="text-decoration-none fw-medium" style="color: #fca311;">
+        <i class="bi bi-person-plus me-1"></i> ¿No tienes cuenta? Regístrate
+      </a>
+    </div>
+  </div>
+</section>
