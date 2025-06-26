@@ -1,0 +1,59 @@
+<div class="bg-dark text-white p-3 d-flex flex-column" style="width: 250px; min-height: 100vh;">
+  <div class="mb-4">
+    <h5 class="text-center" style="color: #fca311;">
+      <i class="bi bi-box-seam me-2"></i>Productos
+    </h5>
+  </div>
+  <ul class="nav flex-column flex-grow-1">
+     <li class="nav-item mb-2">
+      <a class="nav-link text-white py-2" routerLink="/admin/productos">
+        <i class="bi bi-plus-circle me-2"></i> Listar Productos
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a class="nav-link text-white py-2" routerLink="/admin/productos/crear">
+        <i class="bi bi-plus-circle me-2"></i> Crear Producto
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a class="nav-link text-white py-2" routerLink="/admin/productos/detalle/1">
+        <i class="bi bi-search me-2"></i> Buscar Producto
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a class="nav-link text-white py-2" routerLink="/admin/productos/editar/1">
+        <i class="bi bi-pencil-square me-2"></i> Editar Producto
+      </a>
+    </li>
+    <li class="nav-item mb-2">
+      <a class="nav-link text-white py-2" routerLink="/admin/productos/eliminar/1">
+        <i class="bi bi-trash me-2"></i> Eliminar Producto
+      </a>
+    </li>
+  </ul>
+</div>
+<style>
+  /* Estilos para mejorar la apariencia */
+  body {
+    overflow-x: hidden; /* Evita scroll horizontal */
+  }
+  
+  .nav-link {
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+  
+  .nav-link:hover {
+    background-color: rgba(252, 163, 17, 0.1);
+  }
+  
+  .nav-link.active {
+    background-color: #fca311;
+    color: #0a1a2e !important;
+    font-weight: 500;
+  }
+  
+  .bg-dark {
+    background-color: #14213d !important;
+  }
+</style>
