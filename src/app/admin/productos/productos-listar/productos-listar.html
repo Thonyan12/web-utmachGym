@@ -8,15 +8,52 @@
       <h3 class="fw-bold m-0" style="color: #14213d;">
         <i class="bi bi-list-ul me-2"></i> Listado de Productos
       </h3>
-      <button class="btn btn-sm" style="background-color: #fca311; color: #0a1a2e;">
-        <i class="bi bi-plus-lg me-1"></i> Nuevo
+      <button class="btn btn-sm d-flex align-items-center gap-1" style="background-color: #fca311; color: #0a1a2e;" routerLink="/admin/productos/crear">
+        <i class="bi bi-plus-lg"></i> Nuevo
       </button>
     </div>
     <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <p class="mb-0">Aquí irá la tabla/listado de productos...</p>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle mb-0">
+            <thead style="background-color: #14213d; color: #fff;">
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Precio</th>
+                <th scope="col">Stock</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Fecha Registro</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let prod of productos" class="align-middle">
+                <td class="fw-bold text-center">{{ prod.id_producto }}</td>
+                <td>{{ prod.nombre_prod }}</td>
+                <td>
+                  <span class="badge rounded-pill" style="background-color: #fca311; color: #14213d;">
+                    {{ prod.tipo_prod }}
+                  </span>
+                </td>
+                <td class="text-end">${{ prod.precio_prod }}</td>
+                <td class="text-center">{{ prod.stock }}</td>
+                <td class="text-center">
+                  <span [class]="'badge rounded-pill px-3 ' + (prod.estado ? 'bg-success' : 'bg-danger')">
+                    {{ prod.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-center">{{ prod.f_registro }}</td>
+              </tr>
+              <tr *ngIf="productos.length === 0">
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="bi bi-box"></i> No hay productos registrados.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
