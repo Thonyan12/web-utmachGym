@@ -5,7 +5,39 @@ VALUES
 ('Proteína Whey 2lb Chocolate', 'Suplemento', 39.90, 15),
 ('Guantes de Entrenamiento', 'Accesorio', 12.50, 50),
 ('Camiseta Dry-Fit Larga', 'Ropa Deportiva', 18.99, 30),
-('Mancuernas Ajustables 20kg', 'Implemento de Entrenamiento', 65.00, 10);
+('Mancuernas Ajustables 20kg', 'Implemento de Entrenamiento', 65.00, 10),
+('BCAA 2:1:1 200g Frutas', 'Suplemento', 19.99, 25),
+('Proteína Vegana 1lb Vainilla', 'Suplemento', 34.99, 20),
+('Pre-Entreno NitroX 300g', 'Suplemento', 27.50, 15),
+('Omega 3 1000mg x90 cápsulas', 'Suplemento', 21.99, 35),
+('Glutamina 250g Polvo', 'Suplemento', 22.00, 20),
+('Creatina Micronizada 500g', 'Suplemento', 29.99, 12),
+('Proteína Isolate 5lb Fresa', 'Suplemento', 74.90, 8),
+('Termogénico LipoX 60 cápsulas', 'Suplemento', 26.99, 18),
+('Caseína Nocturna 2lb Vainilla', 'Suplemento', 42.50, 10),
+('Multivitamínico Deportivo x120', 'Suplemento', 17.99, 30),
+
+('Cinturón de Levantamiento', 'Accesorio', 22.99, 25),
+('Rodilleras Pro Fitness', 'Accesorio', 16.00, 20),
+('Straps para Levantamiento', 'Accesorio', 10.50, 40),
+('Botella Shaker 700ml', 'Accesorio', 7.99, 60),
+('Toalla Deportiva Microfibra', 'Accesorio', 9.90, 45),
+('Pulseras Magnéticas Fitness', 'Accesorio', 11.50, 25),
+('Lentes Antiempañantes Gym', 'Accesorio', 14.00, 15),
+('Bolso Deportivo Grande', 'Accesorio', 29.99, 20),
+('Soporte de Muñeca', 'Accesorio', 13.50, 30),
+('Cuerda para Saltar Pro', 'Accesorio', 8.99, 50),
+
+('Short Deportivo Hombre', 'Ropa Deportiva', 17.50, 25),
+('Leggings Mujer Compresión', 'Ropa Deportiva', 22.99, 30),
+('Top Deportivo Mujer M', 'Ropa Deportiva', 16.00, 20),
+('Chaqueta Fitness Unisex', 'Ropa Deportiva', 29.90, 15),
+('Pantalón Jogger Seca Rápido', 'Ropa Deportiva', 24.99, 18),
+('Gorra Dry Fit', 'Ropa Deportiva', 12.00, 40),
+('Medias Antideslizantes Gym', 'Ropa Deportiva', 5.99, 60),
+('Camiseta sin Mangas M', 'Ropa Deportiva', 13.50, 35),
+('Faja Deportiva Reductora', 'Ropa Deportiva', 18.00, 22),
+('Sudadera Hoodie XL', 'Ropa Deportiva', 34.99, 12);
 
 -- Insertar rutinas de ejemplo
 INSERT INTO Rutina (nivel, tipo_rut, descripcion_rut, duracion_rut)
