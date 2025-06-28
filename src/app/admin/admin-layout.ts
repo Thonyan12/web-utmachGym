@@ -14,4 +14,5 @@ export class AdminLayout {
   volverInicio() {
     this.router.navigate(['/']);
   }
+  
 }
