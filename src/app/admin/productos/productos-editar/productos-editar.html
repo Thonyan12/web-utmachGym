@@ -1,4 +1,72 @@
 <div class="d-flex" style="min-height: 100vh;">
-  <!-- Sidebar reutilizable -->
   <app-productos-sidebar></app-productos-sidebar>
+  <div class="container mt-4">
+    <h2>Editar Producto</h2>
+    <form class="mb-4" (ngSubmit)="buscarProducto()" #buscarForm="ngForm">
+      <div class="row">
+        <div class="col-md-4 mb-2">
+          <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID o Nombre del producto" required>
+        </div>
+        <div class="col-md-2 mb-2">
+          <button type="submit" class="btn btn-info w-100">Buscar</button>
+        </div>
+      </div>
+    </form>
+
+    <form *ngIf="producto" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+      <div class="mb-3">
+        <label class="form-label">ID del Producto</label>
+        <input [(ngModel)]="producto.id_producto" name="id_producto" type="number" class="form-control" readonly>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <input [(ngModel)]="producto.nombre_prod" name="nombre_prod" type="text" class="form-control" required #nombre="ngModel">
+        <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
+          El nombre es obligatorio.
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Tipo</label>
+        <input [(ngModel)]="producto.tipo_prod" name="tipo_prod" type="text" class="form-control" required #tipo="ngModel">
+        <div class="text-danger" *ngIf="tipo.invalid && (tipo.dirty || tipo.touched)">
+          El tipo es obligatorio.
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Precio</label>
+        <input [(ngModel)]="producto.precio_prod" name="precio_prod" type="number" class="form-control" required step="0.01" min="0.01" #precio="ngModel">
+        <div class="text-danger" *ngIf="precio.invalid && (precio.dirty || precio.touched)">
+          El precio es obligatorio y debe ser mayor a 0.
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Stock</label>
+        <input [(ngModel)]="producto.stock" name="stock" type="number" class="form-control" required min="0" #stock="ngModel">
+        <div class="text-danger" *ngIf="stock.invalid && (stock.dirty || stock.touched)">
+          El stock es obligatorio y no puede ser negativo.
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select [(ngModel)]="producto.estado" name="estado" class="form-control" required #estado="ngModel">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+        <div class="text-danger" *ngIf="estado.invalid && (estado.dirty || estado.touched)">
+          El estado es obligatorio.
+        </div>
+      </div>
+      <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
+    </form>
+
+    <div *ngIf="mensaje" class="alert alert-info mt-3">
+      {{ mensaje }}
+    </div>
+    <div *ngIf="!producto && mensaje && !cargando" class="text-danger mt-3">
+      No se encontró el producto.
+    </div>
+    <div *ngIf="cargando" class="text-secondary mt-3">
+      Buscando producto...
+    </div>
+  </div>
 </div>

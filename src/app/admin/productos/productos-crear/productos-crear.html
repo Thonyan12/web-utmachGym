@@ -1,4 +1,45 @@
 <div class="d-flex" style="min-height: 100vh;">
-  <!-- Sidebar reutilizable -->
   <app-productos-sidebar></app-productos-sidebar>
+  <div class="container mt-4">
+    <h2>Registrar Producto</h2>
+    <form (ngSubmit)="guardar(form)" #form="ngForm" novalidate>
+      <div class="mb-3">
+        <label>Nombre</label>
+        <input type="text" class="form-control" [(ngModel)]="producto.nombre_prod" name="nombre_prod" required minlength="3" #nombre="ngModel">
+        <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
+          <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
+          <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Tipo</label>
+        <input type="text" class="form-control" [(ngModel)]="producto.tipo_prod" name="tipo_prod" required minlength="3" #tipo="ngModel">
+        <div class="text-danger" *ngIf="tipo.invalid && (tipo.dirty || tipo.touched)">
+          <span *ngIf="tipo.errors?.['required']">El tipo es obligatorio.</span>
+          <span *ngIf="tipo.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Precio</label>
+        <input type="number" class="form-control" [(ngModel)]="producto.precio_prod" name="precio_prod" required step="0.01" min="0.01" #precio="ngModel">
+        <div class="text-danger" *ngIf="precio.invalid && (precio.dirty || precio.touched)">
+          <span *ngIf="precio.errors?.['required']">El precio es obligatorio.</span>
+          <span *ngIf="precio.errors?.['min']">Debe ser mayor a 0.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Stock</label>
+        <input type="number" class="form-control" [(ngModel)]="producto.stock" name="stock" required min="0" #stock="ngModel">
+        <div class="text-danger" *ngIf="stock.invalid && (stock.dirty || stock.touched)">
+          <span *ngIf="stock.errors?.['required']">El stock es obligatorio.</span>
+          <span *ngIf="stock.errors?.['min']">No puede ser negativo.</span>
+        </div>
+      </div>
+      <div *ngIf="form.invalid && form.submitted" class="alert alert-danger">
+        Por favor, corrige los errores antes de guardar.
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
+      <div class="mt-2">{{ mensaje }}</div>
+    </form>
+  </div>
 </div>
