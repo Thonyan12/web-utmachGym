@@ -1,0 +1,53 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar reutilizable -->
+    <app-miembros-sidebar></app-miembros-sidebar>
+  
+    <!-- Contenido principal -->
+    <div class="flex-grow-1 p-4 bg-light">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold m-0" style="color: #14213d;">
+          <i class="bi bi-list-ul me-2"></i> Listado de Miembros
+        </h3>
+        <button class="btn btn-sm d-flex align-items-center gap-1" style="background-color: #f6f6f5; color: #0a1a2e;" routerLink="/admin/miembros/crear">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+      </div>
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover table-bordered align-middle mb-0">
+              <thead style="background-color: #14213d; color: #fff;">
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Apellido</th>
+                  <th scope="col">Email</th>
+                  <th scope="col">Estado</th>
+                  <th scope="col">Fecha Registro</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let miembro of miembros" class="align-middle">
+                  <td class="fw-bold text-center">{{ miembro.id_miembro }}</td>
+                  <td>{{ miembro.nombre }}</td>
+                  <td>{{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
+                  <td>{{ miembro.correo }}</td>
+                  <td class="text-center">
+                    <span [class]="'badge rounded-pill px-3 ' + (miembro.estado ? 'bg-success' : 'bg-danger')">
+                      {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="text-center">{{ miembro.f_registro }}</td>
+                </tr>
+                <tr *ngIf="miembros.length === 0">
+                  <td colspan="6" class="text-center text-muted py-4">
+                    <i class="bi bi-box"></i> No hay miembros registrados.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

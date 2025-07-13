@@ -1,0 +1,56 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-miembros-sidebar></app-miembros-sidebar>
+    <div class="container mt-4">
+        <div *ngIf="miembro; else loading">
+            <h2 class="mb-4">Detalles del Miembro</h2>
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</h5>
+                    <span class="badge" [ngClass]="miembro.estado ? 'bg-success' : 'bg-danger'">
+                        {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Cédula:</strong> {{ miembro.cedula }}</p>
+                            <p><strong>Correo:</strong> {{ miembro.correo }}</p>
+                            <p><strong>Edad:</strong> {{ miembro.edad }} años</p>
+                            <p><strong>Sexo:</strong> {{ miembro.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
+                            <p><strong>Dirección:</strong> {{ miembro.direccion }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Altura:</strong> {{ miembro.altura }} m</p>
+                            <p><strong>Peso:</strong> {{ miembro.peso }} kg</p>
+                            <p><strong>Contextura:</strong> {{ miembro.contextura }}</p>
+                            <p><strong>Fecha de Inscripción:</strong> {{ miembro.fecha_inscripcion | date:'longDate' }}
+                            </p>
+                        </div>
+                    </div>
+                    <hr>
+                    <h6>Objetivo:</h6>
+                    <p class="text-muted" style="white-space: pre-wrap;">{{ miembro.objetivo }}</p>
+                </div>
+                <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                    <small>Fecha de Registro: {{ miembro.f_registro | date:'medium' }}</small>
+                    <div>
+                        <a [routerLink]="['/admin/miembros/editar', miembro.id_miembro]"
+                            class="btn btn-sm btn-outline-primary me-2">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </a>
+                        <a [routerLink]="['/admin/miembros/eliminar', miembro.id_miembro]"
+                            class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Eliminar
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <a routerLink="/admin/miembros" class="btn btn-secondary mt-3">
+                <i class="bi bi-arrow-left"></i> Volver a la lista
+            </a>
+        </div>
+        <ng-template #loading>
+            <div class="alert alert-info">Cargando detalles del miembro...</div>
+        </ng-template>
+    </div>
+</div>

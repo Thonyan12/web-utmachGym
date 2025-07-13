@@ -1,0 +1,32 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-miembros-sidebar></app-miembros-sidebar>
+    <div class="container mt-4">
+      <h2 class="mb-3">Eliminar Miembro</h2>
+      <div class="mb-3">
+        <label class="form-label">ID del Miembro</label>
+        <input [(ngModel)]="idMiembro" name="idMiembro" type="number" class="form-control" required>
+      </div>
+      <button class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
+      <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!miembro">Eliminar</button>
+  
+      <div *ngIf="miembro" class="mt-3">
+        <strong>Miembro encontrado:</strong>
+        <div>Nombre: {{ miembro.nombre }}</div>
+        <div>Apellido: {{ miembro.apellido1 }} {{ miembro.apellido2 }}</div>
+        <div>Email: {{ miembro.correo }}</div>
+        <div>Estado: {{ miembro.estado ? 'Activo' : 'Inactivo' }}</div>
+      </div>
+  
+      <!-- Confirmación antes de eliminar -->
+      <div *ngIf="mostrarConfirmacion" class="alert alert-warning mt-3">
+        <strong>¿Estás seguro de que deseas eliminar este miembro?</strong>
+        <br>
+        <button class="btn btn-danger me-2" (click)="eliminar()">Sí, eliminar</button>
+        <button class="btn btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+      </div>
+  
+      <div *ngIf="mensaje" class="alert alert-info mt-3">
+        {{ mensaje }}
+      </div>
+    </div>
+  </div>

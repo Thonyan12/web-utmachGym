@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
 import { AdminLayout } from './admin-layout';
 import { Dashboard } from './dashboard/dashboard';
-import { Miembros } from './miembros/miembros';
 import { Entrenadores } from './entrenadores/entrenadores';
 import { Mensualidades } from './mensualidades/mensualidades';
 import { Facturas } from './facturas/facturas';
+import { MiembrosListarComponent } from './miembros/miembros-listar/miembros-listar';
+import { MiembrosCrearComponent } from './miembros/miembros-crear/miembros-crear';
+import { MiembrosEditarComponent } from './miembros/miembros-editar/miembros-editar';
+import { MiembrosDetalle } from './miembros/miembros-detalle/miembros-detalle';
+import { MiembrosEliminarComponent } from './miembros/miembros-eliminar/miembros-eliminar';
 
 import { ProductosListar } from './productos/productos-listar/productos-listar';
 import { ProductosCrearComponent } from './productos/productos-crear/productos-crear';
@@ -17,9 +21,8 @@ export const adminRoutes: Routes = [
     path: '',
     component: AdminLayout,
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }, // <-- Redirección aquí
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
-      { path: 'miembros', component: Miembros },
       { path: 'entrenadores', component: Entrenadores },
       { path: 'mensualidades', component: Mensualidades },
       { path: 'facturas', component: Facturas },
@@ -31,6 +34,16 @@ export const adminRoutes: Routes = [
           { path: 'editar/:id', component: ProductosEditar },
           { path: 'detalle/:id', component: ProductosDetalle },
           { path: 'eliminar/:id', component: ProductosEliminar }
+        ]
+      },
+      {
+        path: 'miembros',
+        children: [
+          { path: '', component: MiembrosListarComponent },
+          { path: 'crear', component: MiembrosCrearComponent },
+          { path: 'editar/:id', component: MiembrosEditarComponent },
+          { path: 'detalle/:id', component: MiembrosDetalle },
+          { path: 'eliminar/:id', component: MiembrosEliminarComponent }
         ]
       }
     ]
