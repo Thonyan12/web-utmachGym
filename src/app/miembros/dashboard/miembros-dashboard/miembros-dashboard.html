@@ -1,0 +1,276 @@
+<div class="container-fluid py-4" style="background-color: #f8f9fa; min-height: calc(100vh - 76px);">
+  <div class="row">
+    <!-- Bienvenida personalizada -->
+    <div class="col-12 mb-4">
+      <div class="card border-0 shadow-sm" 
+           style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%); color: white;">
+        <div class="card-body py-4">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="fw-bold mb-2">
+                ¡Hola, {{ obtenerPrimerNombre() }}! 👋
+              </h2>
+              <p class="mb-0 opacity-75">
+                Bienvenido de vuelta a tu área personal. ¡Sigamos trabajando hacia tus objetivos!
+              </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+              <div class="d-inline-flex align-items-center bg-warning text-dark px-3 py-2 rounded-pill">
+                <i class="bi bi-calendar-check me-2"></i>
+                <span class="fw-bold">{{ fechaActual }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas de resumen rápido -->
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+               style="width: 60px; height: 60px; background-color: rgba(40, 167, 69, 0.1);">
+            <i class="bi bi-credit-card text-success" style="font-size: 1.5rem;"></i>
+          </div>
+          <h6 class="card-title">Estado Mensualidad</h6>
+          <h4 class="text-success fw-bold" *ngIf="estadoMensualidad.activa">Activa</h4>
+          <h4 class="text-danger fw-bold" *ngIf="!estadoMensualidad.activa">Vencida</h4>
+          <small class="text-muted">
+            {{ estadoMensualidad.diasRestantes }} días restantes
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+               style="width: 60px; height: 60px; background-color: rgba(255, 193, 7, 0.1);">
+            <i class="bi bi-trophy text-warning" style="font-size: 1.5rem;"></i>
+          </div>
+          <h6 class="card-title">Progreso Semanal</h6>
+          <h4 class="fw-bold" style="color: #fca311;">
+            {{ progresoSemanal.clases }}/{{ progresoSemanal.meta }}
+          </h4>
+          <small class="text-muted">Clases completadas</small>
+          <div class="progress mt-2" style="height: 6px;">
+            <div class="progress-bar bg-warning" 
+                 [style.width.%]="(progresoSemanal.clases / progresoSemanal.meta) * 100">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+               style="width: 60px; height: 60px; background-color: rgba(220, 53, 69, 0.1);">
+            <i class="bi bi-bell text-danger" style="font-size: 1.5rem;"></i>
+          </div>
+          <h6 class="card-title">Notificaciones</h6>
+          <h4 class="text-danger fw-bold">3</h4>
+          <small class="text-muted">Mensajes pendientes</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body text-center">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3"
+               style="width: 60px; height: 60px; background-color: rgba(13, 110, 253, 0.1);">
+            <i class="bi bi-cart3 text-primary" style="font-size: 1.5rem;"></i>
+          </div>
+          <h6 class="card-title">Carrito</h6>
+          <h4 class="text-primary fw-bold">2</h4>
+          <small class="text-muted">Productos agregados</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Próximas clases -->
+    <div class="col-lg-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0" style="color: #14213d;">
+            <i class="bi bi-calendar-week me-2"></i>Próximas Clases
+          </h5>
+          <a routerLink="/miembros/entrenamiento" class="btn btn-sm btn-outline-primary">
+            Ver todas
+          </a>
+        </div>
+        <div class="card-body pt-3">
+          <div *ngFor="let clase of proximasClases" 
+               class="d-flex align-items-center p-3 mb-3 rounded-3" 
+               style="background-color: #f8f9fa;">
+            <div class="flex-shrink-0 me-3">
+              <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center"
+                   style="width: 50px; height: 50px;">
+                <i class="bi bi-dumbbell"></i>
+              </div>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="mb-1 fw-bold">{{ clase.tipo }}</h6>
+              <small class="text-muted">Con {{ clase.entrenador }}</small>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold" style="color: #14213d;">{{ clase.fecha }}</div>
+              <small class="text-muted">{{ clase.hora }}</small>
+            </div>
+          </div>
+          <div *ngIf="proximasClases.length === 0" class="text-center py-4 text-muted">
+            <i class="bi bi-calendar-x display-6 mb-3"></i>
+            <p>No tienes clases programadas</p>
+            <a routerLink="/miembros/entrenamiento" class="btn btn-outline-primary btn-sm">
+              Programar clase
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accesos rápidos -->
+    <div class="col-lg-6 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0" style="color: #14213d;">
+            <i class="bi bi-lightning me-2"></i>Accesos Rápidos
+          </h5>
+        </div>
+        <div class="card-body pt-3">
+          <div class="row g-3">
+            <div class="col-6">
+              <a routerLink="/miembros/perfil" class="text-decoration-none">
+                <div class="d-flex flex-column align-items-center p-3 rounded-3 h-100 bg-light">
+                  <i class="bi bi-person-circle text-primary mb-2" style="font-size: 2rem;"></i>
+                  <span class="fw-bold text-dark">Mi Perfil</span>
+                </div>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/miembros/entrenamiento" class="text-decoration-none">
+                <div class="d-flex flex-column align-items-center p-3 rounded-3 h-100 bg-light">
+                  <i class="bi bi-trophy text-warning mb-2" style="font-size: 2rem;"></i>
+                  <span class="fw-bold text-dark">Entrenar</span>
+                </div>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/miembros/nutricion" class="text-decoration-none">
+                <div class="d-flex flex-column align-items-center p-3 rounded-3 h-100 bg-light">
+                  <i class="bi bi-apple text-success mb-2" style="font-size: 2rem;"></i>
+                  <span class="fw-bold text-dark">Nutrición</span>
+                </div>
+              </a>
+            </div>
+            <div class="col-6">
+              <a routerLink="/miembros/tienda" class="text-decoration-none">
+                <div class="d-flex flex-column align-items-center p-3 rounded-3 h-100 bg-light">
+                  <i class="bi bi-cart3 text-info mb-2" style="font-size: 2rem;"></i>
+                  <span class="fw-bold text-dark">Tienda</span>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado físico reciente -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0" style="color: #14213d;">
+            <i class="bi bi-heart-pulse me-2"></i>Estado Físico
+          </h5>
+          <a routerLink="/miembros/perfil" class="btn btn-sm btn-outline-success">
+            Actualizar
+          </a>
+        </div>
+        <div class="card-body pt-3">
+          <div class="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3 bg-light">
+            <span class="fw-bold">Peso actual:</span>
+            <span class="badge bg-success px-3 py-2">75.2 kg</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3 bg-light">
+            <span class="fw-bold">IMC:</span>
+            <span class="badge bg-warning px-3 py-2">22.8</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center p-3 rounded-3 bg-light">
+            <span class="fw-bold">Última medición:</span>
+            <span class="text-muted">12/01/2025</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensualidad -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0" style="color: #14213d;">
+            <i class="bi bi-credit-card me-2"></i>Mi Mensualidad
+          </h5>
+        </div>
+        <div class="card-body pt-3">
+          <div class="text-center mb-3">
+            <div class="badge bg-success fs-6 px-4 py-2 mb-2">ACTIVA</div>
+            <p class="text-muted mb-0">Vence el {{ estadoMensualidad.fechaVencimiento }}</p>
+          </div>
+          <div class="d-grid gap-2">
+            <a routerLink="/miembros/pagos" class="btn btn-outline-primary">
+              <i class="bi bi-eye me-1"></i> Ver detalles
+            </a>
+            <button class="btn btn-warning" style="color: #0a1a2e;">
+              <i class="bi bi-arrow-repeat me-1"></i> Renovar ahora
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notificaciones recientes -->
+    <div class="col-lg-4 mb-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header d-flex justify-content-between align-items-center bg-transparent border-0 pb-0">
+          <h5 class="fw-bold mb-0" style="color: #14213d;">
+            <i class="bi bi-bell me-2"></i>Notificaciones
+          </h5>
+          <a routerLink="/miembros/notificaciones" class="btn btn-sm btn-outline-info">
+            Ver todas
+          </a>
+        </div>
+        <div class="card-body pt-3">
+          <div class="d-flex align-items-start p-2 mb-2 rounded-3 bg-light">
+            <i class="bi bi-info-circle text-info me-2 mt-1"></i>
+            <div>
+              <small class="fw-bold">Nueva rutina asignada</small>
+              <br>
+              <small class="text-muted">Tu entrenador te asignó una nueva rutina</small>
+            </div>
+          </div>
+          <div class="d-flex align-items-start p-2 mb-2 rounded-3 bg-light">
+            <i class="bi bi-exclamation-triangle text-warning me-2 mt-1"></i>
+            <div>
+              <small class="fw-bold">Recordatorio de pago</small>
+              <br>
+              <small class="text-muted">Tu mensualidad vence en 15 días</small>
+            </div>
+          </div>
+          <div class="d-flex align-items-start p-2 rounded-3 bg-light">
+            <i class="bi bi-gift text-success me-2 mt-1"></i>
+            <div>
+              <small class="fw-bold">Oferta especial</small>
+              <br>
+              <small class="text-muted">20% descuento en suplementos</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
