@@ -16,7 +16,10 @@ import { ProductosDetalle } from './productos/productos-detalle/productos-detall
 import { ProductosEliminar } from './productos/productos-eliminar/productos-eliminar';
 
 import { MensualidadListar } from './mensualidades/mensualidad-listar/mensualidad-listar';
-import { Mensualidades } from './mensualidades/services/mensualidades';
+import { MensualidadCrearComponent } from './mensualidades/mensualidad-crear/mensualidad-crear';
+import { MensualidadDetalleComponent } from './mensualidades/mensualidad-detalle/mensualidad-detalle';
+import { MensualidadEditarComponent } from './mensualidades/mensualidad-editar/mensualidad-editar';
+import { MensualidadEliminarComponent } from './mensualidades/mensualidad-eliminar/mensualidad-eliminar';
 
 // Importar los guards
 import { authGuard } from '../guards/auth-guard';
@@ -46,7 +49,12 @@ export const adminRoutes: Routes = [
       {
         path: 'mensualidades',
         children: [
-          { path: '', component: MensualidadListar }
+          { path: '', component: MensualidadListar },
+          { path: 'crear', component: MensualidadCrearComponent},
+          { path: 'detalle/:id', component: MensualidadDetalleComponent},
+          { path: 'editar/:id', component: MensualidadEditarComponent},
+          { path: 'eliminar/:id', component: MensualidadEliminarComponent}
+    
         ]
       },
       {

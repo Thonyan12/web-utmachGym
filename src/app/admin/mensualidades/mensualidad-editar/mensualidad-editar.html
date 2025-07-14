@@ -1,0 +1,97 @@
+<div class="d-flex" style="min-height: 100vh;">
+  <!-- Sidebar reutilizable para Mensualidades -->
+  <app-mensualidad-sidebar></app-mensualidad-sidebar>
+
+  <!-- Contenido principal del formulario de edición -->
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="container mt-4">
+      <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
+        <i class="bi bi-pencil-square me-2"></i> Editar Mensualidad
+      </h3>
+
+      <!-- Formulario de búsqueda de mensualidad -->
+      <form class="mb-4" (ngSubmit)="buscarMensualidad()" #buscarForm="ngForm">
+        <div class="row">
+          <div class="col-md-4 mb-2">
+            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID de Mensualidad o ID de Miembro" required>
+          </div>
+          <div class="col-md-2 mb-2">
+            <button type="submit" class="btn btn-info w-100">Buscar</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Formulario de edición de mensualidad (se muestra si se encuentra una mensualidad) -->
+      <form *ngIf="mensualidad" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+        <!-- ID de la Mensualidad (solo lectura) -->
+        <div class="mb-3">
+          <label class="form-label">ID de la Mensualidad</label>
+          <input [(ngModel)]="mensualidad.id_mensualidad" name="id_mensualidad" type="number" class="form-control" readonly>
+        </div>
+        <!-- ID del Miembro -->
+        <div class="mb-3">
+          <label class="form-label">ID del Miembro</label>
+          <input [(ngModel)]="mensualidad.id_miembro" name="id_miembro" type="number" class="form-control" required min="1" #idMiembro="ngModel">
+          <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
+            El ID del Miembro es obligatorio y debe ser positivo.
+          </div>
+        </div>
+        <!-- Fecha de Inicio -->
+        <div class="mb-3">
+          <label class="form-label">Fecha Inicio</label>
+          <input [(ngModel)]="mensualidad.fecha_inicio" name="fecha_inicio" type="date" class="form-control" required #fechaInicio="ngModel">
+          <div class="text-danger" *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)">
+            La fecha de inicio es obligatoria.
+          </div>
+        </div>
+        <!-- Fecha de Fin -->
+        <div class="mb-3">
+          <label class="form-label">Fecha Fin</label>
+          <input [(ngModel)]="mensualidad.fecha_fin" name="fecha_fin" type="date" class="form-control" required #fechaFin="ngModel">
+          <div class="text-danger" *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)">
+            La fecha de fin es obligatoria.
+          </div>
+        </div>
+        <!-- Monto -->
+        <div class="mb-3">
+          <label class="form-label">Monto</label>
+          <input [(ngModel)]="mensualidad.monto" name="monto" type="number" class="form-control" required step="0.01" min="0.01" #monto="ngModel">
+          <div class="text-danger" *ngIf="monto.invalid && (monto.dirty || monto.touched)">
+            El monto es obligatorio y debe ser mayor a 0.
+          </div>
+        </div>
+        <!-- Estado de la Mensualidad -->
+        <div class="mb-3">
+          <label class="form-label">Estado de la Mensualidad</label>
+          <select [(ngModel)]="mensualidad.estado_mensualidad" name="estado_mensualidad" class="form-control" required #estadoMensualidad="ngModel">
+            <option value="" disabled selected>Seleccione un estado</option>
+            <option value="Pagada">Pagada</option>
+            <option value="Pendiente">Pendiente</option>
+          </select>
+          <div class="text-danger" *ngIf="estadoMensualidad.invalid && (estadoMensualidad.dirty || estadoMensualidad.touched)">
+            El estado de la mensualidad es obligatorio.
+          </div>
+        </div>
+        <!-- Fecha de Registro (solo lectura) -->
+        <div class="mb-3">
+          <label class="form-label">Fecha de Registro</label>
+          <input [(ngModel)]="mensualidad.f_registro" name="f_registro" type="text" class="form-control" readonly>
+        </div>
+
+        <!-- Botón de Actualizar -->
+        <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
+      </form>
+
+      <!-- Mensajes de estado -->
+      <div *ngIf="mensaje" class="alert alert-info mt-3">
+        {{ mensaje }}
+      </div>
+      <div *ngIf="!mensualidad && mensaje && !cargando" class="text-danger mt-3">
+        No se encontró la mensualidad.
+      </div>
+      <div *ngIf="cargando" class="text-secondary mt-3">
+        Buscando mensualidad...
+      </div>
+    </div>
+  </div>
+</div>
