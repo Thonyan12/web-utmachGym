@@ -2,14 +2,8 @@
   <app-productos-sidebar></app-productos-sidebar>
   <div class="container mt-4">
     <h2 class="mb-4">Lista de Productos</h2>
-    <input
-      type="text"
-      class="form-control mb-3"
-      placeholder="Buscar por nombre, tipo o ID..."
-      [(ngModel)]="filtro"
-      (input)="filtrarProductos()"
-      name="filtro"
-    >
+    <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, tipo o ID..." [(ngModel)]="filtro"
+      (input)="filtrarProductos()" name="filtro">
 
     <div *ngIf="productosFiltrados.length === 0" class="alert alert-warning">
       No se encontraron productos.
@@ -19,23 +13,23 @@
       <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
           *ngFor="let prod of productosFiltrados">
         <div>
-          <span class="fw-bold">{{ prod.nombre_prod }}</span>
-          <span class="badge bg-secondary ms-2">{{ prod.tipo_prod }}</span>
+          <span class="fw-bold">{{ prod.nombre_prod || 'Sin nombre' }}</span>
+          <span class="badge bg-secondary ms-2">{{ prod.tipo_prod || 'Sin tipo' }}</span>
         </div>
         <div class="text-muted small">
-          <span><strong>ID:</strong> {{ prod.id_producto }}</span> |
-          <span><strong>Precio:</strong> ${{ prod.precio_prod }}</span> |
-          <span><strong>Stock:</strong> {{ prod.stock }}</span> |
-          <span><strong>Estado:</strong> 
+          <span><strong>ID:</strong> {{ prod.id_producto || 'N/A' }}</span> |
+          <span><strong>Precio:</strong> ${{ prod.precio_prod || '0' }}</span> |
+          <span><strong>Stock:</strong> {{ prod.stock || '0' }}</span> |
+          <span><strong>Estado:</strong>
             <span [ngClass]="prod.estado ? 'text-success' : 'text-danger'">
               {{ prod.estado ? 'Activo' : 'Inactivo' }}
             </span>
           </span>
         </div>
         <div class="text-end mt-2 mt-md-0">
-          <span class="badge bg-light text-dark">Registrado: {{ prod.f_registro }}</span>
+          <span class="badge bg-light text-dark">Registrado: {{ prod.f_registro | date:'shortDate' }}</span>
         </div>
       </li>
     </ul>
   </div>
-</div>
+</div>  

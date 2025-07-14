@@ -34,15 +34,7 @@
                     <button type="button" class="btn btn-sm btn-outline-info me-2" (click)="abrirModal(miembro)">
                         <i class="bi bi-search"></i> Ver
                     </button>
-                    <a [routerLink]="['/admin/miembros/editar', miembro.id_miembro]"
-                        class="btn btn-sm btn-outline-primary me-2">
-                        <i class="bi bi-pencil-square"></i> Editar
-                    </a>
-                    <a [routerLink]="['/admin/miembros/eliminar', miembro.id_miembro]"
-                        class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i> Eliminar
-                    </a>
-                </div>
+                    </div>
             </li>
         </ul>
 

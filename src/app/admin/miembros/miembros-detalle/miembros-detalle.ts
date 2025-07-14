@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 @Component({
     selector: 'app-miembros-detalle',
     standalone: true,
-    imports: [CommonModule, RouterLink, MiembrosSidebarComponent, FormsModule],
+    imports: [CommonModule, MiembrosSidebarComponent, FormsModule],
     templateUrl: './miembros-detalle.html',
 })
 export class MiembrosDetalleComponent implements OnInit {
@@ -39,6 +39,7 @@ export class MiembrosDetalleComponent implements OnInit {
         this.mostrarModal = false;
         this.miembroSeleccionado = null;
     }
+    
     // ...existing code...
     filtrarMiembros(): void {
         const filtroLower = this.filtro.toLowerCase();
@@ -51,3 +52,4 @@ export class MiembrosDetalleComponent implements OnInit {
         );
     }
 }
+

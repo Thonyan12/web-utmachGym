@@ -1,7 +1,7 @@
 <div class="d-flex" style="min-height: 100vh;">
     <!-- Sidebar reutilizable -->
     <app-miembros-sidebar></app-miembros-sidebar>
-  
+
     <!-- Contenido principal -->
     <div class="flex-grow-1 p-4 bg-light">
       <div class="d-flex justify-content-between align-items-center mb-4">
@@ -33,9 +33,12 @@
                   <td>{{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
                   <td>{{ miembro.correo }}</td>
                   <td class="text-center">
-                    <span [class]="'badge rounded-pill px-3 ' + (miembro.estado ? 'bg-success' : 'bg-danger')">
-                      {{ miembro.estado ? 'Activo' : 'Inactivo' }}
-                    </span>
+                    <select class="form-select form-select-sm w-auto d-inline"
+                      [ngModel]="miembro.estado"
+                      (ngModelChange)="cambiarEstado(miembro, $event)">
+                      <option [ngValue]="true">Activo</option>
+                      <option [ngValue]="false">Inactivo</option>
+                    </select>
                   </td>
                   <td class="text-center">{{ miembro.f_registro }}</td>
                 </tr>
@@ -50,4 +53,4 @@
         </div>
       </div>
     </div>
-  </div>
+</div>
