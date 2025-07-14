@@ -1,0 +1,114 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-miembros-sidebar></app-miembros-sidebar>
+    <div class="container mt-4">
+        <h2>Registrar Miembro</h2>
+        <form (ngSubmit)="guardar(form)" #form="ngForm" novalidate>
+            <div class="mb-3">
+                <label>Cédula</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.cedula" name="cedula" required
+                    maxlength="20" #cedula="ngModel">
+                <div class="text-danger" *ngIf="cedula.invalid && (cedula.dirty || cedula.touched)">
+                    <span *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Nombre</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.nombre" name="nombre" required
+                    minlength="3" #nombre="ngModel">
+                <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
+                    <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
+                    <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Primer Apellido</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.apellido1" name="apellido1" required
+                    #apellido1="ngModel">
+                <div class="text-danger" *ngIf="apellido1.invalid && (apellido1.dirty || apellido1.touched)">
+                    <span *ngIf="apellido1.errors?.['required']">El primer apellido es obligatorio.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Segundo Apellido</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.apellido2" name="apellido2" required
+                    #apellido2="ngModel">
+                <div class="text-danger" *ngIf="apellido2.invalid && (apellido2.dirty || apellido2.touched)">
+                    <span *ngIf="apellido2.errors?.['required']">El segundo apellido es obligatorio.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Edad</label>
+                <input type="number" class="form-control" [(ngModel)]="miembro.edad" name="edad" required min="1"
+                    #edad="ngModel">
+                <div class="text-danger" *ngIf="edad.invalid && (edad.dirty || edad.touched)">
+                    <span *ngIf="edad.errors?.['required']">La edad es obligatoria.</span>
+                    <span *ngIf="edad.errors?.['min']">Debe ser mayor a 0.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Dirección</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.direccion" name="direccion" required
+                    #direccion="ngModel">
+                <div class="text-danger" *ngIf="direccion.invalid && (direccion.dirty || direccion.touched)">
+                    <span *ngIf="direccion.errors?.['required']">La dirección es obligatoria.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Altura (m)</label>
+                <input type="number" class="form-control" [(ngModel)]="miembro.altura" name="altura" required min="0.5"
+                    step="0.01" #altura="ngModel">
+                <div class="text-danger" *ngIf="altura.invalid && (altura.dirty || altura.touched)">
+                    <span *ngIf="altura.errors?.['required']">La altura es obligatoria.</span>
+                    <span *ngIf="altura.errors?.['min']">Debe ser mayor a 0.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Peso (kg)</label>
+                <input type="number" class="form-control" [(ngModel)]="miembro.peso" name="peso" required min="1"
+                    step="0.01" #peso="ngModel">
+                <div class="text-danger" *ngIf="peso.invalid && (peso.dirty || peso.touched)">
+                    <span *ngIf="peso.errors?.['required']">El peso es obligatorio.</span>
+                    <span *ngIf="peso.errors?.['min']">Debe ser mayor a 0.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Contextura</label>
+                <input type="text" class="form-control" [(ngModel)]="miembro.contextura" name="contextura" required
+                    #contextura="ngModel">
+                <div class="text-danger" *ngIf="contextura.invalid && (contextura.dirty || contextura.touched)">
+                    <span *ngIf="contextura.errors?.['required']">La contextura es obligatoria.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Objetivo</label>
+                <textarea class="form-control" [(ngModel)]="miembro.objetivo" name="objetivo" required
+                    #objetivo="ngModel"></textarea>
+                <div class="text-danger" *ngIf="objetivo.invalid && (objetivo.dirty || objetivo.touched)">
+                    <span *ngIf="objetivo.errors?.['required']">El objetivo es obligatorio.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Sexo</label>
+                <select class="form-control" [(ngModel)]="miembro.sexo" name="sexo" required #sexo="ngModel">
+                    <option value="" disabled selected>Seleccione</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                </select>
+                <div class="text-danger" *ngIf="sexo.invalid && (sexo.dirty || sexo.touched)">
+                    <span *ngIf="sexo.errors?.['required']">El sexo es obligatorio.</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label>Correo</label>
+                <input type="email" class="form-control" [(ngModel)]="miembro.correo" name="correo" required email
+                    #correo="ngModel">
+                <div class="text-danger" *ngIf="correo.invalid && (correo.dirty || correo.touched)">
+                    <span *ngIf="correo.errors?.['required']">El correo es obligatorio.</span>
+                    <span *ngIf="correo.errors?.['email']">Debe ser un correo válido.</span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
+            <div class="mt-2">{{ mensaje }}</div>
+        </form>
+    </div>
+</div>

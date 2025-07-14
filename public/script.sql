@@ -90,21 +90,7 @@
         estado BOOLEAN NOT NULL DEFAULT TRUE
     );
 
-    -- ==============================
-    -- Tabla: Usuario (admin, entrenador o miembro)
-    -- ==============================
-    CREATE TABLE Usuario (
-        id_usuario SERIAL PRIMARY KEY,
-        usuario VARCHAR(255) UNIQUE NOT NULL,
-        contrasenia VARCHAR(255) NOT NULL,
-        rol VARCHAR(50) NOT NULL,  -- admin, entrenador, miembro
-        id_coach INT NULL,
-        id_miembro INT NULL,
-        estado BOOLEAN NOT NULL DEFAULT TRUE,
-        fecha_registro DATE NOT NULL DEFAULT CURRENT_DATE,
-        CONSTRAINT fk_usuario_coach FOREIGN KEY (id_coach) REFERENCES Entrenador(id_entrenador),
-        CONSTRAINT fk_usuario_miembro FOREIGN KEY (id_miembro) REFERENCES Miembro(id_miembro)
-    );
+    .
 
     -- ==============================
     -- Tabla: Perfil_fisico
