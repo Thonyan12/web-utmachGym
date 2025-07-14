@@ -1,56 +1,86 @@
 <div class="d-flex" style="min-height: 100vh;">
     <app-miembros-sidebar></app-miembros-sidebar>
     <div class="container mt-4">
-        <div *ngIf="miembro; else loading">
-            <h2 class="mb-4">Detalles del Miembro</h2>
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</h5>
-                    <span class="badge" [ngClass]="miembro.estado ? 'bg-success' : 'bg-danger'">
-                        {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+        <h2 class="mb-4">Lista de Miembros</h2>
+        <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, cédula o ID..."
+            [(ngModel)]="filtro" (input)="filtrarMiembros()" name="filtro">
+
+        <div *ngIf="miembrosFiltrados.length === 0" class="alert alert-warning">
+            No se encontraron miembros.
+        </div>
+
+        <ul class="list-group shadow-sm">
+            <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
+                *ngFor="let miembro of miembrosFiltrados">
+                <div>
+                    <span class="fw-bold">{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</span>
+                    <span class="badge bg-secondary ms-2">{{ miembro.cedula }}</span>
+                </div>
+                <div class="text-muted small">
+                    <span><strong>ID:</strong> {{ miembro.id_miembro }}</span> |
+                    <span><strong>Edad:</strong> {{ miembro.edad }}</span> |
+                    <span><strong>Sexo:</strong> {{ miembro.sexo === 'M' ? 'Masculino' : 'Femenino' }}</span> |
+                    <span><strong>Estado:</strong>
+                        <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
+                            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+                        </span>
                     </span>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>Cédula:</strong> {{ miembro.cedula }}</p>
-                            <p><strong>Correo:</strong> {{ miembro.correo }}</p>
-                            <p><strong>Edad:</strong> {{ miembro.edad }} años</p>
-                            <p><strong>Sexo:</strong> {{ miembro.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
-                            <p><strong>Dirección:</strong> {{ miembro.direccion }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Altura:</strong> {{ miembro.altura }} m</p>
-                            <p><strong>Peso:</strong> {{ miembro.peso }} kg</p>
-                            <p><strong>Contextura:</strong> {{ miembro.contextura }}</p>
-                            <p><strong>Fecha de Inscripción:</strong> {{ miembro.fecha_inscripcion | date:'longDate' }}
-                            </p>
-                        </div>
-                    </div>
-                    <hr>
-                    <h6>Objetivo:</h6>
-                    <p class="text-muted" style="white-space: pre-wrap;">{{ miembro.objetivo }}</p>
+                <div class="text-end mt-2 mt-md-0">
+                    <span class="badge bg-light text-dark">Registrado: {{ miembro.f_registro | date:'shortDate'
+                        }}</span>
                 </div>
-                <div class="card-footer text-muted d-flex justify-content-between align-items-center">
-                    <small>Fecha de Registro: {{ miembro.f_registro | date:'medium' }}</small>
-                    <div>
-                        <a [routerLink]="['/admin/miembros/editar', miembro.id_miembro]"
-                            class="btn btn-sm btn-outline-primary me-2">
-                            <i class="bi bi-pencil-square"></i> Editar
-                        </a>
-                        <a [routerLink]="['/admin/miembros/eliminar', miembro.id_miembro]"
-                            class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i> Eliminar
-                        </a>
+                <div class="mt-2 mt-md-0">
+                    <button type="button" class="btn btn-sm btn-outline-info me-2" (click)="abrirModal(miembro)">
+                        <i class="bi bi-search"></i> Ver
+                    </button>
+                    <a [routerLink]="['/admin/miembros/editar', miembro.id_miembro]"
+                        class="btn btn-sm btn-outline-primary me-2">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    <a [routerLink]="['/admin/miembros/eliminar', miembro.id_miembro]"
+                        class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </a>
+                </div>
+            </li>
+        </ul>
+
+        <!-- Modal simple -->
+        <div class="modal fade" tabindex="-1" [ngClass]="{show: mostrarModal}"
+            [ngStyle]="{display: mostrarModal ? 'block' : 'none'}" style="background:rgba(0,0,0,0.5)">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Detalle de Miembro</h5>
+                        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+                    </div>
+                    <div class="modal-body" *ngIf="miembroSeleccionado">
+                        <p><strong>ID:</strong> {{ miembroSeleccionado.id_miembro }}</p>
+                        <p><strong>Cédula:</strong> {{ miembroSeleccionado.cedula }}</p>
+                        <p><strong>Nombre:</strong> {{ miembroSeleccionado.nombre }} {{ miembroSeleccionado.apellido1 }}
+                            {{ miembroSeleccionado.apellido2 }}</p>
+                        <p><strong>Edad:</strong> {{ miembroSeleccionado.edad }}</p>
+                        <p><strong>Sexo:</strong> {{ miembroSeleccionado.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
+                        <p><strong>Correo:</strong> {{ miembroSeleccionado.correo }}</p>
+                        <p><strong>Dirección:</strong> {{ miembroSeleccionado.direccion }}</p>
+                        <p><strong>Altura:</strong> {{ miembroSeleccionado.altura }}</p>
+                        <p><strong>Peso:</strong> {{ miembroSeleccionado.peso }}</p>
+                        <p><strong>Contextura:</strong> {{ miembroSeleccionado.contextura }}</p>
+                        <p><strong>Objetivo:</strong> {{ miembroSeleccionado.objetivo }}</p>
+                        <p><strong>Estado:</strong>
+                            <span [ngClass]="miembroSeleccionado.estado ? 'text-success' : 'text-danger'">
+                                {{ miembroSeleccionado.estado ? 'Activo' : 'Inactivo' }}
+                            </span>
+                        </p>
+                        <p><strong>Fecha de Registro:</strong> {{ miembroSeleccionado.f_registro | date:'shortDate' }}
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
                     </div>
                 </div>
             </div>
-            <a routerLink="/admin/miembros" class="btn btn-secondary mt-3">
-                <i class="bi bi-arrow-left"></i> Volver a la lista
-            </a>
         </div>
-        <ng-template #loading>
-            <div class="alert alert-info">Cargando detalles del miembro...</div>
-        </ng-template>
     </div>
 </div>

@@ -33,10 +33,6 @@ export class MiembrosService {
         return this.http.get<Miembro[]>(this.apiUrl);
     }
 
-    create(miembro: Miembro): Observable<any> {
-        return this.http.post(this.apiUrl, miembro);
-    }
-
     getById(id: number): Observable<Miembro> {
         return this.http.get<Miembro>(`${this.apiUrl}/${id}`);
     }
@@ -45,8 +41,12 @@ export class MiembrosService {
         return this.http.put<Miembro>(`${this.apiUrl}/${miembro.id_miembro}`, miembro);
     }
 
-    delete(id: number): Observable<any> {
+    delete(id: number) {
         return this.http.delete(`${this.apiUrl}/${id}`);
+    }
+
+    create(miembro: Miembro): Observable<any> {
+        return this.http.post(this.apiUrl, miembro);
     }
 
     constructor() { }

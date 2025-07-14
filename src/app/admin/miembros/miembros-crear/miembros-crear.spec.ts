@@ -18,6 +18,5 @@ describe('MiembrosCrearComponent', () => {
 
     it('should create', () => {
         expect(component).toBeTruthy();
-      });
     });
-    
+});

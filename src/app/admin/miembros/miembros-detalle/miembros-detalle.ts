@@ -1,35 +1,53 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { Miembro, MiembrosService } from '../services/miembros';
 import { MiembrosSidebarComponent } from '../miembros-sidebar/miembros-sidebar';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-miembros-detalle',
     standalone: true,
-    imports: [CommonModule, RouterLink, MiembrosSidebarComponent],
+    imports: [CommonModule, RouterLink, MiembrosSidebarComponent, FormsModule],
     templateUrl: './miembros-detalle.html',
 })
-export class MiembrosDetalle {
-    private route = inject(ActivatedRoute);
-    private router = inject(Router);
+export class MiembrosDetalleComponent implements OnInit {
     private miembrosService = inject(MiembrosService);
 
-    miembro: Miembro | undefined;
+    filtro: string = '';
+    miembros: Miembro[] = [];
+    miembrosFiltrados: Miembro[] = [];
 
     ngOnInit(): void {
-        const id = this.route.snapshot.paramMap.get('id');
-        if (id) {
-            this.miembrosService.getById(Number(id)).subscribe({
-                next: (data) => {
-                    this.miembro = data;
-                },
-                error: (error) => {
-                    console.error('Error al obtener el miembro', error);
-                    this.router.navigate(['/admin/miembros']);
-                }
-            });
-        }
+        this.miembrosService.getMiembros().subscribe({
+            next: (data) => {
+                this.miembros = data;
+                this.filtrarMiembros();
+            }
+        });
+    }
+    // ...existing code...
+    mostrarModal = false;
+    miembroSeleccionado: Miembro | null = null;
+
+    abrirModal(miembro: Miembro) {
+        this.miembroSeleccionado = miembro;
+        this.mostrarModal = true;
+    }
+
+    cerrarModal() {
+        this.mostrarModal = false;
+        this.miembroSeleccionado = null;
+    }
+    // ...existing code...
+    filtrarMiembros(): void {
+        const filtroLower = this.filtro.toLowerCase();
+        this.miembrosFiltrados = this.miembros.filter(m =>
+            m.nombre.toLowerCase().includes(filtroLower) ||
+            m.apellido1.toLowerCase().includes(filtroLower) ||
+            m.apellido2.toLowerCase().includes(filtroLower) ||
+            m.cedula.toLowerCase().includes(filtroLower) ||
+            (m.id_miembro && m.id_miembro.toString().includes(filtroLower))
+        );
     }
 }
-

@@ -6,7 +6,7 @@ import { Facturas } from './facturas/facturas';
 import { MiembrosListarComponent } from './miembros/miembros-listar/miembros-listar';
 import { MiembrosCrearComponent } from './miembros/miembros-crear/miembros-crear';
 import { MiembrosEditarComponent } from './miembros/miembros-editar/miembros-editar';
-import { MiembrosDetalle } from './miembros/miembros-detalle/miembros-detalle';
+import { MiembrosDetalleComponent } from './miembros/miembros-detalle/miembros-detalle';
 import { MiembrosEliminarComponent } from './miembros/miembros-eliminar/miembros-eliminar';
 
 import { ProductosListar } from './productos/productos-listar/productos-listar';
@@ -55,7 +55,7 @@ export const adminRoutes: Routes = [
           { path: '', component: MiembrosListarComponent },
           { path: 'crear', component: MiembrosCrearComponent },
           { path: 'editar/:id', component: MiembrosEditarComponent },
-          { path: 'detalle/:id', component: MiembrosDetalle },
+          { path: 'detalle/:id', component: MiembrosDetalleComponent },
           { path: 'eliminar/:id', component: MiembrosEliminarComponent }
         ]
       }
