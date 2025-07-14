@@ -1,0 +1,70 @@
+<div class="d-flex" style="min-height: 100vh;">
+  <!-- Sidebar reutilizable para Mensualidades -->
+  <app-mensualidad-sidebar></app-mensualidad-sidebar>
+
+  <!-- Contenido principal del formulario de eliminación -->
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="container mt-4">
+      <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
+        <i class="bi bi-trash-fill me-2"></i> Eliminar Mensualidad
+      </h3>
+
+      <div class="card border-0 shadow-sm rounded-lg p-4">
+        <div class="mb-3">
+          <label class="form-label">ID de la Mensualidad</label>
+          <input [(ngModel)]="idMensualidad" name="idMensualidad" type="number" class="form-control rounded-md" placeholder="Ingrese el ID de la mensualidad" required>
+        </div>
+
+        <div class="d-flex gap-2 mb-3">
+          <button class="btn btn-primary rounded-md" (click)="buscar()">
+            <i class="bi bi-search me-1"></i> Buscar
+          </button>
+          <button class="btn btn-danger rounded-md" (click)="confirmarEliminar()" [disabled]="!mensualidad">
+            <i class="bi bi-trash me-1"></i> Eliminar
+          </button>
+        </div>
+
+        <div *ngIf="mensualidad" class="mt-3 p-3 border rounded-md bg-white shadow-sm">
+          <h5 class="fw-bold mb-2">Mensualidad encontrada:</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <div><strong>ID Mensualidad:</strong> {{ mensualidad.id_mensualidad }}</div>
+              <div><strong>ID Miembro:</strong> {{ mensualidad.id_miembro }}</div>
+              <div><strong>Fecha Inicio:</strong> {{ mensualidad.fecha_inicio }}</div>
+            </div>
+            <div class="col-md-6">
+              <div><strong>Fecha Fin:</strong> {{ mensualidad.fecha_fin }}</div>
+              <div><strong>Monto:</strong> ${{ mensualidad.monto | number:'1.2-2' }}</div>
+              <div>
+                <strong>Estado:</strong>
+                <span [class]="'badge rounded-pill px-2 ' + (mensualidad.estado_mensualidad === 'Pagada' ? 'bg-success' : 'bg-warning')">
+                  {{ mensualidad.estado_mensualidad }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-2"><strong>Fecha Registro:</strong> {{ mensualidad.f_registro }}</div>
+        </div>
+
+        <!-- Confirmación antes de eliminar -->
+        <div *ngIf="mostrarConfirmacion" class="alert alert-warning mt-4 rounded-md">
+          <h5 class="alert-heading">¿Estás seguro de que deseas eliminar esta mensualidad?</h5>
+          <p>Esta acción no se puede deshacer.</p>
+          <hr>
+          <div class="d-flex gap-2">
+            <button class="btn btn-danger rounded-md" (click)="eliminar()">
+              <i class="bi bi-check-lg me-1"></i> Sí, eliminar
+            </button>
+            <button class="btn btn-secondary rounded-md" (click)="cancelarEliminar()">
+              <i class="bi bi-x-lg me-1"></i> Cancelar
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="mensaje" [class]="'alert mt-4 rounded-md ' + (mensaje.includes('éxito') ? 'alert-success' : 'alert-info')">
+          {{ mensaje }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
