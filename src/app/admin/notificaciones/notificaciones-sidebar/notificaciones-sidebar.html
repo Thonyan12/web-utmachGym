@@ -1,0 +1,54 @@
+<div class="bg-dark text-white p-3 d-flex flex-column" style="width: 250px; min-height: 100vh;">
+    <div class="mb-4">
+        <h5 class="text-center" style="color: #fca311;">
+            <i class="bi bi-bell-fill me-2"></i>Notificaciones
+        </h5>
+    </div>
+    <ul class="nav flex-column flex-grow-1">
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white py-2" routerLink="/admin/notificaciones">
+                <i class="bi bi-list-ul me-2"></i> Listar Notificaciones
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white py-2" routerLink="/admin/notificaciones/crear">
+                <i class="bi bi-plus-circle me-2"></i> Crear Notificación
+            </a>
+        </li>
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white py-2" routerLink="/admin/notificaciones/detalle/1">
+                <i class="bi bi-search me-2"></i> Buscar Notificación
+            </a>
+        </li>
+    
+        <li class="nav-item mb-2">
+            <a class="nav-link text-white py-2" routerLink="/admin/notificaciones/eliminar/1">
+                <i class="bi bi-trash me-2"></i> Eliminar Notificación
+            </a>
+        </li>
+    </ul>
+</div>
+<style>
+    body {
+        overflow-x: hidden;
+    }
+
+    .nav-link {
+        border-radius: 4px;
+        transition: all 0.2s;
+    }
+
+    .nav-link:hover {
+        background-color: rgba(252, 163, 17, 0.1);
+    }
+
+    .nav-link.active {
+        background-color: #fca311;
+        color: #0a1a2e !important;
+        font-weight: 500;
+    }
+
+    .bg-dark {
+        background-color: #14213d !important;
+    }
+</style>

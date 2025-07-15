@@ -1,0 +1,33 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-notificaciones-sidebar></app-notificaciones-sidebar>
+    <div class="flex-grow-1 d-flex justify-content-center align-items-start p-4 bg-light">
+        <form (ngSubmit)="crearNotificacion(formNoti)" #formNoti="ngForm" class="p-4 bg-white rounded shadow-sm" style="min-width:350px;max-width:400px;width:100%;">
+            <h4 class="mb-3">Crear Notificación</h4>
+
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo</label>
+                <input type="text" id="tipo" name="tipo" class="form-control" [(ngModel)]="notificacion.tipo" required maxlength="100">
+            </div>
+
+            <div class="mb-3">
+                <label for="contenido" class="form-label">Contenido</label>
+                <textarea id="contenido" name="contenido" class="form-control" [(ngModel)]="notificacion.contenido" required rows="4"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="id_usuario" class="form-label">Destinatario</label>
+                <input type="text" class="form-control mb-2" placeholder="Buscar usuario..." [(ngModel)]="filtroUsuario" name="filtroUsuario" autocomplete="off">
+                <select id="id_usuario" name="id_usuario" class="form-select" [(ngModel)]="notificacion.id_usuario" required>
+                    <option value="" disabled>Seleccione un usuario</option>
+                    <option *ngFor="let user of usuarios | userFilter:filtroUsuario" [value]="user.id_usuario">
+                        {{ user.nombre_completo }} ({{ user.usuario }})
+                    </option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary w-100" [disabled]="formNoti.invalid">Crear Notificación</button>
+        <div *ngIf="mensaje" class="alert alert-success mt-3 text-center">
+    {{ mensaje }}
+</div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,67 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar reutilizable -->
+    <app-notificaciones-sidebar></app-notificaciones-sidebar>
+
+    <!-- Contenido principal -->
+    <div class="flex-grow-1 p-4 bg-light">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold m-0" style="color: #14213d;">
+                <i class="bi bi-list-ul me-2"></i> Listado de Notificaciones
+            </h3>
+            <button class="btn btn-sm d-flex align-items-center gap-1"
+                style="background-color: #f6f6f5; color: #0a1a2e;" routerLink="/admin/notificaciones/crear">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle mb-0">
+                        <thead style="background-color: #14213d; color: #fff;">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Tipo</th>
+                                <th scope="col">Contenido</th>
+                                <th scope="col">Remitente</th>
+                                <th scope="col">Destinatario</th>
+                                <th scope="col">Leído</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col">Fecha Envío</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let noti of notificaciones" class="align-middle">
+                                <td class="fw-bold text-center">{{ noti.id_notificacion }}</td>
+                                <td>
+                                    <span class="badge rounded-pill" style="background-color: #fca311; color: #14213d;">
+                                        {{ noti.tipo }}
+                                    </span>
+                                </td>
+                                <td>{{ noti.contenido }}</td>
+                                <td class="text-center">{{ noti.id_usuario_remitente }}</td>
+                                <td class="text-center">{{ noti.id_usuario }}</td>
+                                <td class="text-center">
+                                    <span
+                                        [class]="'badge rounded-pill px-3 ' + (noti.leido ? 'bg-success' : 'bg-danger')">
+                                        {{ noti.leido ? 'Sí' : 'No' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <span
+                                        [class]="'badge rounded-pill px-3 ' + (noti.estado ? 'bg-success' : 'bg-danger')">
+                                        {{ noti.estado ? 'Activo' : 'Inactivo' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">{{ noti.fecha_envio }}</td>
+                            </tr>
+                            <tr *ngIf="notificaciones.length === 0">
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-bell"></i> No hay notificaciones registradas.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>

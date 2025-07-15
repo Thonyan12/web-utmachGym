@@ -8,7 +8,10 @@ import { MiembrosCrearComponent } from './miembros/miembros-crear/miembros-crear
 import { MiembrosEditarComponent } from './miembros/miembros-editar/miembros-editar';
 import { MiembrosDetalleComponent } from './miembros/miembros-detalle/miembros-detalle';
 import { MiembrosEliminarComponent } from './miembros/miembros-eliminar/miembros-eliminar';
-
+import { NotificacionesListarComponent } from './notificaciones/notificaciones-listar/notificaciones-listar';
+import { NotificacionesCrearComponent } from './notificaciones/notificaciones-crear/notificaciones-crear';
+import { NotificacionesDetalleComponent } from './notificaciones/notificaciones-detalle/notificaciones-detalle';
+import { NotificacionesEliminarComponent } from './notificaciones/notificaciones-eliminar/notificaciones-eliminar';
 import { ProductosListar } from './productos/productos-listar/productos-listar';
 import { ProductosCrearComponent } from './productos/productos-crear/productos-crear';
 import { ProductosEditar } from './productos/productos-editar/productos-editar';
@@ -35,9 +38,7 @@ export const adminRoutes: Routes = [
       { path: 'dashboard', component: Dashboard },
       { path: 'entrenadores', component: Entrenadores },
       { path: 'facturas', component: Facturas },
-      {
-        path: 'productos',
-        canActivate: [adminGuard], // Solo admins pueden gestionar productos
+      {path: 'productos',canActivate: [adminGuard], // Solo admins pueden gestionar productos
         children: [
           { path: '', component: ProductosListar },
           { path: 'crear', component: ProductosCrearComponent },
@@ -45,6 +46,13 @@ export const adminRoutes: Routes = [
           { path: 'detalle/:id', component: ProductosDetalle },
           { path: 'eliminar/:id', component: ProductosEliminar }
         ] 
+      },
+      {
+        path: 'notificaciones',
+        children: [
+          { path: '', component: NotificacionesListarComponent },
+          { path: 'crear', component: NotificacionesCrearComponent }
+      ]
       },
       {
         path: 'mensualidades',
@@ -57,6 +65,15 @@ export const adminRoutes: Routes = [
     
         ]
       },
+      {
+  path: 'notificaciones',
+  children: [
+    { path: '', component: NotificacionesListarComponent },
+    { path: 'crear', component: NotificacionesCrearComponent },
+    { path: 'detalle/:id', component: NotificacionesDetalleComponent },
+    { path: 'eliminar/:id', component: NotificacionesEliminarComponent }
+  ]
+},
       {
         path: 'miembros',
         children: [
