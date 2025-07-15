@@ -1,8 +1,8 @@
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
 import { NotificacionesSidebarComponent } from '../notificaciones-sidebar/notificaciones-sidebar';
 import { Notificacion, NotificacionesService } from '../services/notificaciones';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-notificaciones-listar',

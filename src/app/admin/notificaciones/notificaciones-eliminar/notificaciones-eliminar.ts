@@ -1,13 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { NotificacionesSidebarComponent } from '../notificaciones-sidebar/notificaciones-sidebar';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { Notificacion, NotificacionesService } from '../services/notificaciones';
 
 @Component({
     selector: 'app-notificaciones-eliminar',
     standalone: true,
-    imports: [CommonModule, FormsModule, NotificacionesSidebarComponent],
+    imports: [CommonModule, NotificacionesSidebarComponent, FormsModule],
     templateUrl: './notificaciones-eliminar.html',
     styleUrl: './notificaciones-eliminar.css'
 })

@@ -1,14 +1,14 @@
+import { FormsModule } from '@angular/forms';
 import { Component, inject, OnInit } from '@angular/core';
 import { NotificacionesSidebarComponent } from '../notificaciones-sidebar/notificaciones-sidebar';
 import { Notificacion, NotificacionesService } from '../services/notificaciones';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-notificaciones-detalle',
     standalone: true,
-    imports: [CommonModule, FormsModule, NotificacionesSidebarComponent, RouterModule],
+    imports: [CommonModule, NotificacionesSidebarComponent, RouterModule,FormsModule],
     templateUrl: './notificaciones-detalle.html',
     styleUrls: ['./notificaciones-detalle.css']
 })

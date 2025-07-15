@@ -9,15 +9,11 @@ import { MiembrosCrearComponent } from './miembros/miembros-crear/miembros-crear
 import { MiembrosEditarComponent } from './miembros/miembros-editar/miembros-editar';
 import { MiembrosDetalleComponent } from './miembros/miembros-detalle/miembros-detalle';
 import { MiembrosEliminarComponent } from './miembros/miembros-eliminar/miembros-eliminar';
-<<<<<<< HEAD
 import { NotificacionesListarComponent } from './notificaciones/notificaciones-listar/notificaciones-listar';
 import { NotificacionesCrearComponent } from './notificaciones/notificaciones-crear/notificaciones-crear';
 import { NotificacionesDetalleComponent } from './notificaciones/notificaciones-detalle/notificaciones-detalle';
 import { NotificacionesEliminarComponent } from './notificaciones/notificaciones-eliminar/notificaciones-eliminar';
-=======
-
 // Productos
->>>>>>> 9545952fa61baf9553f48907dbae7dc246bf76e1
 import { ProductosListar } from './productos/productos-listar/productos-listar';
 import { ProductosCrearComponent } from './productos/productos-crear/productos-crear';
 import { ProductosEditar } from './productos/productos-editar/productos-editar';
@@ -47,17 +43,9 @@ export const adminRoutes: Routes = [
       // ❌ ELIMINAR: { path: 'entrenadores', component: Entrenadores },
       
       { path: 'facturas', component: Facturas },
-<<<<<<< HEAD
-      {path: 'productos',canActivate: [adminGuard], // Solo admins pueden gestionar productos
-=======
-      
-      // ===============================
-      // PRODUCTOS - Solo para administradores
-      // ===============================
-      {
-        path: 'productos',
+      {path: 'productos',canActivate: [adminGuard],}, // Solo admins pueden gestionar productos
+      {path: 'productos',
         canActivate: [adminGuard], // Solo admins pueden gestionar productos
->>>>>>> 9545952fa61baf9553f48907dbae7dc246bf76e1
         children: [
           { path: '', component: ProductosListar },
           { path: 'crear', component: ProductosCrearComponent },
