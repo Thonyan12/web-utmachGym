@@ -8,6 +8,7 @@ import { Contacto } from './pages/contacto/contacto';
 import { adminRoutes } from './admin/admin.routes';
 import { StaffLogin } from './pages/staff-login/staff-login';
 import { miembrosRoutes } from './miembros/miembro.routes';
+import { entrenadoresRoutes } from './entrenadores/entrenadores.routes';
 
 export const routes: Routes = [
   { path: '', component: Landing },
@@ -19,5 +20,6 @@ export const routes: Routes = [
   { path: 'contacto', component: Contacto },
   { path: 'admin', children: adminRoutes }, 
   {path:'miembros', children: miembrosRoutes},
+  {path: 'entrenadores', children: entrenadoresRoutes},
   { path: '**', redirectTo: '', pathMatch: 'full' } // <-- Siempre al final
 ];
