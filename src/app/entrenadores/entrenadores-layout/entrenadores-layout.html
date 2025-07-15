@@ -1,0 +1,139 @@
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm" 
+     style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+  <div class="container-fluid">
+    <a class="navbar-brand fw-bold d-flex align-items-center" routerLink="/entrenadores/dashboard">
+      <img src="logomain.png" alt="Logo" width="40" class="me-2">
+      <span class="d-none d-md-inline">Coach <span style="color: #fca311;">Utmach</span> Gym</span>
+      <span class="d-md-none" style="color: #fca311;">CG</span>
+    </a>
+    
+    <button class="navbar-toggler" type="button" (click)="toggleMenu()" 
+            [attr.aria-expanded]="!menuCollapsed">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" [class.show]="!menuCollapsed" id="entrenadoresNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/dashboard" 
+             routerLinkActive="active" style="color: #fca311;">
+            <i class="bi bi-speedometer2 me-2"></i>
+            <span class="d-none d-lg-inline">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/mis-miembros" 
+             style="color: #fca311;">
+            <i class="bi bi-people me-2"></i>
+            <span class="d-none d-lg-inline">Mis Miembros</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/asistencia" 
+             style="color: #fca311;">
+            <i class="bi bi-check2-square me-2"></i>
+            <span class="d-none d-lg-inline">Asistencia</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/notificaciones" 
+             style="color: #fca311;">
+            <i class="bi bi-chat-dots me-2"></i>
+            <span class="d-none d-lg-inline">Mensajes</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/perfil" 
+             style="color: #fca311;">
+            <i class="bi bi-person-circle me-2"></i>
+            <span class="d-none d-lg-inline">Mi Perfil</span>
+          </a>
+        </li>
+      </ul>
+      
+      <!-- Usuario y acciones -->
+      <div class="d-flex align-items-center">
+        <!-- Notificaciones -->
+        <button class="btn btn-sm btn-outline-warning me-2 position-relative">
+          <i class="bi bi-bell"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+            2
+            <span class="visually-hidden">notificaciones</span>
+          </span>
+        </button>
+
+        <!-- Usuario logueado -->
+        <div *ngIf="currentUser" class="navbar-text text-white me-3 d-none d-md-block">
+          <i class="bi bi-person-check me-1"></i>
+          <span class="fw-bold">{{ obtenerPrimerNombre() }}</span>
+          <small class="d-block text-warning">Entrenador</small>
+        </div>
+        
+        <!-- Menú usuario móvil -->
+        <div class="dropdown d-md-none">
+          <button class="btn btn-sm btn-outline-warning dropdown-toggle" 
+                  data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><span class="dropdown-header">{{ currentUser?.nombre_completo }}</span></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item" (click)="volverInicio()">
+              <i class="bi bi-house me-2"></i>Página Principal</a></li>
+            <li><a class="dropdown-item text-danger" (click)="mostrarDialogoSalir = true">
+              <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+          </ul>
+        </div>
+
+        <!-- Botones desktop -->
+        <div class="d-none d-md-flex">
+          <button class="btn btn-sm btn-outline-secondary me-2" (click)="volverInicio()">
+            <i class="bi bi-house me-1"></i> Inicio
+          </button>
+          
+          <button class="btn btn-sm btn-outline-warning" (click)="mostrarDialogoSalir = true">
+            <i class="bi bi-box-arrow-right me-1"></i> Salir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Modal de confirmación con colores consistentes -->
+<div *ngIf="mostrarDialogoSalir" class="modal fade show d-block" 
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%); color: white;">
+        <h5 class="modal-title fw-bold">
+          <i class="bi bi-exclamation-diamond me-2"></i>Confirmar Salida
+        </h5>
+        <button type="button" class="btn-close btn-close-white" 
+                (click)="mostrarDialogoSalir = false"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <div class="mb-3">
+          <i class="bi bi-person-x" style="font-size: 3rem; color: #fca311;"></i>
+        </div>
+        <h6>¿Estás seguro de que deseas cerrar sesión?</h6>
+        <p class="text-muted mb-0">Serás redirigido a la página principal del gimnasio.</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" class="btn btn-secondary px-4" 
+                (click)="mostrarDialogoSalir = false">
+          <i class="bi bi-x-lg me-1"></i> Cancelar
+        </button>
+        <button type="button" class="btn px-4" (click)="logout()"
+                style="background-color: #fca311; color: #0a1a2e; font-weight: 600;">
+          <i class="bi bi-box-arrow-right me-1"></i> Sí, Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Contenido principal -->
+<div class="container-fluid" style="background-color: #f8f9fa; min-height: calc(100vh - 76px);">
+  <router-outlet></router-outlet>
+</div>
