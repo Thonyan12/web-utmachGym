@@ -33,13 +33,15 @@ export class StaffLogin {
           this.loading = false;
           
           // ✅ VALIDAR QUE SEA STAFF (admin o entrenador)
-          if (response.user.rol === 'admin' || response.user.rol === 'entrenador') {
-            // ✅ Es staff, puede acceder
-            this.router.navigate([response.redirectTo]);
+          if (response.user.rol === 'admin') {
+            // ✅ Es administrador → va al área admin
+            this.router.navigate(['/admin/dashboard']);
+          } else if (response.user.rol === 'entrenador') {
+            // ✅ Es entrenador → va al área entrenadores
+            this.router.navigate(['/entrenadores/dashboard']);
           } else if (response.user.rol === 'miembro') {
             // ❌ Es un miembro, NO puede acceder al área staff
             this.authService.logout(); // Limpiar token
-            // ⚠️ NO redirigir, solo mostrar error
             this.error = '🚫 Acceso denegado. Usted es un miembro del gimnasio. Para acceder a su área personal, use el botón "Miembro" en la página principal.';
           } else {
             // ❌ Rol desconocido

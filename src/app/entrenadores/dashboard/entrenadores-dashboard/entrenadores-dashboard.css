@@ -1,0 +1,79 @@
+/* src/app/entrenadores/dashboard/entrenadores-dashboard/entrenadores-dashboard.css */
+.card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Animaciones para las tarjetas de acceso rápido */
+.bg-light {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.bg-light:hover {
+  background-color: #e9ecef !important;
+  transform: scale(1.05);
+}
+
+/* Estados de clases - usando colores consistentes */
+.bg-success.text-white {
+  background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%) !important;
+}
+
+/* Custom badge styles */
+.badge {
+  font-weight: 500;
+}
+
+/* Icon hover effects */
+.bi {
+  transition: transform 0.2s ease;
+}
+
+.card:hover .bi {
+  transform: scale(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .display-6 {
+    font-size: 2rem;
+  }
+  
+  .fw-bold {
+    font-size: 0.9rem;
+  }
+}
+
+/* Button hover effects - colores consistentes */
+.btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(252, 163, 17, 0.4);
+  background-color: #fca311;
+  border-color: #fca311;
+  color: #0a1a2e;
+}
+
+.btn-outline-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(252, 163, 17, 0.3);
+  background-color: #fca311;
+  border-color: #fca311;
+  color: #0a1a2e;
+}
+
+.btn-outline-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(252, 163, 17, 0.3);
+  background-color: #fca311;
+  border-color: #fca311;
+  color: #0a1a2e;
+}
