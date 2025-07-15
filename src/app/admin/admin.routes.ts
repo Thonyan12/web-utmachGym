@@ -9,10 +9,13 @@ import { MiembrosCrearComponent } from './miembros/miembros-crear/miembros-crear
 import { MiembrosEditarComponent } from './miembros/miembros-editar/miembros-editar';
 import { MiembrosDetalleComponent } from './miembros/miembros-detalle/miembros-detalle';
 import { MiembrosEliminarComponent } from './miembros/miembros-eliminar/miembros-eliminar';
+
+// Notificaciones
 import { NotificacionesListarComponent } from './notificaciones/notificaciones-listar/notificaciones-listar';
 import { NotificacionesCrearComponent } from './notificaciones/notificaciones-crear/notificaciones-crear';
 import { NotificacionesDetalleComponent } from './notificaciones/notificaciones-detalle/notificaciones-detalle';
 import { NotificacionesEliminarComponent } from './notificaciones/notificaciones-eliminar/notificaciones-eliminar';
+
 // Productos
 import { ProductosListar } from './productos/productos-listar/productos-listar';
 import { ProductosCrearComponent } from './productos/productos-crear/productos-crear';
@@ -35,36 +38,37 @@ export const adminRoutes: Routes = [
   {
     path: '',
     component: AdminLayout,
-    canActivate: [authGuard], // Protege todas las rutas admin
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
-      
-      // ❌ ELIMINAR: { path: 'entrenadores', component: Entrenadores },
-      
       { path: 'facturas', component: Facturas },
-      {path: 'productos',canActivate: [adminGuard],}, // Solo admins pueden gestionar productos
-      {path: 'productos',
-        canActivate: [adminGuard], // Solo admins pueden gestionar productos
+
+      // Productos (solo admins)
+      {
+        path: 'productos',
+        canActivate: [adminGuard],
         children: [
           { path: '', component: ProductosListar },
           { path: 'crear', component: ProductosCrearComponent },
           { path: 'editar/:id', component: ProductosEditar },
           { path: 'detalle/:id', component: ProductosDetalle },
           { path: 'eliminar/:id', component: ProductosEliminar }
-        ] 
+        ]
       },
-      
-      // ===============================
-      // MENSUALIDADES
-      // ===============================
+
+      // Notificaciones
       {
         path: 'notificaciones',
         children: [
           { path: '', component: NotificacionesListarComponent },
-          { path: 'crear', component: NotificacionesCrearComponent }
-      ]
+          { path: 'crear', component: NotificacionesCrearComponent },
+          { path: 'detalle/:id', component: NotificacionesDetalleComponent },
+          { path: 'eliminar/:id', component: NotificacionesEliminarComponent }
+        ]
       },
+
+      // Mensualidades
       {
         path: 'mensualidades',
         children: [
@@ -75,19 +79,8 @@ export const adminRoutes: Routes = [
           { path: 'eliminar/:id', component: MensualidadEliminarComponent }
         ]
       },
-      
-      // ===============================
-      // MIEMBROS
-      // ===============================
-      {
-  path: 'notificaciones',
-  children: [
-    { path: '', component: NotificacionesListarComponent },
-    { path: 'crear', component: NotificacionesCrearComponent },
-    { path: 'detalle/:id', component: NotificacionesDetalleComponent },
-    { path: 'eliminar/:id', component: NotificacionesEliminarComponent }
-  ]
-},
+
+      // Miembros
       {
         path: 'miembros',
         children: [
