@@ -75,11 +75,11 @@
         <div class="col-md-3 mb-4">
           <label for="edad" class="form-label fw-medium" style="color: #14213d;">Edad</label>
           <input type="number" class="form-control py-2 border-2" id="edad" formControlName="edad" 
-                 min="10" max="100" style="border-color: #14213d;">
+                 min="15" max="80" style="border-color: #14213d;">
           <div *ngIf="edad?.touched && edad?.invalid" class="text-danger small mt-1">
             <div *ngIf="edad?.errors?.['required']">La edad es requerida</div>
-            <div *ngIf="edad?.errors?.['min']">Debe ser mayor a 10 años</div>
-            <div *ngIf="edad?.errors?.['max']">Debe ser menor a 100 años</div>
+            <div *ngIf="edad?.errors?.['min']">Debe ser mayor a 15 años</div>
+            <div *ngIf="edad?.errors?.['max']">Debe ser menor a 80 años</div>
           </div>
         </div>
         
@@ -89,9 +89,8 @@
           <select class="form-select py-2 border-2" id="sexo" formControlName="sexo" 
                   style="border-color: #14213d;">
             <option value="">Selecciona</option>
-            <option value="Masculino">Masculino</option>
-            <option value="Femenino">Femenino</option>
-            <option value="Otro">Otro</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
           </select>
           <div *ngIf="sexo?.touched && sexo?.invalid" class="text-danger small mt-1">
             <div *ngIf="sexo?.errors?.['required']">El sexo es requerido</div>
@@ -113,11 +112,11 @@
         <div class="col-md-4 mb-4">
           <label for="altura" class="form-label fw-medium" style="color: #14213d;">Altura (cm)</label>
           <input type="number" class="form-control py-2 border-2" id="altura" formControlName="altura" 
-                 min="100" max="250" step="0.01" style="border-color: #14213d;">
+                 min="130" max="220" step="0.01" style="border-color: #14213d;">
           <div *ngIf="altura?.touched && altura?.invalid" class="text-danger small mt-1">
             <div *ngIf="altura?.errors?.['required']">La altura es requerida</div>
-            <div *ngIf="altura?.errors?.['min']">Mínimo 100 cm</div>
-            <div *ngIf="altura?.errors?.['max']">Máximo 250 cm</div>
+            <div *ngIf="altura?.errors?.['min']">Mínimo 130 cm</div>
+            <div *ngIf="altura?.errors?.['max']">Máximo 220 cm</div>
           </div>
         </div>
         
@@ -125,10 +124,10 @@
         <div class="col-md-4 mb-4">
           <label for="peso" class="form-label fw-medium" style="color: #14213d;">Peso (kg)</label>
           <input type="number" class="form-control py-2 border-2" id="peso" formControlName="peso" 
-                 min="30" max="200" step="0.01" style="border-color: #14213d;">
+                 min="35" max="200" step="0.01" style="border-color: #14213d;">
           <div *ngIf="peso?.touched && peso?.invalid" class="text-danger small mt-1">
             <div *ngIf="peso?.errors?.['required']">El peso es requerido</div>
-            <div *ngIf="peso?.errors?.['min']">Mínimo 30 kg</div>
+            <div *ngIf="peso?.errors?.['min']">Mínimo 35 kg</div>
             <div *ngIf="peso?.errors?.['max']">Máximo 200 kg</div>
           </div>
         </div>
@@ -167,15 +166,130 @@
               [style]="registroForm.valid ? 
                       'background-color: #fca311; color: #0a1a2e; font-weight: 600; border: none;' : 
                       'background-color: #cccccc; color: #666666; font-weight: 600; border: none;'"
-              [disabled]="registroForm.invalid">
-        <i class="bi bi-person-plus me-2"></i> Registrarse
+              [disabled]="registroForm.invalid || loading">
+        <span *ngIf="!loading">
+          <i class="bi bi-person-plus me-2"></i> Registrarse
+        </span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm me-2"></span> Registrando...
+        </span>
       </button>
+
+      <!-- Mostrar errores -->
+      <div *ngIf="error" class="alert alert-danger mt-3 text-center">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+      </div>
     </form>
     
     <div class="mt-4 text-center">
-      <a routerLink="/login" class="text-decoration-none fw-medium" style="color: #fca311;">
+      <a routerLink="/auth" class="text-decoration-none fw-medium" style="color: #fca311;">
         <i class="bi bi-box-arrow-in-right me-1"></i> ¿Ya tienes cuenta? Inicia sesión
       </a>
     </div>
   </div>
 </section>
+
+<!-- Modal de éxito con credenciales -->
+<div *ngIf="showSuccessModal" class="modal fade show d-block" 
+     style="background: rgba(0,0,0,0.8); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <!-- Header -->
+      <div class="modal-header text-center border-0" 
+           style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%); color: white;">
+        <div class="w-100">
+          <div class="mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size: 4rem; color: #fca311;"></i>
+          </div>
+          <h4 class="modal-title fw-bold mb-0">¡REGISTRO EXITOSO!</h4>
+        </div>
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body p-4">
+        <div class="text-center mb-4">
+          <h5 class="fw-bold text-success">
+            Bienvenido {{ datosRegistroExitoso?.nombre_completo }}
+          </h5>
+          <p class="text-muted">{{ datosRegistroExitoso?.mensaje_principal }}</p>
+        </div>
+        
+        <!-- Credenciales destacadas -->
+        <div class="card bg-light border-warning border-2 mb-4">
+          <div class="card-body">
+            <h6 class="fw-bold text-warning mb-3">
+              <i class="bi bi-key-fill me-2"></i>TUS CREDENCIALES DE ACCESO
+            </h6>
+            <div class="row">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Usuario:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control bg-white" 
+                         [value]="datosRegistroExitoso?.credenciales?.usuario" readonly>
+                  <button class="btn btn-outline-secondary" type="button" 
+                          (click)="copiarTexto(datosRegistroExitoso?.credenciales?.usuario)">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold">Contraseña:</label>
+                <div class="input-group">
+                  <input [type]="showPassword ? 'text' : 'password'" 
+                         class="form-control bg-white fw-bold text-primary" 
+                         [value]="datosRegistroExitoso?.credenciales?.contrasenia" readonly>
+                  <button class="btn btn-outline-secondary" type="button" 
+                          (click)="showPassword = !showPassword">
+                    <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                  </button>
+                  <button class="btn btn-outline-secondary" type="button" 
+                          (click)="copiarTexto(datosRegistroExitoso?.credenciales?.contrasenia)">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Instrucciones -->
+        <div class="alert alert-info border-0">
+          <h6 class="fw-bold">
+            <i class="bi bi-info-circle me-2"></i>Próximos pasos:
+          </h6>
+          <ul class="mb-0">
+            <li *ngFor="let instruccion of datosRegistroExitoso?.instrucciones">
+              {{ instruccion }}
+            </li>
+          </ul>
+        </div>
+        
+        <!-- Mensaje de activación -->
+        <div class="alert alert-warning border-0 text-center">
+          <i class="bi bi-exclamation-triangle me-2"></i>
+          <strong>Estado:</strong> Pendiente de activación por administrador
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer border-0 justify-content-center">
+        <button type="button" class="btn btn-lg px-5" 
+                style="background-color: #fca311; color: #0a1a2e; font-weight: 600;"
+                (click)="cerrarModalYRedireccionar()">
+          <i class="bi bi-house me-2"></i>Ir a Iniciar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div *ngIf="loading" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+     style="background: rgba(0,0,0,0.5); z-index: 2000;">
+  <div class="text-center text-white">
+    <div class="spinner-border mb-3" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <p>Registrando miembro...</p>
+  </div>
+</div>
