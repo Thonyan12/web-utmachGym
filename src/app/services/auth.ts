@@ -63,7 +63,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
-    // ❌ QUITAR ESTA LÍNEA: this.router.navigate(['/']);
+   
   }
 
   // Obtener token
