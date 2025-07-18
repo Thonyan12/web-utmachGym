@@ -1,0 +1,33 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-facturas-sidebar></app-facturas-sidebar>
+    <div class="container mt-4">
+      <h2 class="mb-3">Eliminar Factura</h2>
+      <div class="mb-3">
+        <label class="form-label">ID de la Factura</label>
+        <input [(ngModel)]="idFactura" name="idFactura" type="number" class="form-control" required>
+      </div>
+      <button class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
+      <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!factura">Eliminar</button>
+  
+      <div *ngIf="factura" class="mt-3">
+        <strong>Factura encontrada:</strong>
+        <div>ID Miembro: {{ factura.id_miembro }}</div>
+        <div>ID Administrador: {{ factura.id_admin }}</div>
+        <div>Fecha de Emisión: {{ factura.fecha_emision }}</div>
+        <div>Total: ${{ factura.total }}</div>
+        <div>Estado: {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}</div>
+      </div>
+  
+      <!-- Confirmación antes de eliminar -->
+      <div *ngIf="mostrarConfirmacion" class="alert alert-warning mt-3">
+        <strong>¿Estás seguro de que deseas eliminar esta factura?</strong>
+        <br>
+        <button class="btn btn-danger me-2" (click)="eliminar()">Sí, eliminar</button>
+        <button class="btn btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
+      </div>
+  
+      <div *ngIf="mensaje" class="alert alert-info mt-3">
+        {{ mensaje }}
+      </div>
+    </div>
+  </div>

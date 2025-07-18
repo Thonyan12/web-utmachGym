@@ -1,0 +1,61 @@
+<div class="d-flex" style="min-height: 100vh;">
+  <app-facturas-sidebar></app-facturas-sidebar>
+  <div class="container mt-4">
+    <h2>Registrar Factura</h2>
+    <form (ngSubmit)="guardar(form)" #form="ngForm" novalidate>
+      <div class="mb-3">
+        <label>ID Miembro</label>
+        <input type="number" class="form-control" [(ngModel)]="factura.id_miembro" name="id_miembro" required min="1" #idMiembro="ngModel">
+        <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
+          <span *ngIf="idMiembro.errors?.['required']">El ID del miembro es obligatorio.</span>
+          <span *ngIf="idMiembro.errors?.['min']">Debe ser mayor o igual a 1.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>ID Administrador</label>
+        <input type="number" class="form-control" [(ngModel)]="factura.id_admin" name="id_admin" required min="1" #idAdmin="ngModel">
+        <div class="text-danger" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
+          <span *ngIf="idAdmin.errors?.['required']">El ID del administrador es obligatorio.</span>
+          <span *ngIf="idAdmin.errors?.['min']">Debe ser mayor o igual a 1.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Fecha de Emisión</label>
+        <input type="date" class="form-control" [(ngModel)]="factura.fecha_emision" name="fecha_emision" required #fechaEmision="ngModel">
+        <div class="text-danger" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
+          <span *ngIf="fechaEmision.errors?.['required']">La fecha de emisión es obligatoria.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Total</label>
+        <input type="number" class="form-control" [(ngModel)]="factura.total" name="total" required step="0.01" min="0.01" #total="ngModel">
+        <div class="text-danger" *ngIf="total.invalid && (total.dirty || total.touched)">
+          <span *ngIf="total.errors?.['required']">El total es obligatorio.</span>
+          <span *ngIf="total.errors?.['min']">Debe ser mayor a 0.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Estado</label>
+        <select class="form-control" [(ngModel)]="factura.estado_registro" name="estado_registro" required #estadoRegistro="ngModel">
+          <option [ngValue]="true">Activo</option>
+          <option [ngValue]="false">Inactivo</option>
+        </select>
+        <div class="text-danger" *ngIf="estadoRegistro.invalid && (estadoRegistro.dirty || estadoRegistro.touched)">
+          <span *ngIf="estadoRegistro.errors?.['required']">El estado es obligatorio.</span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label>Fecha de Registro</label>
+        <input type="date" class="form-control" [(ngModel)]="factura.f_registro" name="f_registro" required #fechaRegistro="ngModel">
+        <div class="text-danger" *ngIf="fechaRegistro.invalid && (fechaRegistro.dirty || fechaRegistro.touched)">
+          <span *ngIf="fechaRegistro.errors?.['required']">La fecha de registro es obligatoria.</span>
+        </div>
+      </div>
+      <div *ngIf="form.invalid && form.submitted" class="alert alert-danger">
+        Por favor, corrige los errores antes de guardar.
+      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
+      <div class="mt-2">{{ mensaje }}</div>
+    </form>
+  </div>
+</div>

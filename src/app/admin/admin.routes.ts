@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { AdminLayout } from './admin-layout';
 import { Dashboard } from './dashboard/dashboard';
-import { Facturas } from './facturas/facturas';
 
 // Miembros
 import { MiembrosListarComponent } from './miembros/miembros-listar/miembros-listar';
@@ -34,6 +33,16 @@ import { MensualidadEliminarComponent } from './mensualidades/mensualidad-elimin
 import { authGuard } from '../guards/auth-guard';
 import { adminGuard } from '../guards/admin-guard';
 
+//Factura
+import { FacturasListarComponent } from './facturas/facturas-listar/facturas-listar';
+import { FacturasCrearComponent } from './facturas/facturas-crear/facturas-crear';
+import { FacturasDetalle } from './facturas/facturas-detalle/facturas-detalle';
+import { FacturasEditar } from './facturas/facturas-editar/facturas-editar';
+import { FacturasEliminar } from './facturas/facturas-eliminar/facturas-eliminar';
+
+
+
+
 export const adminRoutes: Routes = [
   {
     path: '',
@@ -42,7 +51,6 @@ export const adminRoutes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
-      { path: 'facturas', component: Facturas },
 
       // Productos (solo admins)
       {
@@ -90,7 +98,21 @@ export const adminRoutes: Routes = [
           { path: 'detalle/:id', component: MiembrosDetalleComponent },
           { path: 'eliminar/:id', component: MiembrosEliminarComponent }
         ]
+      },
+
+      // Facturas
+      {
+        path: 'facturas',
+        children: [
+          { path: '', component: FacturasListarComponent }, // Listar Facturas
+          { path: 'crear', component: FacturasCrearComponent},
+          { path: 'editar/:id', component: FacturasEditar }, 
+          { path: 'detalle/:id', component: FacturasDetalle},
+          { path: 'eliminar/:id', component: FacturasEliminar}
+        ]
       }
+
+
     ]
   }
 ];

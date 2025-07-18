@@ -1,0 +1,35 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-facturas-sidebar></app-facturas-sidebar>
+    <div class="container mt-4">
+      <h2 class="mb-4">Detalles de Facturas</h2>
+      <input type="text" class="form-control mb-3" placeholder="Buscar por ID Miembro, ID Admin o Total..." [(ngModel)]="filtro"
+        (input)="filtrarFacturas()" name="filtro">
+  
+      <div *ngIf="facturasFiltradas.length === 0" class="alert alert-warning">
+        No se encontraron facturas.
+      </div>
+  
+      <ul class="list-group shadow-sm">
+        <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
+            *ngFor="let factura of facturasFiltradas">
+          <div>
+            <span class="fw-bold">Factura ID: {{ factura.id_factura || 'N/A' }}</span>
+            <span class="badge bg-secondary ms-2">Admin ID: {{ factura.id_admin || 'N/A' }}</span>
+          </div>
+          <div class="text-muted small">
+            <span><strong>ID Miembro:</strong> {{ factura.id_miembro || 'N/A' }}</span> |
+            <span><strong>Total:</strong> ${{ factura.total || '0' }}</span> |
+            <span><strong>Estado:</strong>
+              <span [ngClass]="factura.estado_registro ? 'text-success' : 'text-danger'">
+                {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}
+              </span>
+            </span>
+          </div>
+          <div class="text-end mt-2 mt-md-0">
+            <span class="badge bg-light text-dark">Fecha de Emisión: {{ factura.fecha_emision | date:'shortDate' }}</span>
+            <span class="badge bg-light text-dark">Registrado: {{ factura.f_registro | date:'shortDate' }}</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>

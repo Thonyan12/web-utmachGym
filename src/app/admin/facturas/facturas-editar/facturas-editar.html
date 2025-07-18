@@ -1,0 +1,72 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <app-facturas-sidebar></app-facturas-sidebar>
+    <div class="container mt-4">
+      <h2>Editar Factura</h2>
+      <form class="mb-4" (ngSubmit)="buscarFactura()" #buscarForm="ngForm">
+        <div class="row">
+          <div class="col-md-4 mb-2">
+            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID de la factura" required>
+          </div>
+          <div class="col-md-2 mb-2">
+            <button type="submit" class="btn btn-info w-100">Buscar</button>
+          </div>
+        </div>
+      </form>
+  
+      <form *ngIf="factura" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+        <div class="mb-3">
+          <label class="form-label">ID de la Factura</label>
+          <input [(ngModel)]="factura.id_factura" name="id_factura" type="number" class="form-control" readonly>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ID Miembro</label>
+          <input [(ngModel)]="factura.id_miembro" name="id_miembro" type="number" class="form-control" required #idMiembro="ngModel">
+          <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
+            El ID del miembro es obligatorio.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">ID Administrador</label>
+          <input [(ngModel)]="factura.id_admin" name="id_admin" type="number" class="form-control" required #idAdmin="ngModel">
+          <div class="text-danger" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
+            El ID del administrador es obligatorio.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Fecha de Emisión</label>
+          <input [(ngModel)]="factura.fecha_emision" name="fecha_emision" type="date" class="form-control" required #fechaEmision="ngModel">
+          <div class="text-danger" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
+            La fecha de emisión es obligatoria.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Total</label>
+          <input [(ngModel)]="factura.total" name="total" type="number" class="form-control" required step="0.01" min="0.01" #total="ngModel">
+          <div class="text-danger" *ngIf="total.invalid && (total.dirty || total.touched)">
+            El total es obligatorio y debe ser mayor a 0.
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Estado</label>
+          <select [(ngModel)]="factura.estado_registro" name="estado_registro" class="form-control" required #estadoRegistro="ngModel">
+            <option [ngValue]="true">Activo</option>
+            <option [ngValue]="false">Inactivo</option>
+          </select>
+          <div class="text-danger" *ngIf="estadoRegistro.invalid && (estadoRegistro.dirty || estadoRegistro.touched)">
+            El estado es obligatorio.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
+      </form>
+  
+      <div *ngIf="mensaje" class="alert alert-info mt-3">
+        {{ mensaje }}
+      </div>
+      <div *ngIf="!factura && mensaje && !cargando" class="text-danger mt-3">
+        No se encontró la factura.
+      </div>
+      <div *ngIf="cargando" class="text-secondary mt-3">
+        Buscando factura...
+      </div>
+    </div>
+  </div>

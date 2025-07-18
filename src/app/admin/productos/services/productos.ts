@@ -18,6 +18,7 @@ f_registro: string;
 export class Productos {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/api/productos';
+  
   getProductos(): Observable<Producto[]> {
   return this.http.get<Producto[]>(this.apiUrl);
   }
