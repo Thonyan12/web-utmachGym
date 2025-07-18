@@ -1,35 +1,59 @@
-<div class="d-flex" style="min-height: 100vh;">
-    <app-notificaciones-sidebar></app-notificaciones-sidebar>
-    <div class="container mt-4">
-        <h2 class="mb-4">Lista de Notificaciones</h2>
-        <input type="text" class="form-control mb-3" placeholder="Buscar por tipo, contenido o ID..."
-            [(ngModel)]="filtro" (input)="filtrarNotificaciones()" name="filtro">
+<div class="d-flex" style="min-height: 100vh">
+  <app-notificaciones-sidebar></app-notificaciones-sidebar>
+  <div class="container mt-4">
+    <h2 class="mb-4">Lista de Notificaciones</h2>
 
-        <div *ngIf="notificacionesFiltradas.length === 0" class="alert alert-warning">
-            No se encontraron notificaciones.
-        </div>
-
-        <ul class="list-group shadow-sm">
-            <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
-                *ngFor="let noti of notificacionesFiltradas">
-                <div>
-                    <span class="fw-bold">{{ noti.tipo || 'Sin tipo' }}</span>
-                    <span class="badge bg-secondary ms-2">{{ noti.contenido || 'Sin contenido' }}</span>
-                </div>
-                <div class="text-muted small">
-                    <span><strong>ID:</strong> {{ noti.id_notificacion || 'N/A' }}</span> |
-                    <span><strong>Remitente:</strong> {{ noti.id_usuario_remitente || 'N/A' }}</span> |
-                    <span><strong>Destinatario:</strong> {{ noti.id_usuario || 'N/A' }}</span> |
-                    <span><strong>Leído:</strong>
-                        <span [ngClass]="noti.leido ? 'text-success' : 'text-danger'">
-                            {{ noti.leido ? 'Sí' : 'No' }}
-                        </span>
-                    </span>
-                </div>
-                <div class="text-end mt-2 mt-md-0">
-                    <span class="badge bg-light text-dark">Enviada: {{ noti.fecha_envio | date:'shortDate' }}</span>
-                </div>
-            </li>
-        </ul>
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Buscar por ID, tipo o contenido…"
+        [(ngModel)]="filtro"
+        (input)="filtrarNotificaciones()"
+      />
     </div>
+
+    <div
+      *ngIf="notificacionesFiltradas.length === 0"
+      class="alert alert-warning"
+    >
+      No se encontraron notificaciones.
+    </div>
+
+    <div class="row g-3">
+      <div *ngFor="let noti of notificacionesFiltradas" class="col-12">
+        <div class="card shadow-sm">
+          <div
+            class="card-header bg-primary text-white d-flex justify-content-between align-items-center"
+          >
+            <span class="fw-bold text-capitalize"
+              >{{ noti.tipo || 'Sin tipo' }}</span
+            >
+            <small class="badge bg-light text-dark"
+              >{{ noti.fecha_envio | date:'shortDate' }}</small
+            >
+          </div>
+          <div class="card-body">
+            <p class="card-text">{{ noti.contenido || 'Sin contenido' }}</p>
+            <div class="d-flex flex-wrap gap-2 mt-3">
+              <span class="badge bg-secondary"
+                >ID: {{ noti.id_notificacion || 'N/A' }}</span
+              >
+              <span class="badge bg-secondary"
+                >Remitente: {{ noti.id_usuario_remitente || 'N/A' }}</span
+              >
+              <span class="badge bg-secondary"
+                >Destinatario: {{ noti.id_usuario || 'N/A' }}</span
+              >
+              <span
+                [ngClass]="noti.leido ? 'badge bg-success' : 'badge bg-danger'"
+              >
+                Leído: {{ noti.leido ? 'Sí' : 'No' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
