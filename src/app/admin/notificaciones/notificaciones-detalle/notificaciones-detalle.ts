@@ -31,23 +31,27 @@ export class NotificacionesDetalleComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.notificacionesService.getNotificaciones().subscribe({
-            next: (data) => {
-                this.notificaciones = (data || []).filter(noti => !!noti);
+        this.notificacionesService.getAllUserNotifications().subscribe({
+            next: res => {
+                // Unimos enviadas y recibidas
+                this.notificaciones = [...res.sent, ...res.received];
                 this.notificacionesFiltradas = this.notificaciones;
             },
-            error: (error) => console.log('Error al obtener notificaciones', error)
+            error: err => console.log('Error al obtener notificaciones', err)
         });
     }
 
-    filtrarNotificaciones() {
-        const filtroLower = this.filtro.toLowerCase();
-        this.notificacionesFiltradas = this.notificaciones.filter(noti =>
-            !!noti && (
-                (noti.tipo || '').toLowerCase().includes(filtroLower) ||
-                (noti.contenido || '').toLowerCase().includes(filtroLower) ||
-                String(noti.id_notificacion || '').includes(filtroLower)
-            )
-        );
+    filtrarNotificaciones(): void {
+        const term = this.filtro.toLowerCase().trim();
+        this.notificacionesFiltradas = this.notificaciones.filter(noti => {
+            const id   = noti.id_notificacion?.toString() ?? '';
+            const tipo = noti.tipo.toLowerCase();
+            const cont = noti.contenido.toLowerCase();
+            // si term es vacío => true (muestra todo), o coincide con id, tipo o contenido
+            return term === '' 
+                || id.includes(term) 
+                || tipo.includes(term) 
+                || cont.includes(term);
+        });
     }
 }
