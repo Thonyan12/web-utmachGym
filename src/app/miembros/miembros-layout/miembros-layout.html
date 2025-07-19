@@ -42,13 +42,32 @@
             <span class="d-none d-lg-inline">Nutrición</span>
           </a>
         </li>
+        
+        <!-- ✅ TIENDA (sin carrito) -->
         <li class="nav-item">
           <a class="nav-link d-flex align-items-center" routerLink="/miembros/tienda" 
-             style="color: #fca311;">
-            <i class="bi bi-cart3 me-2"></i>
+             routerLinkActive="active" style="color: #fca311;">
+            <i class="bi bi-shop me-2"></i>
             <span class="d-none d-lg-inline">Tienda</span>
           </a>
         </li>
+
+        <!-- ✅ CARRITO con contador bien alineado -->
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center position-relative" 
+             routerLink="/miembros/cart"
+             routerLinkActive="active"
+             style="color: #fca311;">
+            <i class="bi bi-cart3 me-2"></i>
+            <span class="d-none d-lg-inline">Carrito</span>
+            <span *ngIf="cartCount > 0"
+                  class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                  style="font-size: 0.7rem; margin-left: -8px;">
+              {{ cartCount }}
+            </span>
+          </a>
+        </li>
+
         <li class="nav-item">
           <a class="nav-link d-flex align-items-center" routerLink="/miembros/pagos" 
              style="color: #fca311;">

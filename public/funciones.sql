@@ -538,3 +538,220 @@ BEGIN
     ORDER BY ar.f_registro DESC, ar.fecha_inicio DESC;
 END;
 $$ LANGUAGE plpgsql;
+-- ============================================
+-- NUEVAS FUNCIONES Y TRIGGERS
+-- ============================================
+-- 1) Funciones de notificación
+CREATE OR REPLACE FUNCTION notify_admin(p_tipo VARCHAR, p_contenido TEXT) RETURNS VOID AS $$
+BEGIN
+  INSERT INTO Notificacion (
+    id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido, estado
+  )
+  SELECT u.id_usuario, NULL, p_tipo, p_contenido, CURRENT_DATE, FALSE, TRUE
+  FROM Usuario u
+  WHERE u.rol = 'admin';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION notify_member(p_member_id INT, p_tipo VARCHAR, p_contenido TEXT) RETURNS VOID AS $$
+DECLARE
+  v_user_id INT;
+BEGIN
+  -- ✅ Buscar el id_usuario basado en el id_miembro
+  SELECT id_usuario INTO v_user_id
+  FROM Usuario 
+  WHERE id_miembro = p_member_id 
+  AND estado = TRUE;
+  
+  -- ✅ Solo insertar si encontramos el usuario
+  IF v_user_id IS NOT NULL THEN
+    INSERT INTO Notificacion (
+      id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido, estado
+    ) VALUES (
+      v_user_id, NULL, p_tipo, p_contenido, CURRENT_DATE, FALSE, TRUE
+    );
+    
+    RAISE NOTICE 'Notificación enviada al usuario % (miembro %)', v_user_id, p_member_id;
+  ELSE
+    RAISE WARNING 'No se encontró usuario activo para miembro %', p_member_id;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 2) Trigger: stock bajo en Producto
+CREATE OR REPLACE FUNCTION trg_low_stock() RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.stock <= 5 AND OLD.stock > 5 THEN
+    PERFORM notify_admin(
+      'stock_bajo',
+      'Stock bajo para producto ' || NEW.nombre_prod || 
+      ' (ID: ' || NEW.id_producto || '), quedan ' || NEW.stock || ' unidades'
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER low_stock_trigger
+  AFTER UPDATE ON Producto
+  FOR EACH ROW
+  WHEN (NEW.stock <= 5)
+  EXECUTE FUNCTION trg_low_stock();
+
+-- 3) Trigger: nuevo carrito
+CREATE OR REPLACE FUNCTION trg_new_cart() RETURNS TRIGGER AS $$
+BEGIN
+  PERFORM notify_admin(
+    'nuevo_carrito',
+    'Nuevo carrito #' || NEW.id_carrito || 
+    ' creado por miembro ' || NEW.id_miembro
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER new_cart_trigger
+  AFTER INSERT ON Carrito
+  FOR EACH ROW
+  EXECUTE FUNCTION trg_new_cart();
+
+-- 4) Trigger: checkout de carrito (procesado=true)
+CREATE OR REPLACE FUNCTION trg_checkout_cart() RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+  v_total NUMERIC := 0;
+  v_admin_id INT;
+  v_factura_id INT;
+BEGIN
+  -- Solo cuando cambie de false → true
+  IF NEW.procesado AND NOT OLD.procesado THEN
+
+    -- 4.1 Decrementar stock y sumar totales
+    FOR rec IN 
+      SELECT id_producto, cantidad, precio_unitario, subtotal
+      FROM Detalle_Carrito
+      WHERE id_carrito = NEW.id_carrito
+    LOOP
+      UPDATE Producto
+        SET stock = stock - rec.cantidad
+      WHERE id_producto = rec.id_producto;
+      v_total := v_total + rec.subtotal;
+    END LOOP;
+
+    -- 4.2 Obtener un admin cualquiera
+    SELECT id_usuario
+      INTO v_admin_id
+      FROM Usuario
+     WHERE rol = 'admin'
+     LIMIT 1;
+
+    -- 4.3 Crear la factura
+    INSERT INTO Factura (
+      id_miembro, id_admin, total, estado_registro, f_registro
+    ) VALUES (
+      NEW.id_miembro, v_admin_id, v_total, TRUE, CURRENT_DATE
+    )
+    RETURNING id_factura INTO v_factura_id;
+
+    -- 4.4 Crear detalle de factura por cada item
+    FOR rec IN 
+      SELECT id_producto, cantidad, precio_unitario, subtotal
+      FROM Detalle_Carrito
+      WHERE id_carrito = NEW.id_carrito
+    LOOP
+      INSERT INTO Detalle_Factura (
+        id_factura,
+        tipo_detalle,
+        referencia_id,
+        descripcion,
+        monto,
+        iva,
+        metodo_pago,
+        estado_registro,
+        f_registro
+      ) VALUES (
+        v_factura_id,
+        'compra producto',
+        rec.id_producto,
+        'Compra de producto ' || rec.id_producto,
+        rec.subtotal,
+        rec.subtotal * 0.15,
+        'desconocido',
+        TRUE,
+        CURRENT_DATE
+      );
+    END LOOP;
+
+    -- 4.5 Notificaciones finales
+    PERFORM notify_admin(
+      'checkout',
+      'Carrito #' || NEW.id_carrito || 
+      ' procesado. Factura #' || v_factura_id || ' generada.'
+    );
+    PERFORM notify_member(
+      NEW.id_miembro,
+      'factura',
+      'Su factura #' || v_factura_id || ' está lista. Total: ' || v_total
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER checkout_cart_trigger
+  AFTER UPDATE ON Carrito
+  FOR EACH ROW
+  WHEN (NEW.procesado AND NOT OLD.procesado)
+  EXECUTE FUNCTION trg_checkout_cart();
+-- 1) función auxiliar para recalcular total_pago
+CREATE OR REPLACE FUNCTION trg_recalc_total_pago() RETURNS TRIGGER AS $$
+DECLARE
+  v_cart INT;
+BEGIN
+  -- Determinar carrito según operación
+  IF TG_OP = 'DELETE' THEN
+    v_cart := OLD.id_carrito;
+  ELSE
+    v_cart := NEW.id_carrito;
+  END IF;
+
+  -- Recalcular total_pago
+  UPDATE Carrito
+    SET total_pago = COALESCE(
+      (SELECT SUM(subtotal)
+         FROM Detalle_Carrito
+        WHERE id_carrito = v_cart),
+      0
+    )
+  WHERE id_carrito = v_cart;
+
+  -- Devolver la fila adecuada
+  IF TG_OP = 'DELETE' THEN
+    RETURN OLD;
+  ELSE
+    RETURN NEW;
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Disparador AFTER INSERT
+DROP TRIGGER IF EXISTS recalc_total_after_ins ON Detalle_Carrito;
+CREATE TRIGGER recalc_total_after_ins
+  AFTER INSERT ON Detalle_Carrito
+  FOR EACH ROW
+  EXECUTE FUNCTION trg_recalc_total_pago();
+
+-- Disparador AFTER UPDATE
+DROP TRIGGER IF EXISTS recalc_total_after_upd ON Detalle_Carrito;
+CREATE TRIGGER recalc_total_after_upd
+  AFTER UPDATE OF cantidad, precio_unitario ON Detalle_Carrito
+  FOR EACH ROW
+  EXECUTE FUNCTION trg_recalc_total_pago();
+
+-- Disparador AFTER DELETE
+DROP TRIGGER IF EXISTS recalc_total_after_del ON Detalle_Carrito;
+CREATE TRIGGER recalc_total_after_del
+  AFTER DELETE ON Detalle_Carrito
+  FOR EACH ROW
+  EXECUTE FUNCTION trg_recalc_total_pago();

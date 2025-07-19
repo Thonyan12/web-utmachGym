@@ -132,8 +132,7 @@ VALUES
 -- ===============================
 INSERT INTO Usuario (usuario, contrasenia, rol, id_miembro, id_coach)
 VALUES
-('admin.juana', 'Admin123', 'admin', NULL, NULL),
-('admin.luis', 'Admin456', 'admin', NULL, NULL);
+('admin', 'Admin123', 'admin', NULL, NULL),
 
 INSERT INTO Perfil_fisico (id_miembro, altura, peso, observaciones)
 VALUES
@@ -215,9 +214,9 @@ VALUES
 INSERT INTO Factura (id_miembro, id_admin, fecha_emision, total)
 VALUES
 (1, 11, '2025-06-22', 34.50),
-(2, 12, '2025-06-22', 34.50),
+(2, 11, '2025-06-22', 34.50),
 (3, 11, '2025-06-22', 34.50),
-(4, 12, '2025-06-22', 34.50),
+(4, 11, '2025-06-22', 34.50),
 (5, 11, '2025-06-22', 34.50);
 
 -- DETALLE FACTURA SOLO MENSUALIDAD
@@ -235,9 +234,9 @@ VALUES
 INSERT INTO Factura (id_miembro, id_admin, fecha_emision, total)
 VALUES
 (1, 11, '2025-06-22', 28.74),
-(2, 12, '2025-06-22', 45.89),
+(2, 11, '2025-06-22', 45.89),
 (3, 11, '2025-06-22', 14.38),
-(4, 12, '2025-06-22', 21.84),
+(4, 11, '2025-06-22', 21.84),
 (5, 11, '2025-06-22', 74.75);
 
 -- DETALLE FACTURA SOLO COMPRA DE PRODUCTO
@@ -271,7 +270,7 @@ VALUES
 INSERT INTO Notificacion (id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido)
 VALUES
 (1, 11, 'pago', '¡Tu pago de mensualidad de junio fue registrado exitosamente!', '2025-06-22', FALSE),
-(2, 12, 'compra', 'Has comprado 2 unidades de Proteína Whey 2lb Chocolate. ¡Gracias por tu compra!', '2025-06-22', TRUE),
+(2, 11, 'compra', 'Has comprado 2 unidades de Proteína Whey 2lb Chocolate. ¡Gracias por tu compra!', '2025-06-22', TRUE),
 (3, 11, 'rutina', 'Nueva rutina de fuerza asignada. Consulta tu perfil para más detalles.', '2025-06-21', FALSE),
-(4, 12, 'compra', 'Tu pedido de Camiseta Dry-Fit Larga está listo para retirar.', '2025-06-21', TRUE),
+(4, 11, 'compra', 'Tu pedido de Camiseta Dry-Fit Larga está listo para retirar.', '2025-06-21', TRUE),
 (5, 11, 'clase', '¡Felicidades! Has completado tu clase de resistencia hoy.', '2025-06-22', FALSE);

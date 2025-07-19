@@ -1,0 +1,75 @@
+/* Estilos mínimos para mejorar la apariencia sin cambiar estructura */
+.cart-title {
+  color: #14213d;
+  font-weight: 600;
+  padding-bottom: 0.3rem;
+  border-bottom: 2px solid #fca311;
+}
+
+.cart-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cart-table thead {
+  background-color: #f8f9fa;
+}
+
+.cart-table th {
+  font-weight: 600;
+  color: #14213d;
+}
+
+.product-name {
+  font-weight: 500;
+}
+
+.quantity-input {
+  border: 1px solid #ced4da;
+  text-align: center;
+}
+
+.quantity-input:focus {
+  border-color: #fca311;
+  box-shadow: 0 0 0 0.2rem rgba(252, 163, 17, 0.25);
+}
+
+.remove-btn {
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  transform: scale(1.1);
+}
+
+.unit-price, .subtotal {
+  font-weight: 500;
+}
+
+.total-text {
+  color: #14213d;
+}
+
+.checkout-btn {
+  transition: all 0.2s;
+}
+
+.checkout-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.empty-cart-icon {
+  font-size: 3.5rem;
+}
+
+.empty-cart-text {
+  color: #6c757d;
+}
+
+.empty-cart-btn {
+  transition: all 0.2s;
+}
+
+.empty-cart-btn:hover {
+  transform: translateY(-2px);
+}
