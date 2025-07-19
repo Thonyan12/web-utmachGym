@@ -601,72 +601,119 @@ CREATE TRIGGER low_stock_trigger
 
 -- 3) Trigger: nuevo carrito
 CREATE OR REPLACE FUNCTION trg_new_cart() RETURNS TRIGGER AS $$
+DECLARE
+  v_member_name VARCHAR;
 BEGIN
-  PERFORM notify_admin(
-    'nuevo_carrito',
-    'Nuevo carrito #' || NEW.id_carrito || 
-    ' creado por miembro ' || NEW.id_miembro
-  );
+  -- Obtener nombre del miembro
+  SELECT m.nombre || ' ' || m.apellido1 INTO v_member_name
+  FROM Miembro m 
+  WHERE m.id_miembro = NEW.id_miembro;
+  
+  -- ✅ SOLO NOTIFICAR SI EL CARRITO TIENE TOTAL > 0
+  -- Esto significa que ya tiene productos añadidos
+  IF NOT NEW.procesado AND NEW.total_pago > 0 THEN
+    PERFORM notify_admin(
+      'nuevo_carrito',
+      'Nuevo carrito #' || NEW.id_carrito || 
+      ' creado por ' || COALESCE(v_member_name, 'miembro ' || NEW.id_miembro) ||
+      '. Total: $' || NEW.total_pago || '. Estado: Pendiente'
+    );
+    
+    RAISE NOTICE 'Carrito % notificado - Miembro: %, Total: $%', 
+                 NEW.id_carrito, NEW.id_miembro, NEW.total_pago;
+  ELSE
+    RAISE NOTICE 'Carrito % creado pero sin productos - no se notifica', NEW.id_carrito;
+  END IF;
+  
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
+-- ✅ TRIGGER QUE SE DISPARA CUANDO EL TOTAL CAMBIA DE 0 A >0
+-- Esto significa que se añadió el primer producto
 DROP TRIGGER IF EXISTS new_cart_trigger ON Carrito;
 CREATE TRIGGER new_cart_trigger
-  AFTER INSERT ON Carrito
+  AFTER UPDATE OF total_pago ON Carrito
   FOR EACH ROW
+  WHEN (NOT NEW.procesado AND OLD.total_pago = 0 AND NEW.total_pago > 0)
   EXECUTE FUNCTION trg_new_cart();
 
--- 4) Trigger: checkout de carrito (procesado=true)
+-- ✅ CORREGIR TRIGGER DE CHECKOUT (información más precisa)
 CREATE OR REPLACE FUNCTION trg_checkout_cart() RETURNS TRIGGER AS $$
 DECLARE
   rec RECORD;
   v_total NUMERIC := 0;
+  v_member_name VARCHAR;
+  v_productos_texto TEXT := '';
+  v_count_productos INT := 0;
 BEGIN
   -- Solo cuando cambie de false → true
   IF NEW.procesado AND NOT OLD.procesado THEN
 
-    -- ✅ 1. Decrementar stock y calcular total
+    -- Obtener nombre del miembro
+    SELECT m.nombre || ' ' || m.apellido1 INTO v_member_name
+    FROM Miembro m 
+    WHERE m.id_miembro = NEW.id_miembro;
+
+    -- ✅ 1. Decrementar stock, calcular total y construir detalle
     FOR rec IN 
-      SELECT id_producto, cantidad, precio_unitario, subtotal
-      FROM Detalle_Carrito
-      WHERE id_carrito = NEW.id_carrito
+      SELECT 
+        dc.id_producto, 
+        dc.cantidad, 
+        dc.precio_unitario, 
+        dc.subtotal,
+        p.nombre_prod
+      FROM Detalle_Carrito dc
+      INNER JOIN Producto p ON dc.id_producto = p.id_producto
+      WHERE dc.id_carrito = NEW.id_carrito
     LOOP
+      -- Decrementar stock
       UPDATE Producto
         SET stock = stock - rec.cantidad
       WHERE id_producto = rec.id_producto;
+      
+      -- Sumar al total
       v_total := v_total + rec.subtotal;
+      
+      -- Construir texto de productos
+      v_count_productos := v_count_productos + 1;
+      v_productos_texto := v_productos_texto || rec.cantidad || 'x ' || rec.nombre_prod;
+      
+      IF v_count_productos < 3 THEN
+        v_productos_texto := v_productos_texto || ', ';
+      ELSIF v_count_productos = 3 THEN
+        v_productos_texto := v_productos_texto || '...';
+        EXIT; -- Solo mostrar los primeros 3 productos
+      END IF;
     END LOOP;
 
-    -- ✅ 2. SOLO NOTIFICAR A ADMINS (sin crear factura)
+    -- ✅ 2. NOTIFICAR A ADMINS con información detallada
     PERFORM notify_admin(
       'checkout',
-      'Carrito #' || NEW.id_carrito || ' procesado por miembro ' || NEW.id_miembro || 
-      '. Total: $' || v_total || '. REQUIERE FACTURACIÓN MANUAL.'
+      '🛒 CHECKOUT COMPLETADO - Carrito #' || NEW.id_carrito || 
+      ' por ' || COALESCE(v_member_name, 'miembro ' || NEW.id_miembro) || 
+      '. Productos: ' || RTRIM(v_productos_texto, ', ') ||
+      '. Total: $' || ROUND(v_total, 2) || 
+      '. ⚠️ REQUIERE FACTURACIÓN MANUAL.'
     );
     
-    -- ✅ 3. NOTIFICAR AL MIEMBRO (sin factura)
+    -- ✅ 3. NOTIFICAR AL MIEMBRO
     PERFORM notify_member(
       NEW.id_miembro,
       'compra',
-      'Tu pedido #' || NEW.id_carrito || ' ha sido procesado exitosamente. ' ||
-      'Total: $' || v_total || '. Espera confirmación del administrador para tu factura.'
+      '✅ ¡Pedido procesado exitosamente! Tu carrito #' || NEW.id_carrito || 
+      ' con ' || v_count_productos || ' producto(s) ha sido confirmado. ' ||
+      'Total: $' || ROUND(v_total, 2) || 
+      '. 📋 Espera la confirmación del administrador para recibir tu factura oficial.'
     );
     
-    RAISE NOTICE 'Carrito % procesado. Total: %. Factura pendiente de creación manual.', NEW.id_carrito, v_total;
+    RAISE NOTICE 'Carrito % procesado por %. Total: $%. Stock actualizado.', 
+                 NEW.id_carrito, v_member_name, ROUND(v_total, 2);
   END IF;
 
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
-
--- ✅ REEMPLAZAR EL TRIGGER EXISTENTE
-DROP TRIGGER IF EXISTS checkout_cart_trigger ON Carrito;
-CREATE TRIGGER checkout_cart_trigger
-  AFTER UPDATE ON Carrito
-  FOR EACH ROW
-  WHEN (NEW.procesado AND NOT OLD.procesado)
-  EXECUTE FUNCTION trg_checkout_cart();
 
 -- 1) función auxiliar para recalcular total_pago
 CREATE OR REPLACE FUNCTION trg_recalc_total_pago() RETURNS TRIGGER AS $$
@@ -719,3 +766,102 @@ CREATE TRIGGER recalc_total_after_del
   AFTER DELETE ON Detalle_Carrito
   FOR EACH ROW
   EXECUTE FUNCTION trg_recalc_total_pago();
+
+-- ✅ SOLUCIÓN DEFINITIVA: Eliminar triggers duplicados y crear uno solo inteligente
+
+-- 1) Eliminar todos los triggers de carrito existentes
+DROP TRIGGER IF EXISTS new_cart_trigger ON Carrito;
+DROP TRIGGER IF EXISTS checkout_cart_trigger ON Carrito;
+
+-- 2) Crear UN SOLO trigger que maneje todo
+CREATE OR REPLACE FUNCTION trg_carrito_eventos() RETURNS TRIGGER AS $$
+DECLARE
+  rec RECORD;
+  v_total NUMERIC := 0;
+  v_member_name VARCHAR;
+  v_productos_texto TEXT := '';
+  v_count_productos INT := 0;
+BEGIN
+  -- Obtener nombre del miembro
+  SELECT m.nombre || ' ' || m.apellido1 INTO v_member_name
+  FROM Miembro m 
+  WHERE m.id_miembro = NEW.id_miembro;
+
+  -- ✅ EVENTO 1: NUEVO CARRITO CON PRODUCTOS (solo cuando total pasa de 0 a >0)
+  IF TG_OP = 'UPDATE' AND OLD.total_pago = 0 AND NEW.total_pago > 0 AND NOT NEW.procesado THEN
+    PERFORM notify_admin(
+      'nuevo_carrito',
+      'Nuevo carrito #' || NEW.id_carrito || 
+      ' creado por ' || COALESCE(v_member_name, 'miembro ' || NEW.id_miembro) ||
+      '. Total: $' || NEW.total_pago || '. Estado: Pendiente'
+    );
+    
+    RAISE NOTICE 'Carrito % con productos notificado - Miembro: %, Total: $%', 
+                 NEW.id_carrito, NEW.id_miembro, NEW.total_pago;
+  END IF;
+
+  -- ✅ EVENTO 2: CHECKOUT COMPLETADO (solo cuando procesado cambia de false a true)
+  IF TG_OP = 'UPDATE' AND NOT OLD.procesado AND NEW.procesado THEN
+    
+    -- Calcular detalles del checkout
+    FOR rec IN 
+      SELECT 
+        dc.id_producto, 
+        dc.cantidad, 
+        dc.precio_unitario, 
+        dc.subtotal,
+        p.nombre_prod
+      FROM Detalle_Carrito dc
+      INNER JOIN Producto p ON dc.id_producto = p.id_producto
+      WHERE dc.id_carrito = NEW.id_carrito
+    LOOP
+      -- Decrementar stock
+      UPDATE Producto SET stock = stock - rec.cantidad WHERE id_producto = rec.id_producto;
+      
+      -- Sumar al total
+      v_total := v_total + rec.subtotal;
+      
+      -- Construir texto de productos
+      v_count_productos := v_count_productos + 1;
+      v_productos_texto := v_productos_texto || rec.cantidad || 'x ' || rec.nombre_prod;
+      
+      IF v_count_productos < 3 THEN
+        v_productos_texto := v_productos_texto || ', ';
+      ELSIF v_count_productos = 3 THEN
+        v_productos_texto := v_productos_texto || '...';
+        EXIT;
+      END IF;
+    END LOOP;
+
+    -- Notificar a admins
+    PERFORM notify_admin(
+      'checkout',
+      '🛒 CHECKOUT COMPLETADO - Carrito #' || NEW.id_carrito || 
+      ' por ' || COALESCE(v_member_name, 'miembro ' || NEW.id_miembro) || 
+      '. Productos: ' || RTRIM(v_productos_texto, ', ') ||
+      '. Total: $' || ROUND(v_total, 2) || 
+      '. ⚠️ REQUIERE FACTURACIÓN MANUAL.'
+    );
+    
+    -- Notificar al miembro
+    PERFORM notify_member(
+      NEW.id_miembro,
+      'compra',
+      '✅ ¡Pedido procesado exitosamente! Tu carrito #' || NEW.id_carrito || 
+      ' con ' || v_count_productos || ' producto(s) ha sido confirmado. ' ||
+      'Total: $' || ROUND(v_total, 2) || 
+      '. 📋 Espera la confirmación del administrador para recibir tu factura oficial.'
+    );
+    
+    RAISE NOTICE 'Checkout completado - Carrito: %, Total: $%', NEW.id_carrito, ROUND(v_total, 2);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 3) Crear UN SOLO trigger para manejar ambos eventos
+CREATE TRIGGER carrito_eventos_trigger
+  AFTER UPDATE ON Carrito
+  FOR EACH ROW
+  EXECUTE FUNCTION trg_carrito_eventos();
