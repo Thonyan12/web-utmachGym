@@ -592,10 +592,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS low_stock_trigger ON Producto;
 CREATE TRIGGER low_stock_trigger
   AFTER UPDATE ON Producto
   FOR EACH ROW
-  WHEN (NEW.stock <= 5)
+  WHEN (NEW.stock <= 5 AND OLD.stock > 5)
   EXECUTE FUNCTION trg_low_stock();
 
 -- 3) Trigger: nuevo carrito
@@ -610,6 +611,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS new_cart_trigger ON Carrito;
 CREATE TRIGGER new_cart_trigger
   AFTER INSERT ON Carrito
   FOR EACH ROW
@@ -620,13 +622,11 @@ CREATE OR REPLACE FUNCTION trg_checkout_cart() RETURNS TRIGGER AS $$
 DECLARE
   rec RECORD;
   v_total NUMERIC := 0;
-  v_admin_id INT;
-  v_factura_id INT;
 BEGIN
   -- Solo cuando cambie de false → true
   IF NEW.procesado AND NOT OLD.procesado THEN
 
-    -- 4.1 Decrementar stock y sumar totales
+    -- ✅ 1. Decrementar stock y calcular total
     FOR rec IN 
       SELECT id_producto, cantidad, precio_unitario, subtotal
       FROM Detalle_Carrito
@@ -638,72 +638,36 @@ BEGIN
       v_total := v_total + rec.subtotal;
     END LOOP;
 
-    -- 4.2 Obtener un admin cualquiera
-    SELECT id_usuario
-      INTO v_admin_id
-      FROM Usuario
-     WHERE rol = 'admin'
-     LIMIT 1;
-
-    -- 4.3 Crear la factura
-    INSERT INTO Factura (
-      id_miembro, id_admin, total, estado_registro, f_registro
-    ) VALUES (
-      NEW.id_miembro, v_admin_id, v_total, TRUE, CURRENT_DATE
-    )
-    RETURNING id_factura INTO v_factura_id;
-
-    -- 4.4 Crear detalle de factura por cada item
-    FOR rec IN 
-      SELECT id_producto, cantidad, precio_unitario, subtotal
-      FROM Detalle_Carrito
-      WHERE id_carrito = NEW.id_carrito
-    LOOP
-      INSERT INTO Detalle_Factura (
-        id_factura,
-        tipo_detalle,
-        referencia_id,
-        descripcion,
-        monto,
-        iva,
-        metodo_pago,
-        estado_registro,
-        f_registro
-      ) VALUES (
-        v_factura_id,
-        'compra producto',
-        rec.id_producto,
-        'Compra de producto ' || rec.id_producto,
-        rec.subtotal,
-        rec.subtotal * 0.15,
-        'desconocido',
-        TRUE,
-        CURRENT_DATE
-      );
-    END LOOP;
-
-    -- 4.5 Notificaciones finales
+    -- ✅ 2. SOLO NOTIFICAR A ADMINS (sin crear factura)
     PERFORM notify_admin(
       'checkout',
-      'Carrito #' || NEW.id_carrito || 
-      ' procesado. Factura #' || v_factura_id || ' generada.'
+      'Carrito #' || NEW.id_carrito || ' procesado por miembro ' || NEW.id_miembro || 
+      '. Total: $' || v_total || '. REQUIERE FACTURACIÓN MANUAL.'
     );
+    
+    -- ✅ 3. NOTIFICAR AL MIEMBRO (sin factura)
     PERFORM notify_member(
       NEW.id_miembro,
-      'factura',
-      'Su factura #' || v_factura_id || ' está lista. Total: ' || v_total
+      'compra',
+      'Tu pedido #' || NEW.id_carrito || ' ha sido procesado exitosamente. ' ||
+      'Total: $' || v_total || '. Espera confirmación del administrador para tu factura.'
     );
+    
+    RAISE NOTICE 'Carrito % procesado. Total: %. Factura pendiente de creación manual.', NEW.id_carrito, v_total;
   END IF;
 
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
+-- ✅ REEMPLAZAR EL TRIGGER EXISTENTE
+DROP TRIGGER IF EXISTS checkout_cart_trigger ON Carrito;
 CREATE TRIGGER checkout_cart_trigger
   AFTER UPDATE ON Carrito
   FOR EACH ROW
   WHEN (NEW.procesado AND NOT OLD.procesado)
   EXECUTE FUNCTION trg_checkout_cart();
+
 -- 1) función auxiliar para recalcular total_pago
 CREATE OR REPLACE FUNCTION trg_recalc_total_pago() RETURNS TRIGGER AS $$
 DECLARE

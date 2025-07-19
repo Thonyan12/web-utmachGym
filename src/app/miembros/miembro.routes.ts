@@ -4,6 +4,7 @@ import { MiembrosLayout } from './miembros-layout/miembros-layout';
 import { MiembrosDashboard } from './dashboard/miembros-dashboard/miembros-dashboard';
 import { ProductoListComponent } from './tienda/producto-list/producto-list';
 import { CarritoComponent } from './tienda/carrito/carrito';
+import { Pagos } from './pagos/pagos';
 
 export const miembrosRoutes: Routes = [
   {
@@ -16,6 +17,7 @@ export const miembrosRoutes: Routes = [
 
       { path: 'tienda', component: ProductoListComponent },
       { path: 'cart', component: CarritoComponent },
+      { path: 'pagos', component: Pagos},
     ],
   },
 ];
