@@ -1,0 +1,22 @@
+.perfil-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+}
+
+.content {
+  flex: 1;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .perfil-layout {
+    flex-direction: column;
+  }
+  
+  .content {
+    margin-left: 0;
+  }
+}

@@ -441,15 +441,8 @@ BEGIN
         END IF;
     END IF;
     
-    -- Verificar que no sea la misma rutina que ya tiene activa
-    IF NOT EXISTS (
-        SELECT 1 FROM Asignacion_rutina 
-        WHERE id_miembro = p_id_miembro 
-        AND id_rutina = v_id_rutina_nueva 
-        AND estado = TRUE
-    ) AND v_id_rutina_nueva IS NOT NULL THEN
-        
-        -- Insertar nueva asignación de rutina
+    -- SIEMPRE insertar nueva rutina si se encontró una
+    IF v_id_rutina_nueva IS NOT NULL THEN
         INSERT INTO Asignacion_rutina (
             id_miembro, 
             id_rutina, 
@@ -476,7 +469,7 @@ BEGIN
         
         RAISE NOTICE 'Nueva rutina % asignada al miembro % por progreso físico', v_id_rutina_nueva, p_id_miembro;
     ELSE
-        RAISE NOTICE 'No se requiere nueva rutina para el miembro % o ya tiene la rutina óptima', p_id_miembro;
+        RAISE NOTICE 'No se encontró rutina para el miembro %', p_id_miembro;
     END IF;
 END;
 $$ LANGUAGE plpgsql;
@@ -524,14 +517,14 @@ BEGIN
     RETURN QUERY
     SELECT 
         ar.id_asignacion,
-        (r.nivel || ' - ' || r.tipo_rut) as rutina_nombre,
-        r.tipo_rut as rutina_tipo,
-        r.nivel as rutina_nivel,
-        ar.descripcion_rut as descripcion_asignacion,
+        (r.nivel || ' - ' || r.tipo_rut)::varchar as rutina_nombre, -- <-- CAST
+        r.tipo_rut::varchar as rutina_tipo,                         -- <-- CAST
+        r.nivel::varchar as rutina_nivel,                           -- <-- CAST
+        ar.descripcion_rut::varchar as descripcion_asignacion,      -- <-- CAST
         ar.fecha_inicio,
         ar.f_registro as fecha_registro,
         ar.estado as estado_rutina,
-        r.duracion_rut as duracion_semanas
+        r.duracion_rut::varchar as duracion_semanas                 -- <-- CAST
     FROM Asignacion_rutina ar
     INNER JOIN Rutina r ON ar.id_rutina = r.id_rutina
     WHERE ar.id_miembro = p_id_miembro
@@ -772,6 +765,7 @@ CREATE TRIGGER recalc_total_after_del
 -- 1) Eliminar todos los triggers de carrito existentes
 DROP TRIGGER IF EXISTS new_cart_trigger ON Carrito;
 DROP TRIGGER IF EXISTS checkout_cart_trigger ON Carrito;
+DROP TRIGGER IF EXISTS carrito_eventos_trigger ON Carrito;
 
 -- 2) Crear UN SOLO trigger que maneje todo
 CREATE OR REPLACE FUNCTION trg_carrito_eventos() RETURNS TRIGGER AS $$
@@ -865,3 +859,67 @@ CREATE TRIGGER carrito_eventos_trigger
   AFTER UPDATE ON Carrito
   FOR EACH ROW
   EXECUTE FUNCTION trg_carrito_eventos();
+
+-- ============================================
+-- FUNCIÓN: Desactivar automáticamente rutinas anteriores al asignar una nueva
+-- ============================================
+CREATE OR REPLACE FUNCTION desactivar_rutinas_anteriores(
+    p_id_miembro INT
+) RETURNS VOID AS $$
+BEGIN
+    -- Desactivar rutinas activas anteriores del miembro
+    UPDATE Asignacion_rutina
+    SET estado = FALSE
+    WHERE id_miembro = p_id_miembro AND estado = TRUE;
+END;
+$$ LANGUAGE plpgsql;
+
+-- ============================================
+-- TRIGGER: Desactivar rutinas anteriores al insertar una nueva asignación
+-- ============================================
+CREATE OR REPLACE FUNCTION trg_desactivar_rutinas_anteriores()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Desactivar rutinas anteriores solo si hay una nueva asignación
+    IF TG_OP = 'INSERT' THEN
+        PERFORM desactivar_rutinas_anteriores(NEW.id_miembro);
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Crear el trigger
+DROP TRIGGER IF EXISTS desactivar_rutinas_anteriores_trigger ON Asignacion_rutina;
+CREATE TRIGGER desactivar_rutinas_anteriores_trigger
+    BEFORE INSERT ON Asignacion_rutina
+    FOR EACH ROW
+    EXECUTE FUNCTION trg_desactivar_rutinas_anteriores();
+
+-- ============================================
+-- FUNCIÓN: Obtener perfil físico actual de un miembro
+-- ============================================
+CREATE OR REPLACE FUNCTION obtener_perfil_fisico_actual(p_id_miembro INT)
+RETURNS TABLE(
+    id_perfil INT,
+    altura NUMERIC,
+    peso NUMERIC,
+    observaciones TEXT,
+    fecha_registro DATE,
+    estado BOOLEAN
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        pf.id_perfil,
+        pf.altura,
+        pf.peso,
+        pf.observaciones,
+        pf.fecha_registro,
+        pf.estado
+    FROM Perfil_fisico pf
+    WHERE pf.id_miembro = p_id_miembro
+    ORDER BY pf.fecha_registro DESC, pf.id_perfil DESC
+    LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;

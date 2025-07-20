@@ -1,0 +1,364 @@
+<div class="perfil-actual-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2><i class="bi bi-person-badge me-2"></i>Mi Perfil Físico Actual</h2>
+        <p class="text-muted">Consulta tu información física actual y crea nuevos registros</p>
+      </div>
+      <button 
+        class="btn btn-primary btn-lg"
+        (click)="abrirModalCrear()"
+        [disabled]="loading"
+      >
+        <i class="bi bi-plus-circle me-2"></i>Nuevo Registro Físico
+      </button>
+    </div>
+  </div>
+
+  <!-- Mensaje de éxito -->
+  <div *ngIf="mensajeExito" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle me-2"></i>{{ mensajeExito }}
+    <button type="button" class="btn-close" (click)="mensajeExito = null"></button>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="d-flex justify-content-center align-items-center">
+      <div class="spinner-border text-primary me-3" role="status"></div>
+      <span class="h5">Cargando información del perfil...</span>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div *ngIf="!loading && perfil" class="content-grid">
+    
+    <!-- Información Personal -->
+    <div class="card info-personal">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0"><i class="bi bi-person-circle me-2"></i>Información Personal</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="info-item">
+              <label>Nombre Completo:</label>
+              <span class="fw-bold">{{ perfil.miembro.nombre_completo }}</span>
+            </div>
+            <div class="info-item">
+              <label>Cédula:</label>
+              <span>{{ perfil.miembro.cedula }}</span>
+            </div>
+            <div class="info-item">
+              <label>Edad:</label>
+              <span>{{ perfil.miembro.edad }} años</span>
+            </div>
+            <div class="info-item">
+              <label>Sexo:</label>
+              <span>{{ perfil.miembro.sexo }}</span>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-item">
+              <label>Objetivo:</label>
+              <span class="badge bg-success fs-6">{{ perfil.miembro.objetivo }}</span>
+            </div>
+            <div class="info-item">
+              <label>Contextura:</label>
+              <span>{{ perfil.miembro.contextura }}</span>
+            </div>
+            <div class="info-item">
+              <label>Fecha de Inscripción:</label>
+              <span>{{ formatearFecha(perfil.miembro.fecha_inscripcion) }}</span>
+            </div>
+            <div class="info-item">
+              <label>Tiempo en Gimnasio:</label>
+              <span class="text-primary fw-bold">{{ perfil.tiempo_en_gimnasio }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estado Físico Actual -->
+    <div class="card estado-fisico">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0"><i class="bi bi-heartbeat me-2"></i>Estado Físico Actual</h4>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Peso -->
+          <div class="col-md-4">
+            <div class="stat-card peso">
+              <div class="stat-icon">
+                <i class="bi bi-speedometer2"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-value">{{ perfil.perfil_fisico_actual.peso }} kg</h3>
+                <p class="stat-label">Peso Actual</p>
+                <small class="text-muted">
+                  Registrado: {{ formatearFecha(perfil.perfil_fisico_actual.fecha_registro) }}
+                </small>
+              </div>
+            </div>
+          </div>
+
+          <!-- Altura -->
+          <div class="col-md-4">
+            <div class="stat-card altura">
+              <div class="stat-icon">
+                <i class="bi bi-rulers"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-value">{{ perfil.perfil_fisico_actual.altura }} cm</h3>
+                <p class="stat-label">Altura</p>
+                <small class="text-muted">Estatura registrada</small>
+              </div>
+            </div>
+          </div>
+
+          <!-- IMC -->
+          <div class="col-md-4">
+            <div class="stat-card imc" [ngClass]="getIMCColor(perfil.categoria_imc)">
+              <div class="stat-icon">
+                <i [class]="getIMCIcon(perfil.categoria_imc)"></i>
+              </div>
+              <div class="stat-content">
+                <h3 class="stat-value">{{ perfil.imc_actual }}</h3>
+                <p class="stat-label">Índice de Masa Corporal</p>
+                <span class="badge" [ngClass]="getIMCColor(perfil.categoria_imc)">
+                  {{ perfil.categoria_imc }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div *ngIf="perfil.perfil_fisico_actual.observaciones" class="mt-4">
+          <h5><i class="bi bi-chat-text me-2"></i>Observaciones del Registro:</h5>
+          <div class="alert alert-info">
+            <p class="mb-0">{{ perfil.perfil_fisico_actual.observaciones }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Estadísticas Generales -->
+    <div class="card estadisticas">
+      <div class="card-header bg-info text-white">
+        <h4 class="mb-0"><i class="bi bi-graph-up me-2"></i>Estadísticas de Progreso</h4>
+      </div>
+      <div class="card-body">
+        <div class="row text-center">
+          <div class="col-6 col-md-3">
+            <div class="stat-box">
+              <h4 class="text-primary">{{ perfil.estadisticas.total_perfiles }}</h4>
+              <p class="mb-0">Registros Físicos</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-box">
+              <h4 class="text-success">{{ perfil.estadisticas.peso_minimo }} kg</h4>
+              <p class="mb-0">Peso Mínimo</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-box">
+              <h4 class="text-warning">{{ perfil.estadisticas.peso_maximo }} kg</h4>
+              <p class="mb-0">Peso Máximo</p>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-box">
+              <h4 class="text-info">{{ perfil.estadisticas.peso_promedio }} kg</h4>
+              <p class="mb-0">Peso Promedio</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rutina Actual -->
+    <div *ngIf="perfil.historial_rutinas && perfil.historial_rutinas.length > 0" class="card rutina-actual">
+      <div class="card-header bg-warning text-dark">
+        <h4 class="mb-0"><i class="bi bi-lightning me-2"></i>Rutina Actual</h4>
+      </div>
+      <div class="card-body">
+        <div class="rutina-info">
+          <h5>{{ perfil.historial_rutinas[0]?.tipo_rutina || 'Sin rutina asignada' }}</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Nivel:</strong> 
+                <span class="badge bg-primary">{{ perfil.historial_rutinas[0]?.nivel || 'N/A' }}</span>
+              </p>
+              <p><strong>Duración:</strong> {{ perfil.historial_rutinas[0]?.duracion_rutina || 'N/A' }} min</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Descripción:</strong></p>
+              <p class="text-muted">{{ perfil.historial_rutinas[0]?.descripcion_rutina || 'Sin descripción disponible' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Crear Nuevo Perfil -->
+<div 
+  class="modal fade" 
+  [class.show]="mostrarModalCrear" 
+  [style.display]="mostrarModalCrear ? 'block' : 'none'"
+  tabindex="-1"
+  *ngIf="mostrarModalCrear"
+>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title">
+          <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Registro Físico
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+      
+      <form [formGroup]="nuevoPerfilForm" (ngSubmit)="crearNuevoPerfil()">
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Importante:</strong> Al crear un nuevo registro físico, el sistema evaluará automáticamente 
+            si necesitas una nueva rutina basada en tu progreso.
+          </div>
+
+          <div class="row">
+            <!-- Altura -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="altura" class="form-label">
+                  <i class="bi bi-rulers me-1"></i>Altura (cm) *
+                </label>
+                <input 
+                  type="number" 
+                  class="form-control"
+                  id="altura"
+                  formControlName="altura"
+                  placeholder="Ej: 175"
+                  min="120"
+                  max="250"
+                  [class.is-invalid]="nuevoPerfilForm.get('altura')?.invalid && nuevoPerfilForm.get('altura')?.touched"
+                >
+                <div class="invalid-feedback">
+                  <div *ngIf="nuevoPerfilForm.get('altura')?.errors?.['required']">
+                    La altura es obligatoria
+                  </div>
+                  <div *ngIf="nuevoPerfilForm.get('altura')?.errors?.['min'] || nuevoPerfilForm.get('altura')?.errors?.['max']">
+                    La altura debe estar entre 120 y 250 cm
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Peso -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="peso" class="form-label">
+                  <i class="bi bi-speedometer2 me-1"></i>Peso (kg) *
+                </label>
+                <input 
+                  type="number" 
+                  class="form-control"
+                  id="peso"
+                  formControlName="peso"
+                  placeholder="Ej: 70.5"
+                  min="30"
+                  max="300"
+                  step="0.1"
+                  [class.is-invalid]="nuevoPerfilForm.get('peso')?.invalid && nuevoPerfilForm.get('peso')?.touched"
+                >
+                <div class="invalid-feedback">
+                  <div *ngIf="nuevoPerfilForm.get('peso')?.errors?.['required']">
+                    El peso es obligatorio
+                  </div>
+                  <div *ngIf="nuevoPerfilForm.get('peso')?.errors?.['min'] || nuevoPerfilForm.get('peso')?.errors?.['max']">
+                    El peso debe estar entre 30 y 300 kg
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Observaciones -->
+          <div class="mb-3">
+            <label for="observaciones" class="form-label">
+              <i class="bi bi-chat-text me-1"></i>Observaciones *
+            </label>
+            <textarea 
+              class="form-control"
+              id="observaciones"
+              formControlName="observaciones"
+              rows="4"
+              placeholder="Describe tu estado físico actual, cómo te sientes, cambios notados, etc..."
+              [class.is-invalid]="nuevoPerfilForm.get('observaciones')?.invalid && nuevoPerfilForm.get('observaciones')?.touched"
+            ></textarea>
+            <div class="invalid-feedback">
+              <div *ngIf="nuevoPerfilForm.get('observaciones')?.errors?.['required']">
+                Las observaciones son obligatorias
+              </div>
+              <div *ngIf="nuevoPerfilForm.get('observaciones')?.errors?.['minlength']">
+                Mínimo 10 caracteres requeridos
+              </div>
+              <div *ngIf="nuevoPerfilForm.get('observaciones')?.errors?.['maxlength']">
+                Máximo 500 caracteres permitidos
+              </div>
+            </div>
+            <div class="form-text">
+              Caracteres: {{ nuevoPerfilForm.get('observaciones')?.value?.length || 0 }}/500
+            </div>
+          </div>
+
+          <!-- Vista previa del IMC -->
+          <div *ngIf="nuevoPerfilForm.get('altura')?.value && nuevoPerfilForm.get('peso')?.value" 
+               class="alert alert-secondary">
+            <h6><i class="bi bi-calculator me-2"></i>Vista Previa del IMC:</h6>
+            <p class="mb-0">
+              <strong>IMC Calculado:</strong> 
+              {{ calcularIMCPreview() }}
+              <span class="ms-2 badge" 
+                    [ngClass]="getIMCColor(getCategoriaIMCPreview())">
+                {{ getCategoriaIMCPreview() }}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cerrarModal()" [disabled]="enviandoPerfil">
+            <i class="bi bi-x-circle me-2"></i>Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-primary"
+            [disabled]="nuevoPerfilForm.invalid || enviandoPerfil"
+          >
+            <span *ngIf="enviandoPerfil" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!enviandoPerfil" class="bi bi-check-circle me-2"></i>
+            {{ enviandoPerfil ? 'Creando...' : 'Crear Registro Físico' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop del modal -->
+<div 
+  *ngIf="mostrarModalCrear" 
+  class="modal-backdrop fade show"
+  (click)="cerrarModal()"
+></div>

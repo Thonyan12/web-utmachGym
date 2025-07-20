@@ -1,0 +1,342 @@
+<div class="historial-perfiles-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2><i class="bi bi-clock-history me-2"></i>Historial de Perfiles Físicos</h2>
+        <p class="text-muted">Evolución de tu estado físico a lo largo del tiempo</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-number text-primary">{{ totalRegistros }}</span>
+          <span class="stat-label">Total Registros</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number text-info">{{ promedioIMC }}</span>
+          <span class="stat-label">IMC Promedio</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" [ngClass]="getTendenciaColor()">
+            <i [class]="getTendenciaIcon()" class="me-1"></i>
+            {{ diferenciaPesoTotal >= 0 ? '+' : '' }}{{ diferenciaPesoTotal }} kg
+          </span>
+          <span class="stat-label">Cambio Total</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="d-flex justify-content-center align-items-center">
+      <div class="spinner-border text-primary me-3" role="status"></div>
+      <span class="h5">Cargando historial de perfiles...</span>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div *ngIf="!loading && historialPerfiles.length > 0">
+    
+    <!-- Resumen de Estadísticas -->
+    <div class="card estadisticas-card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Resumen de tu Evolución</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="stat-box">
+              <div class="stat-icon text-primary">
+                <i class="bi bi-play-circle"></i>
+              </div>
+              <div class="stat-content">
+                <h4>{{ pesoInicial }} kg</h4>
+                <p class="mb-0">Peso Inicial</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-box">
+              <div class="stat-icon text-success">
+                <i class="bi bi-target"></i>
+              </div>
+              <div class="stat-content">
+                <h4>{{ pesoActual }} kg</h4>
+                <p class="mb-0">Peso Actual</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-box">
+              <div class="stat-icon" [ngClass]="getTendenciaColor()">
+                <i [class]="getTendenciaIcon()"></i>
+              </div>
+              <div class="stat-content">
+                <h4 class="text-capitalize">{{ tendenciaPeso || 'Sin datos' }}</h4>
+                <p class="mb-0">Tendencia</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="stat-box">
+              <div class="stat-icon text-info">
+                <i class="bi bi-calendar-range"></i>
+              </div>
+              <div class="stat-content">
+                <h4>{{ totalRegistros }}</h4>
+                <p class="mb-0">Registros</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros y Ordenamiento -->
+    <div class="card filtros-card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros y Ordenamiento</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Búsqueda por texto -->
+          <div class="col-md-3">
+            <label class="form-label">Buscar:</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="buscarTexto"
+                placeholder="Observaciones, categoría..."
+              >
+            </div>
+          </div>
+
+          <!-- Filtro por categoría IMC -->
+          <div class="col-md-2">
+            <label class="form-label">Categoría IMC:</label>
+            <select class="form-select" [(ngModel)]="filtroIMC">
+              <option value="">Todas</option>
+              <option *ngFor="let categoria of categoriasIMC" [value]="categoria">{{ categoria }}</option>
+            </select>
+          </div>
+
+          <!-- Filtro por fecha -->
+          <div class="col-md-2">
+            <label class="form-label">Período:</label>
+            <select class="form-select" [(ngModel)]="filtroFecha">
+              <option *ngFor="let rango of rangosFecha" [value]="rango.valor">{{ rango.label }}</option>
+            </select>
+          </div>
+
+          <!-- Ordenar por -->
+          <div class="col-md-3">
+            <label class="form-label">Ordenar por:</label>
+            <select class="form-select" [(ngModel)]="ordenarPor">
+              <option value="fecha_desc">Fecha (más reciente)</option>
+              <option value="fecha_asc">Fecha (más antiguo)</option>
+              <option value="peso_desc">Peso (mayor a menor)</option>
+              <option value="peso_asc">Peso (menor a mayor)</option>
+              <option value="imc_desc">IMC (mayor a menor)</option>
+              <option value="imc_asc">IMC (menor a mayor)</option>
+            </select>
+          </div>
+
+          <!-- Botón limpiar -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Resultados del filtro -->
+        <div class="mt-3">
+          <span class="badge bg-primary">
+            {{ perfilesFiltrados.length }} de {{ historialPerfiles.length }} registros
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline de Perfiles -->
+    <div class="perfiles-timeline">
+      <div class="row">
+        <div *ngFor="let perfil of perfilesFiltrados; trackBy: trackByPerfil; let i = index" 
+             class="col-lg-6 mb-4">
+          
+          <div class="card perfil-card" [class.perfil-reciente]="i === 0">
+            <!-- Badge de posición -->
+            <div class="perfil-badge">
+              <span class="badge bg-primary">#{{ i + 1 }}</span>
+              <small class="text-muted">{{ formatearFechaCorta(perfil.fecha_registro) }}</small>
+            </div>
+
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <div class="perfil-fecha">
+                <h6 class="mb-0">{{ formatearFecha(perfil.fecha_registro) }}</h6>
+                <small class="text-muted">ID: {{ perfil.id_perfil }}</small>
+              </div>
+              <div class="imc-badge">
+                <span class="badge" [ngClass]="getIMCColor(perfil.categoria_imc)">
+                  <i [class]="getIMCIcon(perfil.categoria_imc)" class="me-1"></i>
+                  {{ perfil.categoria_imc }}
+                </span>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <!-- Métricas principales -->
+              <div class="row g-3 mb-3">
+                <div class="col-4">
+                  <div class="metric-item">
+                    <div class="metric-icon text-primary">
+                      <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h5 class="mb-0">{{ perfil.peso }} kg</h5>
+                      <small class="text-muted">Peso</small>
+                      
+                      <!-- Diferencia con registro anterior -->
+                      <div *ngIf="perfil.diferencia_peso !== undefined" class="metric-change">
+                        <small [ngClass]="getDiferenciaPesoColor(perfil.diferencia_peso)">
+                          <i [class]="getDiferenciaPesoIcon(perfil.diferencia_peso)" class="me-1"></i>
+                          {{ perfil.diferencia_peso >= 0 ? '+' : '' }}{{ perfil.diferencia_peso }} kg
+                        </small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-4">
+                  <div class="metric-item">
+                    <div class="metric-icon text-info">
+                      <i class="bi bi-rulers"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h5 class="mb-0">{{ perfil.altura }} cm</h5>
+                      <small class="text-muted">Altura</small>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-4">
+                  <div class="metric-item">
+                    <div class="metric-icon" [ngClass]="getIMCColor(perfil.categoria_imc)">
+                      <i class="bi bi-calculator"></i>
+                    </div>
+                    <div class="metric-content">
+                      <h5 class="mb-0">{{ perfil.imc_calculado }}</h5>
+                      <small class="text-muted">IMC</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Observaciones -->
+              <div class="observaciones-section">
+                <h6><i class="bi bi-chat-text me-2"></i>Observaciones:</h6>
+                <div class="observaciones-content">
+                  <p class="mb-0">{{ perfil.observaciones || 'Sin observaciones registradas' }}</p>
+                </div>
+              </div>
+
+              <!-- Información adicional -->
+              <div class="info-adicional mt-3">
+                <div class="row g-2">
+                  <div class="col-6" *ngIf="perfil.dias_desde_anterior">
+                    <div class="info-box">
+                      <i class="bi bi-calendar-event text-warning"></i>
+                      <small class="ms-2">{{ perfil.dias_desde_anterior }} días desde anterior</small>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="info-box">
+                      <i class="bi bi-clock text-secondary"></i>
+                      <small class="ms-2">Registro {{ i === 0 ? 'más reciente' : 'histórico' }}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer con acciones -->
+            <div class="card-footer bg-transparent">
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                  <i class="bi bi-hash"></i> {{ perfil.id_perfil }}
+                </small>
+                <div class="perfil-actions">
+                  <button *ngIf="i === 0" class="btn btn-sm btn-success">
+                    <i class="bi bi-star me-1"></i>Actual
+                  </button>
+                  <button *ngIf="i !== 0" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-archive me-1"></i>Histórico
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progreso visual (gráfico simple) -->
+    <div class="card progreso-visual-card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Progreso Visual del Peso</h5>
+      </div>
+      <div class="card-body">
+        <div class="progreso-grafico">
+          <div class="grafico-container">
+            <!-- Puntos de progreso -->
+            <div class="progreso-linea">
+              <div *ngFor="let perfil of perfilesFiltrados.slice().reverse(); let i = index" 
+                   class="progreso-punto"
+                   [style.left.%]="(i / (perfilesFiltrados.length - 1)) * 100"
+                   [attr.data-peso]="perfil.peso"
+                   [attr.data-fecha]="formatearFechaCorta(perfil.fecha_registro)">
+                <div class="punto" [ngClass]="getIMCColor(perfil.categoria_imc)"></div>
+                <div class="punto-info">
+                  <small>{{ perfil.peso }}kg</small>
+                  <small>{{ formatearFechaCorta(perfil.fecha_registro) }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!loading && historialPerfiles.length === 0" class="empty-state">
+    <div class="text-center py-5">
+      <i class="bi bi-inbox display-1 text-muted"></i>
+      <h3 class="mt-4">No hay registros de perfiles</h3>
+      <p class="text-muted">Aún no tienes registros físicos en tu historial.</p>
+      <button class="btn btn-primary" routerLink="../actual">
+        <i class="bi bi-plus-circle me-2"></i>Crear Primer Registro
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado de filtro vacío -->
+  <div *ngIf="!loading && historialPerfiles.length > 0 && perfilesFiltrados.length === 0" class="empty-state">
+    <div class="text-center py-5">
+      <i class="bi bi-funnel display-1 text-muted"></i>
+      <h3 class="mt-4">No hay registros que coincidan</h3>
+      <p class="text-muted">Intenta ajustar los filtros de búsqueda.</p>
+      <button class="btn btn-outline-primary" (click)="limpiarFiltros()">
+        <i class="bi bi-x-circle me-2"></i>Limpiar Filtros
+      </button>
+    </div>
+  </div>
+</div>

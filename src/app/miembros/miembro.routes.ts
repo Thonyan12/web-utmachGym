@@ -21,6 +21,10 @@ export const miembrosRoutes: Routes = [
       { path: 'tienda', component: ProductoListComponent },
       { path: 'cart', component: CarritoComponent },
       { path: 'pagos', component: Pagos},
+       {
+        path: 'perfil',
+        loadChildren: () => import('./mi-perfil/perfil.routes').then(m => m.miPerfilRoutes)
+      }
     ],
   },
 ];
