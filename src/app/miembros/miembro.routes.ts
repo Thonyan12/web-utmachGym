@@ -6,6 +6,7 @@ import { ProductoListComponent } from './tienda/producto-list/producto-list';
 import { CarritoComponent } from './tienda/carrito/carrito';
 import { Pagos } from './pagos/pagos';
 import { NutricionComponent } from './nutricion/nutricion';
+import { EntrenamientoComponent } from './entrenamiento/entrenamiento';
 
 export const miembrosRoutes: Routes = [
   {
@@ -15,6 +16,7 @@ export const miembrosRoutes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: MiembrosDashboard },
+      {path: 'entrenamiento', component:EntrenamientoComponent},
       { path: 'nutricion', component: NutricionComponent },
       { path: 'tienda', component: ProductoListComponent },
       { path: 'cart', component: CarritoComponent },
