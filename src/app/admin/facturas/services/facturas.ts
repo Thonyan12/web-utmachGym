@@ -40,8 +40,10 @@ export class FacturasService {
   }
 
   // Eliminar una factura por ID
-  deleteFactura(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  deleteFactura(idFactura: number): Observable<any> {
+    const url = `${this.apiUrl}/${idFactura}`;
+    console.log('URL generada para eliminar:', url);
+    return this.http.delete(url);
   }
 
   constructor() { }

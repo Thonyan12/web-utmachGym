@@ -1,55 +1,100 @@
 <div class="d-flex" style="min-height: 100vh;">
-    <!-- Sidebar reutilizable -->
-    <app-facturas-sidebar></app-facturas-sidebar>
-  
-    <!-- Contenido principal -->
-    <div class="flex-grow-1 p-4 bg-light">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="fw-bold m-0" style="color: #14213d;">
-          <i class="bi bi-list-ul me-2"></i> Listado de Facturas
-        </h3>
-        <button class="btn btn-sm d-flex align-items-center gap-1" style="background-color: #f6f6f5; color: #0a1a2e;" routerLink="/admin/facturas/crear">
-          <i class="bi bi-plus-lg"></i> 
+  <!-- Sidebar reutilizable -->
+  <app-facturas-sidebar></app-facturas-sidebar>
+
+  <!-- Contenido principal -->
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold m-0" style="color: #14213d;">
+        <i class="bi bi-list-ul me-2"></i> Listado de Facturas
+      </h3>
+      <button class="btn btn-sm d-flex align-items-center gap-1" style="background-color: #f6f6f5; color: #0a1a2e;" routerLink="/admin/facturas/crear">
+        <i class="bi bi-plus-lg"></i> 
+      </button>
+    </div>
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle mb-0">
+            <thead style="background-color: #14213d; color: #fff;">
+              <tr>
+                <th scope="col">ID Factura</th>
+                <th scope="col">ID Miembro</th>
+                <th scope="col">ID Admin</th>
+                <th scope="col">Fecha Emisión</th>
+                <th scope="col">Total</th>
+                <th scope="col">Estado Registro</th>
+                <th scope="col">Fecha Registro</th>
+                <th scope="col">VER</th>
+              </tr>
+            </thead>
+            <tbody>
+  <tbody>
+    <tr *ngFor="let factura of facturas" class="align-middle">
+      <td class="fw-bold text-center">{{ factura.id_factura }}</td>
+      <td class="text-center">{{ factura.id_miembro }}</td>
+      <td class="text-center">{{ factura.id_admin }}</td>
+      <td class="text-center">{{ factura.fecha_emision }}</td>
+      <td class="text-end">${{ factura.total }}</td>
+      <td class="text-center">
+        <span [class]="'badge rounded-pill px-3 ' + (factura.estado_registro ? 'bg-success' : 'bg-danger')">
+          {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}
+        </span>
+      </td>
+      <td class="text-center">{{ factura.f_registro }}</td>
+      <td class="text-center">
+        <button class="btn btn-sm btn-primary" (click)="abrirModal(factura.id_factura!)">
+          <i class="bi bi-eye"></i> Ver Detalle
         </button>
+      </td>
+    </tr>
+  <tr *ngIf="facturas.length === 0">
+    <td colspan="8" class="text-center text-muted py-4">
+      <i class="bi bi-box"></i> No hay facturas registradas.
+    </td>
+  </tr>
+  
+  </tbody>
+  
+<!-- Modal -->
+<div class="modal fade" id="detalleFacturaModal" tabindex="-1" aria-labelledby="detalleFacturaModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleFacturaModalLabel">Detalles de Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-          <div class="table-responsive">
-            <table class="table table-hover table-bordered align-middle mb-0">
-              <thead style="background-color: #14213d; color: #fff;">
-                <tr>
-                  <th scope="col">ID Factura</th>
-                  <th scope="col">ID Miembro</th>
-                  <th scope="col">ID Admin</th>
-                  <th scope="col">Fecha Emisión</th>
-                  <th scope="col">Total</th>
-                  <th scope="col">Estado Registro</th>
-                  <th scope="col">Fecha Registro</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let factura of facturas" class="align-middle">
-                  <td class="fw-bold text-center">{{ factura.id_factura }}</td>
-                  <td class="text-center">{{ factura.id_miembro }}</td>
-                  <td class="text-center">{{ factura.id_admin }}</td>
-                  <td class="text-center">{{ factura.fecha_emision }}</td>
-                  <td class="text-end">${{ factura.total }}</td>
-                  <td class="text-center">
-                    <span [class]="'badge rounded-pill px-3 ' + (factura.estado_registro ? 'bg-success' : 'bg-danger')">
-                      {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}
-                    </span>
-                  </td>
-                  <td class="text-center">{{ factura.f_registro }}</td>
-                </tr>
-                <tr *ngIf="facturas.length === 0">
-                  <td colspan="7" class="text-center text-muted py-4">
-                    <i class="bi bi-box"></i> No hay facturas registradas.
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>ID Detalle</th>
+              <th>ID Factura</th>
+              <th>Tipo Detalle</th>
+              <th>Referencia ID</th>
+              <th>Descripción</th>
+              <th>Monto</th>
+              <th>IVA</th>
+              <th>Método de Pago</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of detallesFactura">
+              <td>{{ detalle.id_detalle }}</td>
+              <td>{{ detalle.id_factura }}</td>
+              <td>{{ detalle.tipo_detalle }}</td>
+              <td>{{ detalle.referencia_id }}</td>
+              <td>{{ detalle.descripcion }}</td>
+              <td>{{ detalle.monto | currency }}</td>
+              <td>{{ detalle.iva | percent }}</td>
+              <td>{{ detalle.metodo_pago }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
       </div>
     </div>
+  </div>
 </div>
