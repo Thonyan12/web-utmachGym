@@ -1,0 +1,268 @@
+<div class="historial-rutinas-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2><i class="bi bi-lightning me-2"></i>Historial de Rutinas</h2>
+        <p class="text-muted">Revisa todas las rutinas que has tenido asignadas</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat-item">
+          <span class="stat-number text-primary">{{ totalRutinas }}</span>
+          <span class="stat-label">Total Rutinas</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number text-success">{{ rutinasActivas }}</span>
+          <span class="stat-label">Activas</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number text-secondary">{{ rutinasCompletadas }}</span>
+          <span class="stat-label">Completadas</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+    <button type="button" class="btn-close" (click)="error = null"></button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="d-flex justify-content-center align-items-center">
+      <div class="spinner-border text-primary me-3" role="status"></div>
+      <span class="h5">Cargando historial de rutinas...</span>
+    </div>
+  </div>
+
+  <!-- Contenido Principal -->
+  <div *ngIf="!loading && historialRutinas.length > 0">
+    
+    <!-- Filtros y Búsqueda -->
+    <div class="card filtros-card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filtros y Búsqueda</h5>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <!-- Búsqueda por texto -->
+          <div class="col-md-4">
+            <label class="form-label">Buscar rutina:</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-search"></i></span>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="buscarTexto"
+                placeholder="Tipo, descripción..."
+              >
+            </div>
+          </div>
+
+          <!-- Filtro por tipo -->
+          <div class="col-md-2">
+            <label class="form-label">Tipo:</label>
+            <select class="form-select" [(ngModel)]="filtroTipo">
+              <option value="">Todos</option>
+              <option *ngFor="let tipo of tiposRutina" [value]="tipo">{{ tipo }}</option>
+            </select>
+          </div>
+
+          <!-- Filtro por nivel -->
+          <div class="col-md-2">
+            <label class="form-label">Nivel:</label>
+            <select class="form-select" [(ngModel)]="filtroNivel">
+              <option value="">Todos</option>
+              <option *ngFor="let nivel of nivelesRutina" [value]="nivel">{{ nivel }}</option>
+            </select>
+          </div>
+
+          <!-- Filtro por estado -->
+          <div class="col-md-2">
+            <label class="form-label">Estado:</label>
+            <select class="form-select" [(ngModel)]="filtroEstado">
+              <option value="">Todos</option>
+              <option value="activa">Activas</option>
+              <option value="completada">Completadas</option>
+            </select>
+          </div>
+
+          <!-- Botón limpiar -->
+          <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-outline-secondary w-100" (click)="limpiarFiltros()">
+              <i class="bi bi-x-circle me-1"></i>Limpiar
+            </button>
+          </div>
+        </div>
+
+        <!-- Resultados del filtro -->
+        <div class="mt-3">
+          <span class="badge bg-primary">
+            {{ rutinasFiltradas.length }} de {{ historialRutinas.length }} rutinas
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Rutinas -->
+    <div class="rutinas-grid">
+      <div *ngFor="let rutina of rutinasFiltradas; trackBy: trackByRutina" 
+           class="card rutina-card"
+           [class.rutina-activa]="rutina.estado_rutina">
+        
+        <!-- Header de la rutina -->
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center">
+            <i [class]="getTipoIcon(rutina.tipo_rutina)" class="tipo-icon me-2"></i>
+            <div>
+              <h5 class="mb-0">{{ rutina.tipo_rutina }}</h5>
+              <small class="text-muted">ID: {{ rutina.id_rutina }}</small>
+            </div>
+          </div>
+          <div class="badges">
+            <span class="badge me-2" [ngClass]="getNivelBadgeClass(rutina.nivel)">
+              {{ rutina.nivel }}
+            </span>
+            <span class="badge" [ngClass]="getEstadoBadgeClass(rutina.estado_rutina)">
+              {{ getEstadoTexto(rutina.estado_rutina) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Body de la rutina -->
+        <div class="card-body">
+          <div class="row">
+            <!-- Información principal -->
+            <div class="col-md-8">
+              <div class="rutina-info">
+                <h6><i class="bi bi-info-circle me-2"></i>Descripción de la Rutina:</h6>
+                <p class="mb-2">{{ rutina.descripcion_rutina || 'Sin descripción disponible' }}</p>
+                
+                <h6><i class="bi bi-clipboard-data me-2"></i>Asignación:</h6>
+                <p class="mb-3">{{ rutina.descripcion_asignacion || 'Sin observaciones de asignación' }}</p>
+                
+                <div class="row g-2">
+                  <div class="col-6">
+                    <div class="info-box">
+                      <i class="bi bi-clock text-primary"></i>
+                      <span class="ms-2"><strong>Duración:</strong> {{ rutina.duracion_rutina }} min</span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="info-box">
+                      <i class="bi bi-calendar-event text-success"></i>
+                      <span class="ms-2"><strong>Inicio:</strong> {{ formatearFecha(rutina.fecha_inicio) }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6" *ngIf="rutina.fecha_fin">
+                    <div class="info-box">
+                      <i class="bi bi-calendar-check text-warning"></i>
+                      <span class="ms-2"><strong>Fin:</strong> {{ formatearFecha(rutina.fecha_fin) }}</span>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="info-box">
+                      <i class="bi bi-hourglass-split text-info"></i>
+                      <span class="ms-2">
+                        <strong>Días transcurridos:</strong> 
+                        {{ calcularDiasTranscurridos(rutina.fecha_inicio, rutina.fecha_fin) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sidebar con progreso -->
+            <div class="col-md-4">
+              <div class="progreso-sidebar">
+                <h6><i class="bi bi-graph-up me-2"></i>Progreso</h6>
+                
+                <!-- Progreso visual si está disponible -->
+                <div *ngIf="tieneProgreso(rutina)" class="progress-container">
+                  <div class="progress mb-2">
+                    <div class="progress-bar bg-success" 
+                         [style.width.%]="getPorcentajeProgreso(rutina)">
+                    </div>
+                  </div>
+                  <small class="text-muted">
+                    {{ getDiasCompletados(rutina) }}
+                  </small>
+                  <div class="text-center mt-1">
+                    <span class="badge bg-primary">{{ getPorcentajeProgreso(rutina) }}%</span>
+                  </div>
+                </div>
+
+                <!-- Progreso alternativo cuando no hay datos específicos -->
+                <div *ngIf="!tieneProgreso(rutina)" class="progress-alternative">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <small><strong>Progreso por tiempo:</strong><br>
+                    {{ calcularDiasTranscurridos(rutina.fecha_inicio, rutina.fecha_fin) }} días transcurridos</small>
+                  </div>
+                </div>
+
+                <!-- Estado de la rutina -->
+                <div class="estado-rutina mt-3">
+                  <div *ngIf="rutina.estado_rutina" class="alert alert-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Rutina Activa</strong>
+                    <br><small>Continúa con tu entrenamiento</small>
+                  </div>
+                  <div *ngIf="!rutina.estado_rutina" class="alert alert-secondary">
+                    <i class="bi bi-flag-fill me-2"></i>
+                    <strong>Rutina Completada</strong>
+                    <br><small>Has finalizado esta rutina</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer con acciones -->
+        <div class="card-footer bg-transparent">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">
+              Asignación ID: {{ rutina.id_asignacion }}
+            </small>
+            <div class="rutina-actions">
+              <button *ngIf="rutina.estado_rutina" class="btn btn-sm btn-primary">
+                <i class="bi bi-eye me-1"></i>Ver Detalles
+              </button>
+              <button *ngIf="!rutina.estado_rutina" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-archive me-1"></i>Archivada
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estado vacío -->
+  <div *ngIf="!loading && historialRutinas.length === 0" class="empty-state">
+    <div class="text-center py-5">
+      <i class="bi bi-inbox display-1 text-muted"></i>
+      <h3 class="mt-4">No hay rutinas registradas</h3>
+      <p class="text-muted">Aún no tienes rutinas asignadas en tu historial.</p>
+      <button class="btn btn-primary" routerLink="../actual">
+        <i class="bi bi-arrow-left me-2"></i>Volver al Perfil
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado de filtro vacío -->
+  <div *ngIf="!loading && historialRutinas.length > 0 && rutinasFiltradas.length === 0" class="empty-state">
+    <div class="text-center py-5">
+      <i class="bi bi-funnel display-1 text-muted"></i>
+      <h3 class="mt-4">No hay rutinas que coincidan</h3>
+      <p class="text-muted">Intenta ajustar los filtros de búsqueda.</p>
+      <button class="btn btn-outline-primary" (click)="limpiarFiltros()">
+        <i class="bi bi-x-circle me-2"></i>Limpiar Filtros
+      </button>
+    </div>
+  </div>
+</div>

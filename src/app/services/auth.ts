@@ -3,25 +3,23 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 
-export interface LoginResponse {
-  message: string;
-  token: string;
-  user: {
-    id: number;
-    usuario: string;
-    rol: string;
-    nombre_completo: string;
-    email: string;
-  };
-  redirectTo: string;
-}
 export interface User {
   id: number;
+  id_miembro?: number;
+  id_coach?: number;
   usuario: string;
   rol: string;
   nombre_completo: string;
   email: string;
 }
+
+export interface LoginResponse {
+  message: string;
+  token: string;
+  user: User; 
+  redirectTo: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -63,7 +61,6 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('currentUser');
     this.currentUserSubject.next(null);
-   
   }
 
   // Obtener token
