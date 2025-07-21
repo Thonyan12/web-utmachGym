@@ -1,1 +1,58 @@
-<p>registrar-asistencia works!</p>
+<div class="container mt-4">
+  <h2>Registrar Asistencia</h2>
+  <form (ngSubmit)="registrarAsistencia()" #asistenciaForm="ngForm" class="mb-3">
+    <div class="mb-3">
+      <label for="busqueda" class="form-label">Buscar Miembro</label>
+      <input
+        type="text"
+        id="busqueda"
+        class="form-control"
+        [(ngModel)]="busqueda"
+        (input)="filtrarMiembros()"
+        placeholder="Buscar por nombre o cédula"
+        autocomplete="off"
+        required
+        name="busqueda"
+      >
+      <ul *ngIf="miembrosFiltrados.length && busqueda" class="list-group position-absolute w-50 zindex-dropdown">
+        <li
+          class="list-group-item list-group-item-action"
+          style="cursor:pointer"
+          *ngFor="let m of miembrosFiltrados"
+          (click)="seleccionarMiembro(m)"
+        >
+          {{ m.nombre }} - {{ m.cedula }}
+        </li>
+      </ul>
+    </div>
+    <div class="mb-3">
+      <label for="idMiembro" class="form-label">ID Seleccionado</label>
+      <input
+        type="text"
+        id="idMiembro"
+        class="form-control"
+        [value]="idMiembro"
+        readonly
+        tabindex="-1"
+      >
+      <input
+        type="hidden"
+        [(ngModel)]="idMiembro"
+        name="idMiembro"
+        required
+      >
+    </div>
+    <div class="mb-3">
+      <label for="horario" class="form-label">Horario</label>
+      <input type="text" id="horario" class="form-control" [(ngModel)]="horario" name="horario" required>
+    </div>
+    <div class="mb-3">
+      <label for="fecha" class="form-label">Fecha de Asistencia</label>
+      <input type="date" id="fecha" class="form-control" [(ngModel)]="fecha_asistencia" name="fecha_asistencia" required>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="asistenciaForm.invalid">Registrar</button>
+  </form>
+  <div *ngIf="mensaje" class="alert alert-info mt-3">
+    {{ mensaje }}
+  </div>
+</div>

@@ -10,16 +10,16 @@ export const authGuard: CanActivateFn = (route, state) => {
   if (authService.isAuthenticated()) {
     const user = authService.getCurrentUser();
     
-    // ✅ Solo admin y entrenador pueden acceder al área admin
+    // Solo admin y entrenador pueden acceder al área admin
     if (user && (user.rol === 'admin' || user.rol === 'entrenador')) {
       return true;
     } else {
-      // ❌ Si es miembro o rol no válido, solo redirigir (SIN logout)
+      // Si es miembro o rol no válido, solo redirigir (SIN logout)
       router.navigate(['/staff-login']);
       return false;
     }
   } else {
-    // ❌ No autenticado
+    // No autenticado
     router.navigate(['/staff-login']);
     return false;
   }

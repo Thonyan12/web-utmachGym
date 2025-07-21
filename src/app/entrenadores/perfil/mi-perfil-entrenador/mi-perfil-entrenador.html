@@ -1,1 +1,21 @@
-<p>mi-perfil-entrenador works!</p>
+<div class="container mt-4">
+  <h2>Mi Perfil</h2>
+  <div *ngIf="entrenador; else cargando">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">{{ entrenador.nombre }} {{ entrenador.apellido }}</h4>
+        <p class="card-text"><strong>Especialidad:</strong> {{ entrenador.especialidad }}</p>
+        <p class="card-text"><strong>Teléfono:</strong> {{ entrenador.telefono }}</p>
+        <p class="card-text"><strong>Fecha de Registro:</strong> {{ entrenador.fecha_registro | date:'yyyy-MM-dd' }}</p>
+        <p class="card-text"><strong>Estado:</strong>
+          <span [ngClass]="entrenador.estado ? 'text-success' : 'text-danger'">
+            {{ entrenador.estado ? 'Activo' : 'Inactivo' }}
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <ng-template #cargando>
+    <div class="alert alert-info mt-3">Cargando datos del perfil...</div>
+  </ng-template>
+</div>

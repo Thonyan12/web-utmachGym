@@ -1,0 +1,29 @@
+<div class="container mt-4">
+    <h2>Asignar Miembros</h2>
+    <form (ngSubmit)="asignarSeleccionados()">
+      <table class="table table-bordered table-striped mt-3">
+        <thead>
+          <tr>
+            <th></th>
+            <th>Nombre</th>
+            <th>Cédula</th>
+            <th>Correo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let miembro of miembrosDisponibles">
+            <td>
+              <input type="checkbox" [(ngModel)]="miembro.seleccionado" name="seleccionado_{{miembro.id_miembro}}">
+            </td>
+            <td>{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
+            <td>{{ miembro.cedula }}</td>
+            <td>{{ miembro.correo }}</td>
+          </tr>
+          <tr *ngIf="miembrosDisponibles.length === 0">
+            <td colspan="4" class="text-center">No hay miembros disponibles para asignar.</td>
+          </tr>
+        </tbody>
+      </table>
+      <button class="btn btn-success" type="submit">Asignar seleccionados</button>
+    </form>
+  </div>

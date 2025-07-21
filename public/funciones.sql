@@ -1,87 +1,4 @@
--- ============================================
--- FUNCIÓN: Asignar rutina automáticamente según características físicas
--- ============================================
-CREATE OR REPLACE FUNCTION asignar_rutina_automatica(
-    p_id_miembro INT,
-    p_edad INT,
-    p_peso NUMERIC,
-    p_altura NUMERIC,
-    p_contextura VARCHAR,
-    p_sexo VARCHAR,
-    p_objetivo TEXT
-) RETURNS VOID AS $$
-DECLARE
-    v_id_rutina INT;
-    v_imc NUMERIC;
-BEGIN
-    -- Calcular IMC para mejor asignación
-    v_imc := p_peso / ((p_altura / 100.0) * (p_altura / 100.0));
-    
-    -- Lógica de asignación según características físicas
-    IF p_contextura = 'Ectomorfo' AND v_imc < 18.5 THEN
-        -- Persona delgada, necesita ganar masa muscular
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE nivel = 'Principiante' AND tipo_rut = 'Full Body' 
-        LIMIT 1;
-        
-    ELSIF p_contextura = 'Endomorfo' OR v_imc > 25 THEN
-        -- Persona con tendencia a ganar peso, necesita cardio
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE tipo_rut = 'Cardio y Resistencia' 
-        LIMIT 1;
-        
-    ELSIF p_contextura = 'Mesomorfo' AND p_edad BETWEEN 25 AND 40 THEN
-        -- Contextura atlética, rutina de fuerza
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE nivel = 'Intermedio' AND tipo_rut = 'Fuerza' 
-        LIMIT 1;
-        
-    ELSIF p_edad > 40 THEN
-        -- Personas mayores, rutina funcional
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE tipo_rut = 'Funcional' 
-        LIMIT 1;
-        
-    ELSIF p_edad < 25 AND p_contextura = 'Mesomorfo' THEN
-        -- Jóvenes atléticos, rutina de hipertrofia
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE nivel = 'Avanzado' AND tipo_rut = 'Hipertrofia' 
-        LIMIT 1;
-        
-    ELSE
-        -- Por defecto: rutina básica para principiantes
-        SELECT id_rutina INTO v_id_rutina 
-        FROM Rutina 
-        WHERE nivel = 'Principiante' AND tipo_rut = 'Full Body' 
-        LIMIT 1;
-    END IF;
-    
-    -- Verificar que se encontró una rutina
-    IF v_id_rutina IS NOT NULL THEN
-        -- Insertar asignación de rutina
-        INSERT INTO Asignacion_rutina (
-            id_miembro, 
-            id_rutina, 
-            descripcion_rut, 
-            fecha_inicio
-        ) VALUES (
-            p_id_miembro,
-            v_id_rutina,
-            'Rutina asignada automáticamente: ' || p_contextura || ' - IMC: ' || ROUND(v_imc, 2) || ' - Objetivo: ' || p_objetivo,
-            CURRENT_DATE
-        );
-        
-        RAISE NOTICE 'Rutina % asignada automáticamente al miembro % (IMC: %)', v_id_rutina, p_id_miembro, ROUND(v_imc, 2);
-    ELSE
-        RAISE WARNING 'No se encontró rutina disponible para asignar';
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
+
 
 -- ============================================
 -- FUNCIÓN: Notificar nuevo miembro registrado a todos los admins
@@ -501,30 +418,36 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 -- FUNCIÓN: Obtener historial completo de rutinas de un miembro
 -- ============================================
+DROP FUNCTION IF EXISTS obtener_historial_rutinas_miembro(integer);
+
 CREATE OR REPLACE FUNCTION obtener_historial_rutinas_miembro(p_id_miembro INT)
 RETURNS TABLE(
     id_asignacion INT,
+    id_rutina INT,
     rutina_nombre VARCHAR,
     rutina_tipo VARCHAR,
     rutina_nivel VARCHAR,
+    descripcion_rutina VARCHAR,
+    duracion_rutina VARCHAR,
     descripcion_asignacion VARCHAR,
     fecha_inicio DATE,
     fecha_registro DATE,
-    estado_rutina BOOLEAN,
-    duracion_semanas VARCHAR
+    estado_rutina BOOLEAN
 ) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
         ar.id_asignacion,
-        (r.nivel || ' - ' || r.tipo_rut)::varchar as rutina_nombre, -- <-- CAST
-        r.tipo_rut::varchar as rutina_tipo,                         -- <-- CAST
-        r.nivel::varchar as rutina_nivel,                           -- <-- CAST
-        ar.descripcion_rut::varchar as descripcion_asignacion,      -- <-- CAST
+        r.id_rutina,
+        (r.nivel || ' - ' || r.tipo_rut)::varchar as rutina_nombre,
+        r.tipo_rut::varchar as rutina_tipo,
+        r.nivel::varchar as rutina_nivel,
+        r.descripcion_rut::varchar as descripcion_rutina,
+        r.duracion_rut::varchar as duracion_rutina,
+        ar.descripcion_rut::varchar as descripcion_asignacion,
         ar.fecha_inicio,
         ar.f_registro as fecha_registro,
-        ar.estado as estado_rutina,
-        r.duracion_rut::varchar as duracion_semanas                 -- <-- CAST
+        ar.estado as estado_rutina
     FROM Asignacion_rutina ar
     INNER JOIN Rutina r ON ar.id_rutina = r.id_rutina
     WHERE ar.id_miembro = p_id_miembro
@@ -967,49 +890,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION generar_factura_desde_mensualidad()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_id_factura INT;
-    v_total_factura NUMERIC;
-    v_iva_calculado NUMERIC;
-BEGIN
-    -- Calcular el IVA y el total de la factura
-    v_iva_calculado := NEW.monto * 0.15;
-    v_total_factura := NEW.monto + v_iva_calculado;
-
-    -- Insertar en la tabla 'factura'
-    INSERT INTO factura (id_miembro, id_admin, fecha_emision, total, estado_registro, f_registro)
-    VALUES (
-        NEW.id_miembro,
-        1, -- ID de administrador por defecto
-        NEW.fecha_inicio,
-        v_total_factura,
-        TRUE,
-        CURRENT_DATE
-    )
-    RETURNING id_factura INTO v_id_factura;
-
-    -- Insertar en la tabla 'detalle_factura'
-    INSERT INTO detalle_factura (
-        id_factura, tipo_detalle, referencia_id, descripcion, monto, iva,
-        metodo_pago, estado_registro, f_registro
-    )
-    VALUES (
-        v_id_factura,
-        'pago mensual',
-        NEW.id_mensualidad,
-        'Pago de Mensualidad del ' || TO_CHAR(NEW.fecha_inicio, 'YYYY-MM-DD') || ' al ' || TO_CHAR(NEW.fecha_fin, 'YYYY-MM-DD'),
-        NEW.monto,
-        0.15,
-        'Pendiente',
-        TRUE,
-        CURRENT_DATE
-    );
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 -- Función para desactivar miembro al eliminar mensualidad
 CREATE OR REPLACE FUNCTION desactivar_miembro_al_eliminar_mensualidad()
 RETURNS TRIGGER AS $$
@@ -1067,3 +947,215 @@ CREATE TRIGGER trigger_nuevo_perfil_fisico
 AFTER INSERT ON Perfil_fisico
 FOR EACH ROW
 EXECUTE FUNCTION trigger_asignar_rutina_por_nuevo_perfil();
+
+
+-- Función para notificar al miembro cuando se le asigna un entrenador
+CREATE OR REPLACE FUNCTION trg_notificar_asignacion_entrenador()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_user_id INT;
+  v_entrenador_nombre VARCHAR;
+BEGIN
+  -- Buscar el usuario asociado al miembro
+  SELECT id_usuario INTO v_user_id
+  FROM Usuario
+  WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
+
+  -- Obtener nombre del entrenador
+  SELECT nombre || ' ' || apellido INTO v_entrenador_nombre
+  FROM Entrenador
+  WHERE id_entrenador = NEW.id_entrenador;
+
+  -- Si existe usuario, insertar notificación
+  IF v_user_id IS NOT NULL THEN
+    INSERT INTO Notificacion (
+      id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido, estado, f_registro
+    ) VALUES (
+      v_user_id, NULL, 'asignacion_entrenador',
+      'Se te ha asignado el entrenador: ' || v_entrenador_nombre,
+      CURRENT_DATE, FALSE, TRUE, CURRENT_DATE
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para llamar a la función después de asignar un entrenador
+DROP TRIGGER IF EXISTS trigger_notificar_asignacion_entrenador ON Asignacion_entrenador;
+CREATE TRIGGER trigger_notificar_asignacion_entrenador
+AFTER INSERT ON Asignacion_entrenador
+FOR EACH ROW
+EXECUTE FUNCTION trg_notificar_asignacion_entrenador();
+
+CREATE OR REPLACE FUNCTION notificar_asistencia_clase()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_id_usuario INT;
+  v_nombre_clase VARCHAR;
+BEGIN
+  -- Buscar el id_usuario del miembro
+  SELECT id_usuario INTO v_id_usuario
+  FROM Usuario
+  WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
+
+  -- Puedes personalizar el mensaje y obtener más datos si lo deseas
+  IF v_id_usuario IS NOT NULL THEN
+    INSERT INTO Notificacion (
+      id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
+    ) VALUES (
+      v_id_usuario,
+      'asistencia_clase',
+      '¡Asistencia registrada! Has asistido a tu clase el ' || TO_CHAR(NEW.fecha_asistencia, 'YYYY-MM-DD') || '.',
+      CURRENT_DATE,
+      FALSE,
+      TRUE,
+      CURRENT_DATE
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_notificar_asistencia_clase ON Registro_de_clases;
+CREATE TRIGGER trigger_notificar_asistencia_clase
+AFTER INSERT ON Registro_de_clases
+FOR EACH ROW
+EXECUTE FUNCTION notificar_asistencia_clase();
+
+CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entrenador_id INT;
+BEGIN
+  -- Selecciona un entrenador aleatorio activo
+  SELECT id_entrenador INTO v_entrenador_id
+  FROM Entrenador
+  WHERE estado = TRUE
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+  -- Si hay entrenador disponible, crea la asignación
+  IF v_entrenador_id IS NOT NULL THEN
+    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
+    VALUES (NEW.id_miembro, v_entrenador_id);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
+CREATE TRIGGER trigger_asignar_entrenador_aleatorio
+AFTER INSERT ON Miembro
+FOR EACH ROW
+EXECUTE FUNCTION asignar_entrenador_aleatorio();
+
+
+
+
+CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entrenador_id INT;
+  v_entrenador_nombre TEXT;
+  v_usuario_id INT;
+BEGIN
+  -- Selecciona un entrenador aleatorio activo
+  SELECT id_entrenador, nombre INTO v_entrenador_id, v_entrenador_nombre
+  FROM Entrenador
+  WHERE estado = TRUE
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+  -- Si hay entrenador disponible, crea la asignación
+  IF v_entrenador_id IS NOT NULL THEN
+    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
+    VALUES (NEW.id_miembro, v_entrenador_id);
+
+    -- Busca el usuario asociado al miembro
+    SELECT id_usuario INTO v_usuario_id
+    FROM Usuario
+    WHERE id_miembro = NEW.id_miembro;
+
+    -- Notifica al miembro quién es su entrenador
+    IF v_usuario_id IS NOT NULL THEN
+      INSERT INTO Notificacion (
+        id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
+      ) VALUES (
+        v_usuario_id,
+        'asignacion_entrenador',
+        '¡Bienvenido! Tu entrenador asignado es: ' || v_entrenador_nombre || '.',
+        CURRENT_DATE,
+        FALSE,
+        TRUE,
+        CURRENT_DATE
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
+CREATE TRIGGER trigger_asignar_entrenador_aleatorio
+AFTER INSERT ON Miembro
+FOR EACH ROW
+EXECUTE FUNCTION asignar_entrenador_aleatorio();
+
+
+
+-- Elimina todas las versiones anteriores de la función y el trigger antes de crear la nueva versión
+DROP FUNCTION IF EXISTS asignar_entrenador_aleatorio() CASCADE;
+DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
+
+CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entrenador_id INT;
+  v_entrenador_nombre TEXT;
+  v_entrenador_apellido TEXT;
+  v_usuario_id INT;
+BEGIN
+  -- Selecciona un entrenador aleatorio activo
+  SELECT id_entrenador, nombre, apellido INTO v_entrenador_id, v_entrenador_nombre, v_entrenador_apellido
+  FROM Entrenador
+  WHERE estado = TRUE
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+  -- Si hay entrenador disponible, crea la asignación
+  IF v_entrenador_id IS NOT NULL THEN
+    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
+    VALUES (NEW.id_miembro, v_entrenador_id);
+
+    -- Busca el usuario asociado al miembro
+    SELECT id_usuario INTO v_usuario_id
+    FROM Usuario
+    WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
+
+    -- Notifica al miembro quién es su entrenador
+    IF v_usuario_id IS NOT NULL THEN
+      INSERT INTO Notificacion (
+        id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
+      ) VALUES (
+        v_usuario_id,
+        'asignacion_entrenador',
+        '¡Bienvenido! Tu entrenador asignado es: ' || v_entrenador_nombre || ' ' || v_entrenador_apellido || '.',
+        CURRENT_DATE,
+        FALSE,
+        TRUE,
+        CURRENT_DATE
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_asignar_entrenador_aleatorio
+AFTER INSERT ON Miembro
+FOR EACH ROW
+EXECUTE FUNCTION asignar_entrenador_aleatorio();
