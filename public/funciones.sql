@@ -938,7 +938,7 @@ BEGIN
     INSERT INTO factura (id_miembro, id_admin, fecha_emision, total, estado_registro, f_registro)
     VALUES (
         NEW.id_miembro,
-        1, -- *IMPORTANTE: Define el id_admin por defecto o de proceso automático*
+        1, -- ID de administrador por defecto
         NEW.fecha_inicio,
         v_total_factura,
         TRUE,
@@ -947,10 +947,13 @@ BEGIN
     RETURNING id_factura INTO v_id_factura;
 
     -- Insertar en la tabla 'detalle_factura'
-    INSERT INTO detalle_factura (id_factura, tipo_detalle, referencia_id, descripcion, monto, iva, metodo_pago, estado_registro, f_registro)
+    INSERT INTO detalle_factura (
+        id_factura, tipo_detalle, referencia_id, descripcion, monto, iva,
+        metodo_pago, estado_registro, f_registro
+    )
     VALUES (
         v_id_factura,
-        'pago mensual', -- ¡CAMBIO AQUÍ! Usando el valor permitido por tu restricción
+        'pago mensual',
         NEW.id_mensualidad,
         'Pago de Mensualidad del ' || TO_CHAR(NEW.fecha_inicio, 'YYYY-MM-DD') || ' al ' || TO_CHAR(NEW.fecha_fin, 'YYYY-MM-DD'),
         NEW.monto,
@@ -962,7 +965,7 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION generar_factura_desde_mensualidad()
 RETURNS TRIGGER AS $$
@@ -1007,3 +1010,20 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+-- Función para desactivar miembro al eliminar mensualidad
+CREATE OR REPLACE FUNCTION desactivar_miembro_al_eliminar_mensualidad()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Miembro
+    SET estado = FALSE
+    WHERE id_miembro = OLD.id_miembro;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para llamar a la función después de eliminar una mensualidad
+DROP TRIGGER IF EXISTS trg_desactivar_miembro_delete_mensualidad ON Mensualidad;
+CREATE TRIGGER trg_desactivar_miembro_delete_mensualidad
+AFTER DELETE ON Mensualidad
+FOR EACH ROW
+EXECUTE FUNCTION desactivar_miembro_al_eliminar_mensualidad();
