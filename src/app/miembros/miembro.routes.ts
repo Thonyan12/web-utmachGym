@@ -7,6 +7,7 @@ import { CarritoComponent } from './tienda/carrito/carrito';
 import { Pagos } from './pagos/pagos';
 import { NutricionComponent } from './nutricion/nutricion';
 import { EntrenamientoComponent } from './entrenamiento/entrenamiento';
+import { Notifiacion } from './notifiacion/notifiacion';
 
 export const miembrosRoutes: Routes = [
   {
@@ -16,12 +17,13 @@ export const miembrosRoutes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: MiembrosDashboard },
-      {path: 'entrenamiento', component:EntrenamientoComponent},
+      { path: 'entrenamiento', component: EntrenamientoComponent },
       { path: 'nutricion', component: NutricionComponent },
       { path: 'tienda', component: ProductoListComponent },
       { path: 'cart', component: CarritoComponent },
-      { path: 'pagos', component: Pagos},
-       {
+      { path: 'pagos', component: Pagos },
+      { path: 'notificaciones', component: Notifiacion },
+      {
         path: 'perfil',
         loadChildren: () => import('./mi-perfil/perfil.routes').then(m => m.miPerfilRoutes)
       }

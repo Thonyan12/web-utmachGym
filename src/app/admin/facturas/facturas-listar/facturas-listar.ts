@@ -1,36 +1,55 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { FacturasSidebar } from '../facturas-sidebar/facturas-sidebar';
 import { Factura, FacturasService } from '../services/facturas';
-import { CommonModule } from '@angular/common';
+import { DetalleFactura, DetalleFacturaService } from '../../detallefactura/services/detallefactura';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { RouterModule } from '@angular/router';
+import { FacturasSidebar } from '../facturas-sidebar/facturas-sidebar';
+declare const bootstrap: any;
 @Component({
   selector: 'app-facturas-listar',
-  imports: [FacturasSidebar, CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule, CurrencyPipe, FacturasSidebar],
   templateUrl: './facturas-listar.html',
   styleUrls: ['./facturas-listar.css']
 })
 export class FacturasListarComponent implements OnInit {
-  private service = inject(FacturasService);
+  private facturasService = inject(FacturasService);
+  private detalleFacturaService = inject(DetalleFacturaService);
   facturas: Factura[] = [];
-  searchText: string = '';
+  detallesFactura: DetalleFactura[] = [];
 
-  constructor(private facturasService: FacturasService) { }
+  constructor() {}
 
   ngOnInit(): void {
-    this.facturasService.getFacturas().subscribe(data => {
-      this.facturas = data;
+    this.cargarFacturas();
+  }
+
+  cargarFacturas(): void {
+    this.facturasService.getFacturas().subscribe({
+      next: (facturas) => {
+        this.facturas = facturas; // Asigna directamente el resultado al array
+      },
+      error: (error) => {
+        console.error('Error al cargar las facturas:', error);
+      },
     });
   }
 
-  cambiarEstado(factura: any, nuevoEstado: boolean) {
-    const facturaActualizada = { ...factura, estado_registro: nuevoEstado };
-    this.service.updateFactura(facturaActualizada).subscribe({
-      next: () => {
-        factura.estado_registro = nuevoEstado;
+  
+
+  abrirModal(idFactura: number): void {
+    const modalElement = document.getElementById('detalleFacturaModal');
+    if (modalElement) {
+      const modal = new bootstrap.Modal(modalElement);
+      modal.show();
+    }
+
+    this.detalleFacturaService.getDetallesFacturaByFacturaId(idFactura).subscribe({
+      next: (detalles) => {
+        this.detallesFactura = detalles;
       },
-      error: () => {
-        alert('Error al actualizar el estado');
+      error: (error) => {
+        console.error('Error al cargar detalles de factura:', error);
       }
     });
   }

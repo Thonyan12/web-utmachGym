@@ -132,7 +132,7 @@ VALUES
 -- ===============================
 INSERT INTO Usuario (usuario, contrasenia, rol, id_miembro, id_coach)
 VALUES
-('admin', 'Admin123', 'admin', NULL, NULL),
+('admin', 'Admin123', 'admin', NULL, NULL);
 
 INSERT INTO Perfil_fisico (id_miembro, altura, peso, observaciones)
 VALUES

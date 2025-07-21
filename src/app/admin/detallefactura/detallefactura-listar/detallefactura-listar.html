@@ -1,0 +1,46 @@
+<div class="d-flex" style="min-height: 100vh;">
+    <!-- Sidebar reutilizable -->
+    <app-detallefactura-sidebar></app-detallefactura-sidebar>
+  
+    <!-- Contenido principal -->
+    <div class="flex-grow-1 p-4 bg-light">
+      <div class="container mt-4">
+        <h3 class="fw-bold mb-4" style="color: #14213d;">
+          <i class="bi bi-file-earmark-text me-2"></i> Detalles de Factura
+        </h3>
+  
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle mb-0">
+                  <thead style="background-color: #14213d; color: #fff;">
+                    <tr>
+                      <th scope="col">ID Detalle</th>
+                      <th scope="col">ID Factura</th>
+                      <th scope="col">Tipo Detalle</th>
+                      <th scope="col">Referencia ID</th>
+                      <th scope="col">Descripción</th>
+                      <th scope="col">Monto</th>
+                      <th scope="col">IVA</th>
+                      <th scope="col">Método de Pago</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let detalle of detallesFactura" class="align-middle">
+                      <td class="text-center">{{ detalle.id_detalle }}</td>
+                      <td class="text-center">{{ detalle.id_factura }}</td>
+                      <td class="text-center">{{ detalle.tipo_detalle }}</td>
+                      <td class="text-center">{{ detalle.referencia_id }}</td>
+                      <td>{{ detalle.descripcion }}</td>
+                      <td class="text-center">{{ detalle.monto | currency }}</td>
+                      <td class="text-center">{{ detalle.iva | percent }}</td>
+                      <td class="text-center">{{ detalle.metodo_pago }}</td>
+                    </tr>
+                    <tr *ngIf="detallesFactura.length === 0">
+                      <td colspan="8" class="text-center text-muted py-4">
+                        <i class="bi bi-info-circle"></i> No hay detalles de factura registrados.
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>

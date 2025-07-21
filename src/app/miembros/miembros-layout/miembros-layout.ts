@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'; // ✅ Añadir OnDestroy
+import { Component, OnInit, OnDestroy } from '@angular/core'; 
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, User } from '../../services/auth';
 import { CarritoService } from '../tienda/services/carrito';
+import { NotificacionesMiembroService } from '../services/notificaciones-miembro'; // 👈 Agrega esto
 
 @Component({
   selector: 'app-miembros-layout',
@@ -11,18 +12,20 @@ import { CarritoService } from '../tienda/services/carrito';
   templateUrl: './miembros-layout.html',
   styleUrls: ['./miembros-layout.css']
 })
-export class MiembrosLayout implements OnInit, OnDestroy { // ✅ Añadir OnDestroy
+export class MiembrosLayout implements OnInit, OnDestroy { 
   currentUser: User | null = null;
   cartCount = 0;
   mostrarDialogoSalir = false;
   menuCollapsed = false;
+  notificacionesNoLeidas = 0; 
   
   private notificationListener: any;
 
   constructor(
     private router: Router,
     private authService: AuthService,
-    private carritoService: CarritoService  
+    private carritoService: CarritoService,
+    private notiService: NotificacionesMiembroService 
   ) {}
 
   ngOnInit() {
@@ -30,13 +33,12 @@ export class MiembrosLayout implements OnInit, OnDestroy { // ✅ Añadir OnDest
       this.currentUser = user;
     });
     
-    
     this.loadCartCount();
-    
+    this.loadNotificacionesNoLeidas(); 
     
     this.notificationListener = () => {
-      console.log('🔔 Recibido evento - actualizando carrito y notificaciones');
       this.loadCartCount(); 
+      this.loadNotificacionesNoLeidas(); 
     };
     
     window.addEventListener('notificationsUpdated', this.notificationListener);
@@ -59,6 +61,17 @@ export class MiembrosLayout implements OnInit, OnDestroy { // ✅ Añadir OnDest
       error: err => {
         console.error('Error loading cart:', err);
         this.cartCount = 0;
+      }
+    });
+  }
+
+  private loadNotificacionesNoLeidas() {
+    this.notiService.getMisNotificaciones().subscribe({
+      next: res => {
+        this.notificacionesNoLeidas = res.data.filter(n => !n.leido).length;
+      },
+      error: () => {
+        this.notificacionesNoLeidas = 0;
       }
     });
   }

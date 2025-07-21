@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { NotificacionesSidebarComponent } from '../notificaciones-sidebar/notificaciones-sidebar';
 import { Notificacion, NotificacionesService } from '../services/notificaciones';
 import { CommonModule } from '@angular/common';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-notificaciones-listar',
     standalone: true,
-    imports: [NotificacionesSidebarComponent, CommonModule, FormsModule],
+    imports: [NotificacionesSidebarComponent, CommonModule, FormsModule, RouterModule],
     templateUrl: './notificaciones-listar.html',
     styleUrl: './notificaciones-listar.css'
 })

@@ -46,21 +46,16 @@ export class FacturasEliminar {
   }
 
   eliminar(): void {
-    if (!this.factura) {
-      this.mensaje = 'Primero busque una factura válida para eliminar.';
-      return;
-    }
     this.service.deleteFactura(this.idFactura).subscribe({
       next: () => {
         this.mensaje = 'Factura eliminada correctamente.';
         this.factura = null;
         this.idFactura = 0;
-        this.mostrarConfirmacion = false;
       },
-      error: () => {
+      error: (error) => {
+        console.error('Error al eliminar la factura:', error);
         this.mensaje = 'Error al eliminar la factura.';
-        this.mostrarConfirmacion = false;
-      }
+      },
     });
   }
 }
