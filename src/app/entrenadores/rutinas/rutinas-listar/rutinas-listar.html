@@ -1,1 +1,32 @@
-<p>rutinas-listar works!</p>
+<div class="container mt-4">
+  <h2>Rutinas Disponibles</h2>
+  <table class="table table-bordered table-striped mt-3">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nivel</th>
+        <th>Tipo</th>
+        <th>Descripción</th>
+        <th>Duración</th>
+        <th>Estado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let rutina of rutinas; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ rutina.nivel }}</td>
+        <td>{{ rutina.tipo_rut }}</td>
+        <td>{{ rutina.descripcion_rut }}</td>
+        <td>{{ rutina.duracion_rut }}</td>
+        <td>
+          <span [ngClass]="rutina.estado ? 'text-success' : 'text-danger'">
+            {{ rutina.estado ? 'Activa' : 'Inactiva' }}
+          </span>
+        </td>
+      </tr>
+      <tr *ngIf="rutinas.length === 0">
+        <td colspan="6" class="text-center">No hay rutinas registradas.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

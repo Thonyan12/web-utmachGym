@@ -1,1 +1,30 @@
-<p>mis-notificaciones works!</p>
+<div class="container mt-4">
+  <h2>Mis Notificaciones</h2>
+  <table class="table table-bordered table-striped mt-3">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Tipo</th>
+        <th>Contenido</th>
+        <th>Fecha</th>
+        <th>Leído</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let noti of notificaciones; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ noti.tipo }}</td>
+        <td>{{ noti.contenido }}</td>
+        <td>{{ noti.fecha_envio | date:'yyyy-MM-dd' }}</td>
+        <td>
+          <span [ngClass]="noti.leido ? 'text-success' : 'text-danger'">
+            {{ noti.leido ? 'Sí' : 'No' }}
+          </span>
+        </td>
+      </tr>
+      <tr *ngIf="notificaciones.length === 0">
+        <td colspan="5" class="text-center">No tienes notificaciones.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

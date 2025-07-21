@@ -1,1 +1,30 @@
-<p>historial-asistencia works!</p>
+<div class="container mt-4">
+    <h2>Historial de Asistencia</h2>
+    <table class="table table-bordered table-striped mt-3">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Miembro</th>
+                <th>Horario</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let asistencia of asistencias; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>{{ asistencia.nombre }} {{ asistencia.apellido1 }} {{ asistencia.apellido2 }}</td>
+                <td>{{ asistencia.horario }}</td>
+                <td>{{ asistencia.fecha_asistencia | date:'yyyy-MM-dd' }}</td>
+                <td>
+                    <span [ngClass]="asistencia.estado ? 'text-success' : 'text-danger'">
+                        {{ asistencia.estado ? 'Presente' : 'Ausente' }}
+                    </span>
+                </td>
+            </tr>
+            <tr *ngIf="asistencias.length === 0">
+                <td colspan="5" class="text-center">No hay registros de asistencia.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
