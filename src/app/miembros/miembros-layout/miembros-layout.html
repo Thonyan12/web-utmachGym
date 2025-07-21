@@ -82,11 +82,18 @@
       <!-- Usuario y acciones -->
       <div class="d-flex align-items-center">
         <!-- Notificaciones -->
-        <button class="btn btn-sm btn-outline-warning me-2 position-relative">
-          <i class="bi bi-bell"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            3
-            <span class="visually-hidden">notificaciones</span>
+        <span class="me-2 fs-5" title="Notificaciones">🔔</span>
+        <button class="btn position-relative p-0 border-0 bg-transparent notification-bell me-3"
+                [routerLink]="'/miembros/notificaciones'"
+                aria-label="Ver notificaciones">
+          <i class="bi bi-bell-fill"
+             [ngClass]="{'text-warning': notificacionesNoLeidas > 0, 'text-secondary': notificacionesNoLeidas === 0}"
+             style="font-size: 1.7rem;"></i>
+          <span *ngIf="notificacionesNoLeidas > 0"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm animate__animated animate__bounceIn"
+                style="font-size: 0.75rem; min-width: 1.5em;">
+            {{ notificacionesNoLeidas }}
+            <span class="visually-hidden">notificaciones no leídas</span>
           </span>
         </button>
 
