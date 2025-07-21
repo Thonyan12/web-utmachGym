@@ -1,21 +1,27 @@
-<div class="container mt-4">
-  <h2>Enviar Notificación</h2>
-  <form (ngSubmit)="enviarNotificacion()" #notiForm="ngForm" class="mb-3">
+<div class="container py-4">
+  <h3 class="mb-4 d-flex align-items-center" style="color:#14213d;">
+    <i class="bi bi-send-fill me-2" style="color:#fca311;"></i> Enviar Notificación
+  </h3>
+
+  <form (ngSubmit)="enviarNotificacion()" #form="ngForm" class="mb-3">
     <div class="mb-3">
-      <label for="receptor" class="form-label">ID Usuario Receptor</label>
-      <input type="number" id="receptor" class="form-control" [(ngModel)]="id_usuario" name="id_usuario" required>
+      <label for="id_usuario" class="form-label">ID Usuario destinatario</label>
+      <input type="number" class="form-control" id="id_usuario" [(ngModel)]="id_usuario" name="id_usuario" required>
     </div>
     <div class="mb-3">
       <label for="tipo" class="form-label">Tipo</label>
-      <input type="text" id="tipo" class="form-control" [(ngModel)]="tipo" name="tipo" required>
+      <input type="text" class="form-control" id="tipo" [(ngModel)]="tipo" name="tipo" required>
     </div>
     <div class="mb-3">
       <label for="contenido" class="form-label">Contenido</label>
-      <textarea id="contenido" class="form-control" [(ngModel)]="contenido" name="contenido" rows="3" required></textarea>
+      <textarea class="form-control" id="contenido" [(ngModel)]="contenido" name="contenido" rows="3" required></textarea>
     </div>
-    <button type="submit" class="btn btn-primary" [disabled]="notiForm.invalid">Enviar</button>
+    <button type="submit" class="btn btn-warning px-4" [disabled]="form.invalid">
+      <i class="bi bi-send"></i> Enviar
+    </button>
   </form>
-  <div *ngIf="mensaje" class="alert alert-info mt-3">
+
+  <div *ngIf="mensaje" class="alert" [ngClass]="mensaje.includes('correctamente') ? 'alert-success' : 'alert-danger'">
     {{ mensaje }}
   </div>
 </div>

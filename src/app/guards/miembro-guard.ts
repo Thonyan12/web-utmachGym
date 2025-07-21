@@ -10,11 +10,11 @@ export const miembroGuard: CanActivateFn = (route, state) => {
   if (authService.isAuthenticated()) {
     const user = authService.getCurrentUser();
     
-    // ✅ Solo miembros pueden acceder al área de miembros
+    //  Solo miembros pueden acceder al área de miembros
     if (user && user.rol === 'miembro') {
       return true;
     } else {
-      // ❌ Si no es miembro, redirigir según su rol
+      // Si no es miembro, redirigir según su rol
       if (user?.rol === 'admin' || user?.rol === 'entrenador') {
         router.navigate(['/admin/dashboard']);
       } else {
@@ -23,7 +23,7 @@ export const miembroGuard: CanActivateFn = (route, state) => {
       return false;
     }
   } else {
-    // ❌ No autenticado
+    //  No autenticado
     router.navigate(['/login']);
     return false;
   }

@@ -1,5 +1,22 @@
 import { CanActivateFn } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../services/auth';
 
 export const entrenadorGuard: CanActivateFn = (route, state) => {
-  return true;
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isAuthenticated()) {
+    const user = authService.getCurrentUser();
+    if (user && user.rol === 'entrenador') {
+      return true;
+    } else {
+      router.navigate(['/staff-login']);
+      return false;
+    }
+  } else {
+    router.navigate(['/staff-login']);
+    return false;
+  }
 };

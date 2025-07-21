@@ -6,7 +6,7 @@ import { AuthService, User } from '../../../services/auth';
 @Component({
   selector: 'app-entrenadores-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule],
   templateUrl: './entrenadores-dashboard.html',
   styleUrls: ['./entrenadores-dashboard.css']
 })

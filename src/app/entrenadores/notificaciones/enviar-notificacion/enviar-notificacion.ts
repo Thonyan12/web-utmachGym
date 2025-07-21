@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Notificaciones } from '../../services/notificaciones';
 
 @Component({
   selector: 'app-enviar-notificacion',
- imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './enviar-notificacion.html',
   styleUrl: './enviar-notificacion.css'
 })
@@ -15,7 +15,7 @@ export class EnviarNotificacion {
   contenido: string = '';
   mensaje: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private notiService: Notificaciones) {}
 
   enviarNotificacion() {
     if (!this.id_usuario || !this.tipo || !this.contenido) {
@@ -23,13 +23,11 @@ export class EnviarNotificacion {
       return;
     }
 
-    const body = {
+    this.notiService.enviarNotificacion({
       id_usuario: this.id_usuario,
       tipo: this.tipo,
       contenido: this.contenido
-    };
-
-    this.http.post('/api/notificaciones', body).subscribe({
+    }).subscribe({
       next: () => {
         this.mensaje = 'Notificación enviada correctamente.';
         this.id_usuario = null;

@@ -1030,3 +1030,43 @@ CREATE TRIGGER trigger_nuevo_perfil_fisico
 AFTER INSERT ON Perfil_fisico
 FOR EACH ROW
 EXECUTE FUNCTION trigger_asignar_rutina_por_nuevo_perfil();
+
+
+-- Función para notificar al miembro cuando se le asigna un entrenador
+CREATE OR REPLACE FUNCTION trg_notificar_asignacion_entrenador()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_user_id INT;
+  v_entrenador_nombre VARCHAR;
+BEGIN
+  -- Buscar el usuario asociado al miembro
+  SELECT id_usuario INTO v_user_id
+  FROM Usuario
+  WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
+
+  -- Obtener nombre del entrenador
+  SELECT nombre || ' ' || apellido INTO v_entrenador_nombre
+  FROM Entrenador
+  WHERE id_entrenador = NEW.id_entrenador;
+
+  -- Si existe usuario, insertar notificación
+  IF v_user_id IS NOT NULL THEN
+    INSERT INTO Notificacion (
+      id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido, estado, f_registro
+    ) VALUES (
+      v_user_id, NULL, 'asignacion_entrenador',
+      'Se te ha asignado el entrenador: ' || v_entrenador_nombre,
+      CURRENT_DATE, FALSE, TRUE, CURRENT_DATE
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para llamar a la función después de asignar un entrenador
+DROP TRIGGER IF EXISTS trigger_notificar_asignacion_entrenador ON Asignacion_entrenador;
+CREATE TRIGGER trigger_notificar_asignacion_entrenador
+AFTER INSERT ON Asignacion_entrenador
+FOR EACH ROW
+EXECUTE FUNCTION trg_notificar_asignacion_entrenador();
