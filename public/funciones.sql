@@ -1027,3 +1027,43 @@ CREATE TRIGGER trg_desactivar_miembro_delete_mensualidad
 AFTER DELETE ON Mensualidad
 FOR EACH ROW
 EXECUTE FUNCTION desactivar_miembro_al_eliminar_mensualidad();
+-- ============================================
+-- TRIGGER: Actualizar altura y peso en Miembro al insertar Perfil_fisico
+-- ============================================
+CREATE OR REPLACE FUNCTION actualizar_miembro_al_insertar_perfil()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Miembro
+    SET altura = NEW.altura,
+        peso = NEW.peso
+    WHERE id_miembro = NEW.id_miembro;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_actualizar_miembro_perfil ON Perfil_fisico;
+CREATE TRIGGER trg_actualizar_miembro_perfil
+AFTER INSERT ON Perfil_fisico
+FOR EACH ROW
+EXECUTE FUNCTION actualizar_miembro_al_insertar_perfil();
+
+-- Trigger: Evaluar nuevas rutinas al insertar un nuevo perfil físico
+CREATE OR REPLACE FUNCTION trigger_asignar_rutina_por_nuevo_perfil()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Evaluar y asignar nuevas rutinas si es necesario
+    PERFORM evaluar_nuevas_rutinas_por_perfil(
+        NEW.id_miembro,
+        NEW.altura,
+        NEW.peso,
+        NEW.observaciones
+    );
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_nuevo_perfil_fisico ON Perfil_fisico;
+CREATE TRIGGER trigger_nuevo_perfil_fisico
+AFTER INSERT ON Perfil_fisico
+FOR EACH ROW
+EXECUTE FUNCTION trigger_asignar_rutina_por_nuevo_perfil();
