@@ -14,7 +14,7 @@ export class MiembrosAsignarComponent {
   constructor(private miembrosService: MiembrosService, private router: Router) {
     this.cargarMiembrosDisponibles();
   }
-// ... existing code ...
+
 asignarSeleccionados() {
   const seleccionados = this.miembrosDisponibles.filter(m => m.seleccionado);
   if (seleccionados.length === 0) {
@@ -26,7 +26,7 @@ asignarSeleccionados() {
     error: err => alert('Error al asignar miembros')
   });
 }
-// ... existing code ...
+
   cargarMiembrosDisponibles() {
     this.miembrosService.obtenerMiembrosDisponibles().subscribe((data: any[]) => {
       this.miembrosDisponibles = data;

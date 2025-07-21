@@ -1106,3 +1106,83 @@ CREATE TRIGGER trigger_notificar_asistencia_clase
 AFTER INSERT ON Registro_de_clases
 FOR EACH ROW
 EXECUTE FUNCTION notificar_asistencia_clase();
+
+CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entrenador_id INT;
+BEGIN
+  -- Selecciona un entrenador aleatorio activo
+  SELECT id_entrenador INTO v_entrenador_id
+  FROM Entrenador
+  WHERE estado = TRUE
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+  -- Si hay entrenador disponible, crea la asignación
+  IF v_entrenador_id IS NOT NULL THEN
+    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
+    VALUES (NEW.id_miembro, v_entrenador_id);
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
+CREATE TRIGGER trigger_asignar_entrenador_aleatorio
+AFTER INSERT ON Miembro
+FOR EACH ROW
+EXECUTE FUNCTION asignar_entrenador_aleatorio();
+
+
+
+
+CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_entrenador_id INT;
+  v_entrenador_nombre TEXT;
+  v_usuario_id INT;
+BEGIN
+  -- Selecciona un entrenador aleatorio activo
+  SELECT id_entrenador, nombre INTO v_entrenador_id, v_entrenador_nombre
+  FROM Entrenador
+  WHERE estado = TRUE
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+  -- Si hay entrenador disponible, crea la asignación
+  IF v_entrenador_id IS NOT NULL THEN
+    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
+    VALUES (NEW.id_miembro, v_entrenador_id);
+
+    -- Busca el usuario asociado al miembro
+    SELECT id_usuario INTO v_usuario_id
+    FROM Usuario
+    WHERE id_miembro = NEW.id_miembro;
+
+    -- Notifica al miembro quién es su entrenador
+    IF v_usuario_id IS NOT NULL THEN
+      INSERT INTO Notificacion (
+        id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
+      ) VALUES (
+        v_usuario_id,
+        'asignacion_entrenador',
+        '¡Bienvenido! Tu entrenador asignado es: ' || v_entrenador_nombre || '.',
+        CURRENT_DATE,
+        FALSE,
+        TRUE,
+        CURRENT_DATE
+      );
+    END IF;
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
+CREATE TRIGGER trigger_asignar_entrenador_aleatorio
+AFTER INSERT ON Miembro
+FOR EACH ROW
+EXECUTE FUNCTION asignar_entrenador_aleatorio();
