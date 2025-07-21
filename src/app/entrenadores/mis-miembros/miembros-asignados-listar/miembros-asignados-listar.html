@@ -1,1 +1,36 @@
-<p>miembros-asignados-listar works!</p>
+<div class="container mt-4">
+  <h2>Mis Miembros Asignados</h2>
+  <table class="table table-bordered table-striped mt-3">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Cédula</th>
+        <th>Correo</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let miembro of miembros; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
+        <td>{{ miembro.cedula }}</td>
+        <td>{{ miembro.correo }}</td>
+        <td>
+          <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
+            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+        <td>
+          <a class="btn btn-primary btn-sm" [routerLink]="['/entrenadores/mis-miembros/detalle', miembro.id_miembro]">
+            Ver Detalle
+          </a>
+        </td>
+      </tr>
+      <tr *ngIf="miembros.length === 0">
+        <td colspan="6" class="text-center">No tienes miembros asignados.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

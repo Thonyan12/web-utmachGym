@@ -1,11 +1,32 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-miembros-asignados-listar',
-  imports: [],
+  imports: [CommonModule, HttpClientModule, RouterModule],
   templateUrl: './miembros-asignados-listar.html',
-  styleUrl: './miembros-asignados-listar.css'
+    styleUrls: ['./miembros-asignados-listar.css'],
 })
-export class MiembrosAsignadosListar {
+export class MiembrosAsignadosListar implements OnInit {
+  miembros: any[] = [];
 
+  constructor(private http: HttpClient) {}
+
+ngOnInit(): void {
+const token = localStorage.getItem('token'); // Asegúrate de guardar el token en localStorage
+  const headers = { Authorization: `Bearer ${token}` };
+
+  this.http.get<any>('http://localhost:3000/api/entrenadores/mis-miembros', { headers }).subscribe({
+    next: (data) => {
+      console.log('Datos recibidos:', data);
+      this.miembros = data.data || []; 
+    },
+    error: (err) => {
+      console.log('Error:', err);
+      this.miembros = [];
+    }
+  });
+  }
 }

@@ -1,1 +1,28 @@
-<p>miembro-detalle works!</p>
+<div class="container mt-4">
+  <h2>Detalle del Miembro</h2>
+  <div *ngIf="miembro; else cargando">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</h4>
+        <p class="card-text"><strong>Cédula:</strong> {{ miembro.cedula }}</p>
+        <p class="card-text"><strong>Edad:</strong> {{ miembro.edad }}</p>
+        <p class="card-text"><strong>Correo:</strong> {{ miembro.correo }}</p>
+        <p class="card-text"><strong>Dirección:</strong> {{ miembro.direccion }}</p>
+        <p class="card-text"><strong>Altura:</strong> {{ miembro.altura }} m</p>
+        <p class="card-text"><strong>Peso:</strong> {{ miembro.peso }} kg</p>
+        <p class="card-text"><strong>Contextura:</strong> {{ miembro.contextura }}</p>
+        <p class="card-text"><strong>Objetivo:</strong> {{ miembro.objetivo }}</p>
+        <p class="card-text"><strong>Sexo:</strong> {{ miembro.sexo }}</p>
+        <p class="card-text"><strong>Fecha de inscripción:</strong> {{ miembro.fecha_inscripcion | date:'yyyy-MM-dd' }}</p>
+        <p class="card-text"><strong>Estado:</strong> 
+          <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
+            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+          </span>
+        </p>
+      </div>
+    </div>
+  </div>
+  <ng-template #cargando>
+    <div class="alert alert-info mt-3">Cargando datos del miembro...</div>
+  </ng-template>
+</div>

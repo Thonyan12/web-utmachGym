@@ -1,1 +1,21 @@
-<p>registrar-asistencia works!</p>
+<div class="container mt-4">
+  <h2>Registrar Asistencia</h2>
+  <form (ngSubmit)="registrarAsistencia()" #asistenciaForm="ngForm" class="mb-3">
+    <div class="mb-3">
+      <label for="idMiembro" class="form-label">ID Miembro</label>
+      <input type="number" id="idMiembro" class="form-control" [(ngModel)]="idMiembro" name="idMiembro" required>
+    </div>
+    <div class="mb-3">
+      <label for="horario" class="form-label">Horario</label>
+      <input type="text" id="horario" class="form-control" [(ngModel)]="horario" name="horario" required>
+    </div>
+    <div class="mb-3">
+      <label for="fecha" class="form-label">Fecha de Asistencia</label>
+      <input type="date" id="fecha" class="form-control" [(ngModel)]="fecha_asistencia" name="fecha_asistencia" required>
+    </div>
+    <button type="submit" class="btn btn-primary" [disabled]="asistenciaForm.invalid">Registrar</button>
+  </form>
+  <div *ngIf="mensaje" class="alert alert-info mt-3">
+    {{ mensaje }}
+  </div>
+</div>

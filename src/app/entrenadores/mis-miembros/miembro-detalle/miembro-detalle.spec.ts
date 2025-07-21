@@ -1,16 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MiembroDetalle } from './miembro-detalle'; // Ruta correcta al componente
 
-import { MiembroDetalle } from './miembro-detalle';
-
-describe('MiembroDetalle', () => {
+describe('MiembroDetalleComponent', () => {
   let component: MiembroDetalle;
-  let fixture: ComponentFixture<MiembroDetalle>;
+  let fixture: ComponentFixture<MiembroDetallet>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MiembroDetalle]
-    })
-    .compileComponents();
+      declarations: [MiembroDetalle], // Usa 'declarations' para registrar el componente
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MiembroDetalle);
     component = fixture.componentInstance;
