@@ -1,9 +1,12 @@
 <div class="container mt-4">
-  <h2>Mis Notificaciones</h2>
+  <h2 class="mb-4 d-flex align-items-center" style="color:#14213d;">
+    <i class="bi bi-bell-fill me-2" style="color:#fca311;"></i> Mis Notificaciones
+  </h2>
   <table class="table table-bordered table-striped mt-3">
     <thead>
       <tr>
         <th>#</th>
+        <th>Remitente</th>
         <th>Tipo</th>
         <th>Contenido</th>
         <th>Fecha</th>
@@ -13,17 +16,21 @@
     <tbody>
       <tr *ngFor="let noti of notificaciones; let i = index">
         <td>{{ i + 1 }}</td>
+        <td>{{ noti.remitente || 'Desconocido' }}</td>
         <td>{{ noti.tipo }}</td>
         <td>{{ noti.contenido }}</td>
-        <td>{{ noti.fecha_envio | date:'yyyy-MM-dd' }}</td>
+        <td>{{ noti.fecha_envio | date:'yyyy-MM-dd HH:mm' }}</td>
         <td>
           <span [ngClass]="noti.leido ? 'text-success' : 'text-danger'">
             {{ noti.leido ? 'Sí' : 'No' }}
           </span>
+          <button *ngIf="!noti.leido" class="btn btn-sm btn-primary ms-2" (click)="marcarLeido(noti)">
+            Marcar como leído
+          </button>
         </td>
       </tr>
       <tr *ngIf="notificaciones.length === 0">
-        <td colspan="5" class="text-center">No tienes notificaciones.</td>
+        <td colspan="6" class="text-center">No tienes notificaciones.</td>
       </tr>
     </tbody>
   </table>

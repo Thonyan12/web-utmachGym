@@ -43,6 +43,13 @@
           </a>
         </li>
         <li class="nav-item">
+          <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/notificaciones/enviar" 
+             style="color: #fca311;">
+            <i class="bi bi-send-fill me-2"></i>
+            <span class="d-none d-lg-inline">Enviar Notificación</span>
+          </a>
+        </li>
+        <li class="nav-item">
           <a class="nav-link d-flex align-items-center" routerLink="/entrenadores/perfil" 
              style="color: #fca311;">
             <i class="bi bi-person-circle me-2"></i>
@@ -54,14 +61,7 @@
       <!-- Usuario y acciones -->
       <div class="d-flex align-items-center">
         <!-- Notificaciones -->
-        <button class="btn btn-sm btn-outline-warning me-2 position-relative">
-          <i class="bi bi-bell"></i>
-          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-            2
-            <span class="visually-hidden">notificaciones</span>
-          </span>
-        </button>
-
+        
         <!-- Usuario logueado -->
         <div *ngIf="currentUser" class="navbar-text text-white me-3 d-none d-md-block">
           <i class="bi bi-person-check me-1"></i>
