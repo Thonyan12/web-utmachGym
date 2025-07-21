@@ -29,7 +29,10 @@ export class DetalleFacturaService {
     return this.http.get<DetalleFactura[]>(`${this.apiUrl}/factura/${idFactura}`);
   }
 
-  
+  // Crear un nuevo detalle de factura
+createDetalleFactura(detalle: DetalleFactura): Observable<DetalleFactura> {
+  return this.http.post<DetalleFactura>(`${this.apiUrl}`, detalle);
+}
 
   constructor() {}
 }

@@ -46,5 +46,9 @@ export class FacturasService {
     return this.http.delete(url);
   }
 
+  createFacturaConDetalle(facturaCompleta: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/crear-con-detalle`, facturaCompleta);
+  }
+
   constructor() { }
 }
