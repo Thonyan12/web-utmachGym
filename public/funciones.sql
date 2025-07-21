@@ -501,30 +501,36 @@ $$ LANGUAGE plpgsql;
 -- ============================================
 -- FUNCIÓN: Obtener historial completo de rutinas de un miembro
 -- ============================================
+DROP FUNCTION IF EXISTS obtener_historial_rutinas_miembro(integer);
+
 CREATE OR REPLACE FUNCTION obtener_historial_rutinas_miembro(p_id_miembro INT)
 RETURNS TABLE(
     id_asignacion INT,
+    id_rutina INT,
     rutina_nombre VARCHAR,
     rutina_tipo VARCHAR,
     rutina_nivel VARCHAR,
+    descripcion_rutina VARCHAR,
+    duracion_rutina VARCHAR,
     descripcion_asignacion VARCHAR,
     fecha_inicio DATE,
     fecha_registro DATE,
-    estado_rutina BOOLEAN,
-    duracion_semanas VARCHAR
+    estado_rutina BOOLEAN
 ) AS $$
 BEGIN
     RETURN QUERY
     SELECT 
         ar.id_asignacion,
-        (r.nivel || ' - ' || r.tipo_rut)::varchar as rutina_nombre, -- <-- CAST
-        r.tipo_rut::varchar as rutina_tipo,                         -- <-- CAST
-        r.nivel::varchar as rutina_nivel,                           -- <-- CAST
-        ar.descripcion_rut::varchar as descripcion_asignacion,      -- <-- CAST
+        r.id_rutina,
+        (r.nivel || ' - ' || r.tipo_rut)::varchar as rutina_nombre,
+        r.tipo_rut::varchar as rutina_tipo,
+        r.nivel::varchar as rutina_nivel,
+        r.descripcion_rut::varchar as descripcion_rutina,
+        r.duracion_rut::varchar as duracion_rutina,
+        ar.descripcion_rut::varchar as descripcion_asignacion,
         ar.fecha_inicio,
         ar.f_registro as fecha_registro,
-        ar.estado as estado_rutina,
-        r.duracion_rut::varchar as duracion_semanas                 -- <-- CAST
+        ar.estado as estado_rutina
     FROM Asignacion_rutina ar
     INNER JOIN Rutina r ON ar.id_rutina = r.id_rutina
     WHERE ar.id_miembro = p_id_miembro
@@ -967,49 +973,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION generar_factura_desde_mensualidad()
-RETURNS TRIGGER AS $$
-DECLARE
-    v_id_factura INT;
-    v_total_factura NUMERIC;
-    v_iva_calculado NUMERIC;
-BEGIN
-    -- Calcular el IVA y el total de la factura
-    v_iva_calculado := NEW.monto * 0.15;
-    v_total_factura := NEW.monto + v_iva_calculado;
-
-    -- Insertar en la tabla 'factura'
-    INSERT INTO factura (id_miembro, id_admin, fecha_emision, total, estado_registro, f_registro)
-    VALUES (
-        NEW.id_miembro,
-        1, -- ID de administrador por defecto
-        NEW.fecha_inicio,
-        v_total_factura,
-        TRUE,
-        CURRENT_DATE
-    )
-    RETURNING id_factura INTO v_id_factura;
-
-    -- Insertar en la tabla 'detalle_factura'
-    INSERT INTO detalle_factura (
-        id_factura, tipo_detalle, referencia_id, descripcion, monto, iva,
-        metodo_pago, estado_registro, f_registro
-    )
-    VALUES (
-        v_id_factura,
-        'pago mensual',
-        NEW.id_mensualidad,
-        'Pago de Mensualidad del ' || TO_CHAR(NEW.fecha_inicio, 'YYYY-MM-DD') || ' al ' || TO_CHAR(NEW.fecha_fin, 'YYYY-MM-DD'),
-        NEW.monto,
-        0.15,
-        'Pendiente',
-        TRUE,
-        CURRENT_DATE
-    );
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
 -- Función para desactivar miembro al eliminar mensualidad
 CREATE OR REPLACE FUNCTION desactivar_miembro_al_eliminar_mensualidad()
 RETURNS TRIGGER AS $$
