@@ -2,10 +2,19 @@
   <app-facturas-sidebar></app-facturas-sidebar>
   <div class="container mt-4">
     <h2>Registrar Factura</h2>
-    <form (ngSubmit)="guardar(form)" #form="ngForm" novalidate>
+    <form (ngSubmit)="abrirModal(form)" #form="ngForm" novalidate>
+      <!-- Campos de la factura -->
       <div class="mb-3">
         <label>ID Miembro</label>
-        <input type="number" class="form-control" [(ngModel)]="factura.id_miembro" name="id_miembro" required min="1" #idMiembro="ngModel">
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="factura.id_miembro"
+          name="id_miembro"
+          required
+          min="1"
+          #idMiembro="ngModel"
+        />
         <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
           <span *ngIf="idMiembro.errors?.['required']">El ID del miembro es obligatorio.</span>
           <span *ngIf="idMiembro.errors?.['min']">Debe ser mayor o igual a 1.</span>
@@ -13,7 +22,15 @@
       </div>
       <div class="mb-3">
         <label>ID Administrador</label>
-        <input type="number" class="form-control" [(ngModel)]="factura.id_admin" name="id_admin" required min="1" #idAdmin="ngModel">
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="factura.id_admin"
+          name="id_admin"
+          required
+          min="1"
+          #idAdmin="ngModel"
+        />
         <div class="text-danger" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
           <span *ngIf="idAdmin.errors?.['required']">El ID del administrador es obligatorio.</span>
           <span *ngIf="idAdmin.errors?.['min']">Debe ser mayor o igual a 1.</span>
@@ -21,14 +38,30 @@
       </div>
       <div class="mb-3">
         <label>Fecha de Emisión</label>
-        <input type="date" class="form-control" [(ngModel)]="factura.fecha_emision" name="fecha_emision" required #fechaEmision="ngModel">
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="factura.fecha_emision"
+          name="fecha_emision"
+          required
+          #fechaEmision="ngModel"
+        />
         <div class="text-danger" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
           <span *ngIf="fechaEmision.errors?.['required']">La fecha de emisión es obligatoria.</span>
         </div>
       </div>
       <div class="mb-3">
         <label>Total</label>
-        <input type="number" class="form-control" [(ngModel)]="factura.total" name="total" required step="0.01" min="0.01" #total="ngModel">
+        <input
+          type="number"
+          class="form-control"
+          [(ngModel)]="factura.total"
+          name="total"
+          required
+          step="0.01"
+          min="0.01"
+          #total="ngModel"
+        />
         <div class="text-danger" *ngIf="total.invalid && (total.dirty || total.touched)">
           <span *ngIf="total.errors?.['required']">El total es obligatorio.</span>
           <span *ngIf="total.errors?.['min']">Debe ser mayor a 0.</span>
@@ -36,7 +69,13 @@
       </div>
       <div class="mb-3">
         <label>Estado</label>
-        <select class="form-control" [(ngModel)]="factura.estado_registro" name="estado_registro" required #estadoRegistro="ngModel">
+        <select
+          class="form-control"
+          [(ngModel)]="factura.estado_registro"
+          name="estado_registro"
+          required
+          #estadoRegistro="ngModel"
+        >
           <option [ngValue]="true">Activo</option>
           <option [ngValue]="false">Inactivo</option>
         </select>
@@ -46,7 +85,14 @@
       </div>
       <div class="mb-3">
         <label>Fecha de Registro</label>
-        <input type="date" class="form-control" [(ngModel)]="factura.f_registro" name="f_registro" required #fechaRegistro="ngModel">
+        <input
+          type="date"
+          class="form-control"
+          [(ngModel)]="factura.f_registro"
+          name="f_registro"
+          required
+          #fechaRegistro="ngModel"
+        />
         <div class="text-danger" *ngIf="fechaRegistro.invalid && (fechaRegistro.dirty || fechaRegistro.touched)">
           <span *ngIf="fechaRegistro.errors?.['required']">La fecha de registro es obligatoria.</span>
         </div>
@@ -55,7 +101,118 @@
         Por favor, corrige los errores antes de guardar.
       </div>
       <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
-      <div class="mt-2">{{ mensaje }}</div>
     </form>
+  </div>
+</div>
+
+<!-- Modal para Detalle Factura -->
+<div class="modal fade" id="detalleFacturaModal" tabindex="-1" aria-labelledby="detalleFacturaModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="detalleFacturaModalLabel">Registrar Detalle de Factura</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form #detalleForm="ngForm">
+          <div class="mb-3">
+            <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
+            <input
+              type="text"
+              id="tipoDetalle"
+              class="form-control"
+              [(ngModel)]="detalle.tipo_detalle"
+              name="tipo_detalle"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="referenciaId" class="form-label">Referencia ID</label>
+            <input
+              type="number"
+              id="referenciaId"
+              class="form-control"
+              [(ngModel)]="detalle.referencia_id"
+              name="referencia_id"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea
+              id="descripcion"
+              class="form-control"
+              [(ngModel)]="detalle.descripcion"
+              name="descripcion"
+              required
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="monto" class="form-label">Monto</label>
+            <input
+              type="number"
+              id="monto"
+              class="form-control"
+              [(ngModel)]="detalle.monto"
+              name="monto"
+              required
+              (input)="calcularIVA()"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="iva" class="form-label">IVA</label>
+            <input
+              type="number"
+              id="iva"
+              class="form-control"
+              [(ngModel)]="detalle.iva"
+              name="iva"
+              readonly
+            />
+          </div>
+          <div class="mb-3">
+            <label for="metodoPago" class="form-label">Método de Pago</label>
+            <select
+              id="metodoPago"
+              class="form-control"
+              [(ngModel)]="detalle.metodo_pago"
+              name="metodo_pago"
+              required
+            >
+              <option value="Efectivo">EFECTIVO</option>
+              <option value="Tarjeta">TARJETA</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="estadoRegistro" class="form-label">Estado</label>
+            <select
+              id="estadoRegistro"
+              class="form-control"
+              [(ngModel)]="detalle.estado_registro"
+              name="estado_registro"
+              required
+            >
+              <option [ngValue]="true">Activo</option>
+              <option [ngValue]="false">Inactivo</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="fechaRegistro" class="form-label">Fecha de Registro</label>
+            <input
+              type="date"
+              id="fechaRegistro"
+              class="form-control"
+              [(ngModel)]="detalle.f_registro"
+              name="f_registro"
+              required
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardarDetalleFactura(detalleForm)">Guardar Detalle</button>
+      </div>
+    </div>
   </div>
 </div>

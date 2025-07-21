@@ -39,8 +39,10 @@ import { FacturasCrearComponent } from './facturas/facturas-crear/facturas-crear
 import { FacturasDetalle } from './facturas/facturas-detalle/facturas-detalle';
 import { FacturasEditar } from './facturas/facturas-editar/facturas-editar';
 import { FacturasEliminar } from './facturas/facturas-eliminar/facturas-eliminar';
-import { DetallefacturaListar } from './detallefactura/detallefactura-listar/detallefactura-listar';
 
+//detallefactura
+import { DetallefacturaListar } from './detallefactura/detallefactura-listar/detallefactura-listar';
+import { DetalleFacturaCrearComponent} from './detallefactura/detallefactura-crear/detallefactura-crear';
 
 
 
@@ -117,7 +119,9 @@ export const adminRoutes: Routes = [
       {
         path: 'detallefactura',
         children: [
-          { path: '', component: DetallefacturaListar}
+          { path: '', component: DetallefacturaListar},
+          { path: 'crear', component: DetalleFacturaCrearComponent }
+
         ]
       }
 

@@ -1,19 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { FacturasSidebar } from "../facturas-sidebar/facturas-sidebar";
-import { Factura, FacturasService } from '../services/facturas';
+import { RouterModule } from '@angular/router';
+import { FacturasSidebar } from '../facturas-sidebar/facturas-sidebar';
+import { FacturasService } from '../services/facturas'; // Importar el servicio
+
+declare const bootstrap: any;
 
 @Component({
   selector: 'app-facturas-crear',
-  standalone: true,
-  imports: [CommonModule, FormsModule, FacturasSidebar],
-  templateUrl: './facturas-crear.html'
+  templateUrl: './facturas-crear.html',
+  imports: [CommonModule, FormsModule, FacturasSidebar, RouterModule],
+  styleUrls: ['./facturas-crear.css']
 })
 export class FacturasCrearComponent {
-  private service = inject(FacturasService);
-  mensaje: string = '';
-  factura: Factura = {
+  factura: any = {
     id_miembro: 0,
     id_admin: 0,
     fecha_emision: '',
@@ -22,15 +23,63 @@ export class FacturasCrearComponent {
     f_registro: ''
   };
 
-  guardar(form: NgForm): void {
-    this.service.createFactura(this.factura).subscribe({
+  detalle: any = {
+    tipo_detalle: '',
+    referencia_id: null, // ID de referencia opcional
+    descripcion: '',
+    monto: 0,
+    iva: 0,
+    metodo_pago: '', // Método de pago
+    estado_registro: true, // Estado del registro (Activo por defecto)
+    f_registro: '' // Fecha de registro
+  };
+
+  mensaje: string = '';
+
+  // Inyectar FacturasService en el constructor
+  constructor(private facturasService: FacturasService) {}
+
+  abrirModal(form: NgForm): void {
+    if (form.invalid) {
+      return;
+    }
+    const modal = new bootstrap.Modal(document.getElementById('detalleFacturaModal')!);
+    modal.show();
+  }
+
+  calcularIVA(): void {
+    this.detalle.iva = this.detalle.monto * 0.12;
+  }
+
+  guardarDetalleFactura(detalleForm: NgForm): void {
+    if (detalleForm.invalid) {
+      return;
+    }
+  
+    const facturaCompleta = {
+      factura: this.factura,
+      detalles: [this.detalle] // Enviar el detalle como un array
+    };
+  
+    console.log('Datos enviados al backend:', facturaCompleta); // Depuración
+  
+    this.facturasService.createFacturaConDetalle(facturaCompleta).subscribe({
       next: () => {
-        this.mensaje = 'Factura registrada correctamente.';
-        form.resetForm(); // Esto limpia el formulario y los estados de validación
+        alert('Factura y detalle creados correctamente.');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('detalleFacturaModal')!);
+        modal?.hide();
       },
-      error: () => {
-        this.mensaje = 'Error al registrar la factura.';
+      error: (error) => {
+        console.error('Error al crear la factura y el detalle:', error);
+        alert('Ocurrió un error al guardar la factura y el detalle.');
       }
     });
+  }
+
+  guardar(form: NgForm): void {
+    if (form.invalid) {
+      return;
+    }
+    alert('Factura guardada correctamente.');
   }
 }
