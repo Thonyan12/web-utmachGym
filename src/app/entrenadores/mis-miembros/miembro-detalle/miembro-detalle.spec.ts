@@ -3,7 +3,7 @@ import { MiembroDetalle } from './miembro-detalle'; // Ruta correcta al componen
 
 describe('MiembroDetalleComponent', () => {
   let component: MiembroDetalle;
-  let fixture: ComponentFixture<MiembroDetallet>;
+  let fixture: ComponentFixture<MiembroDetalle>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({

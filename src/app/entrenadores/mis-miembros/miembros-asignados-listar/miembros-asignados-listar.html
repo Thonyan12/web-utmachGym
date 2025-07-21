@@ -1,6 +1,7 @@
 <div class="container mt-4">
   <h2>Mis Miembros Asignados</h2>
-  <table class="table table-bordered table-striped mt-3">
+  <button class="btn btn-success" [routerLink]="['/entrenadores/mis-miembros/asignar']">Asignar más miembros</button>
+  <table class="table table-striped">
     <thead>
       <tr>
         <th>#</th>
@@ -14,12 +15,12 @@
     <tbody>
       <tr *ngFor="let miembro of miembros; let i = index">
         <td>{{ i + 1 }}</td>
-        <td>{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
+        <td>{{ miembro.nombre }}</td>
         <td>{{ miembro.cedula }}</td>
         <td>{{ miembro.correo }}</td>
         <td>
-          <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
-            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
+          <span [ngClass]="miembro.estado === 'Activo' ? 'text-success' : 'text-danger'">
+            {{ miembro.estado }}
           </span>
         </td>
         <td>
@@ -27,9 +28,6 @@
             Ver Detalle
           </a>
         </td>
-      </tr>
-      <tr *ngIf="miembros.length === 0">
-        <td colspan="6" class="text-center">No tienes miembros asignados.</td>
       </tr>
     </tbody>
   </table>
