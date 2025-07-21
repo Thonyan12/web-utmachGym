@@ -1070,3 +1070,39 @@ CREATE TRIGGER trigger_notificar_asignacion_entrenador
 AFTER INSERT ON Asignacion_entrenador
 FOR EACH ROW
 EXECUTE FUNCTION trg_notificar_asignacion_entrenador();
+
+CREATE OR REPLACE FUNCTION notificar_asistencia_clase()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_id_usuario INT;
+  v_nombre_clase VARCHAR;
+BEGIN
+  -- Buscar el id_usuario del miembro
+  SELECT id_usuario INTO v_id_usuario
+  FROM Usuario
+  WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
+
+  -- Puedes personalizar el mensaje y obtener más datos si lo deseas
+  IF v_id_usuario IS NOT NULL THEN
+    INSERT INTO Notificacion (
+      id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
+    ) VALUES (
+      v_id_usuario,
+      'asistencia_clase',
+      '¡Asistencia registrada! Has asistido a tu clase el ' || TO_CHAR(NEW.fecha_asistencia, 'YYYY-MM-DD') || '.',
+      CURRENT_DATE,
+      FALSE,
+      TRUE,
+      CURRENT_DATE
+    );
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trigger_notificar_asistencia_clase ON Registro_de_clases;
+CREATE TRIGGER trigger_notificar_asistencia_clase
+AFTER INSERT ON Registro_de_clases
+FOR EACH ROW
+EXECUTE FUNCTION notificar_asistencia_clase();
