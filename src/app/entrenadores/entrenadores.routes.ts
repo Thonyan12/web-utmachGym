@@ -6,7 +6,6 @@ import { entrenadorGuard } from '../guards/entrenador-guard';
 // Mis miembros
 import { MiembrosAsignadosListar } from './mis-miembros/miembros-asignados-listar/miembros-asignados-listar';
 import { MiembroDetalle } from './mis-miembros/miembro-detalle/miembro-detalle';
-import { MiembrosAsignarComponent } from './mis-miembros/miembros-asignar/miembros-asignar';
 
 // Asistencia
 import { RegistrarAsistencia } from './asistencia/registrar-asistencia/registrar-asistencia';
@@ -35,8 +34,7 @@ export const entrenadoresRoutes: Routes = [
         path: 'mis-miembros',
         children: [
           { path: '', component: MiembrosAsignadosListar },
-          { path: 'detalle/:id', component: MiembroDetalle },
-          { path: 'asignar', component: MiembrosAsignarComponent }
+          { path: 'detalle/:id', component: MiembroDetalle }
         ]
       },
       

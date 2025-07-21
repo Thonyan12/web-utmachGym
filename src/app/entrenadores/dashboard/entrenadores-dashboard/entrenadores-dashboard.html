@@ -1,38 +1,410 @@
-<div
-  class="container-fluid py-4"
-  style="background-color: #f8f9fa; min-height: calc(100vh - 76px)"
->
-  <div class="row">
-    <!-- Bienvenida personalizada para entrenador -->
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: calc(100vh - 76px); position: relative; overflow: hidden;">
+  <!-- Elementos decorativos de fondo -->
+  <div class="bg-particles">
+    <div class="particle" style="--delay: 0s; --duration: 20s;"></div>
+    <div class="particle" style="--delay: 2s; --duration: 25s;"></div>
+    <div class="particle" style="--delay: 4s; --duration: 18s;"></div>
+    <div class="particle" style="--delay: 6s; --duration: 22s;"></div>
+    <div class="particle" style="--delay: 8s; --duration: 30s;"></div>
+  </div>
+
+  <style>
+    /* Partículas flotantes de fondo */
+    .bg-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      animation: float-particle var(--duration) var(--delay) infinite linear;
+    }
+    .particle:nth-child(1) { left: 10%; }
+    .particle:nth-child(2) { left: 25%; }
+    .particle:nth-child(3) { left: 50%; }
+    .particle:nth-child(4) { left: 75%; }
+    .particle:nth-child(5) { left: 90%; }
+
+    @keyframes float-particle {
+      0% { 
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* Efectos de hover mejorados */
+    .ultra-card {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-radius: 25px !important;
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      position: relative;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .ultra-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    .ultra-card:hover::before {
+      left: 100%;
+    }
+    .ultra-card:hover {
+      transform: translateY(-15px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25) !important;
+    }
+
+    /* Tarjeta de bienvenida súper mejorada */
+    .mega-welcome {
+      background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #ffecd2 100%);
+      background-size: 400% 400%;
+      animation: gradient-shift 8s ease infinite;
+      position: relative;
+      overflow: hidden;
+    }
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Efectos en las reglas */
+    .rule-ultra {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px !important;
+      border: none !important;
+      margin-bottom: 1rem;
+      padding: 1.5rem !important;
+      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      position: relative;
+      overflow: hidden;
+    }
+    .rule-ultra::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    .rule-ultra:hover::before {
+      transform: scaleX(1);
+    }
+    .rule-ultra:hover {
+      transform: translateX(20px) translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    /* Frase motivacional mejorada */
+    .quote-spectacular {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      border-radius: 30px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+    .quote-spectacular::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: rotate-glow 4s linear infinite;
+    }
+    @keyframes rotate-glow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* Badge de fecha mejorado */
+    .date-ultra {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      border-radius: 25px;
+      padding: 1rem 2rem;
+      animation: float-badge 3s ease-in-out infinite;
+      box-shadow: 0 10px 25px rgba(255, 154, 158, 0.4);
+    }
+    @keyframes float-badge {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-10px) rotate(1deg); }
+    }
+
+    /* Iconos con efectos */
+    .icon-bounce {
+      display: inline-block;
+      animation: bounce-icon 2s infinite;
+    }
+    @keyframes bounce-icon {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-10px); }
+      60% { transform: translateY(-5px); }
+    }
+
+    /* Texto con efectos */
+    .text-glow {
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Efecto de ondas en el saludo */
+    .wave-hand {
+      display: inline-block;
+      animation: wave-animation 2.5s ease-in-out infinite;
+      transform-origin: 70% 70%;
+    }
+    @keyframes wave-animation {
+      0%, 100% { transform: rotate(0deg); }
+      10%, 30%, 50%, 70% { transform: rotate(14deg); }
+      20%, 40%, 60% { transform: rotate(-8deg); }
+      80% { transform: rotate(14deg); }
+      90% { transform: rotate(-4deg); }
+    }
+
+    /* Tarjetas de estadísticas */
+    .weather-card {
+      background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+      color: white;
+    }
+    .members-card {
+      background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
+      color: white;
+    }
+    .training-card {
+      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+      color: white;
+    }
+    .progress-card {
+      background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+      color: white;
+    }
+
+    /* Contador animado */
+    .counter {
+      font-size: 2.5rem !important;
+      font-weight: 900 !important;
+    }
+
+    /* Progreso animado */
+    .progress-animated {
+      animation: progress-fill 2s ease-in-out;
+    }
+    @keyframes progress-fill {
+      0% { width: 0%; }
+      100% { width: 85%; }
+    }
+
+    /* Efectos hover para las tarjetas de stats */
+    .weather-card:hover, .members-card:hover, 
+    .training-card:hover, .progress-card:hover {
+      transform: translateY(-10px) scale(1.05) !important;
+    }
+
+    /* Animación de los iconos de stats */
+    .weather-icon i, .members-icon i, 
+    .training-icon i, .progress-icon i {
+      transition: transform 0.3s ease;
+    }
+    .weather-card:hover .weather-icon i,
+    .members-card:hover .members-icon i,
+    .training-card:hover .training-icon i,
+    .progress-card:hover .progress-icon i {
+      transform: scale(1.2) rotate(5deg);
+    }
+  </style>
+  
+  <div class="row position-relative" style="z-index: 2;">
+    <!-- Bienvenida Espectacular -->
     <div class="col-12 mb-4">
-      <div
-        class="card border-0 shadow-sm"
-        style="
-          background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);
-          color: white;
-        "
-      >
-        <div class="card-body py-4">
+      <div class="card border-0 shadow-lg ultra-card mega-welcome" style="color: white;">
+        <div class="card-body py-5 position-relative">
           <div class="row align-items-center">
             <div class="col-md-8">
-              <h2 class="fw-bold mb-2">
-                {{ getSaludo() }}, Coach {{ obtenerPrimerNombre() }}! 💪
-              </h2>
-              <p class="mb-0 opacity-75">
-                Listo para entrenar y motivar a tus miembros hacia sus objetivos
-                de hoy.
+              <h1 class="fw-bold mb-3 text-glow" style="font-size: 3rem;">
+                ¡Hola, {{ obtenerPrimerNombre() }}! 
+                <span class="wave-hand">👋</span>
+              </h1>
+              <p class="mb-3 fs-4" style="opacity: 0.95; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                🚀 ¡Bienvenido de vuelta a tu área personal! 
               </p>
-              <div class="alert alert-success mt-3 mb-0 py-2 px-3" style="font-size: 1.1rem;">
-                <i class="bi bi-quote"></i>
-                "El éxito es la suma de pequeños esfuerzos repetidos día tras día."
+              <p class="fs-5" style="opacity: 0.9;">
+                ¡Sigamos trabajando hacia tus objetivos de fitness con energía y determinación!
+              </p>
+              <div class="mt-4">
+                <span class="badge bg-light text-dark px-3 py-2 fs-6">
+                  <i class="bi bi-star-fill text-warning me-2 icon-bounce"></i>
+                  Tu progreso es nuestra motivación
+                </span>
               </div>
             </div>
             <div class="col-md-4 text-md-end">
-              <div
-                class="d-inline-flex align-items-center bg-warning text-dark px-3 py-2 rounded-pill"
-              >
-                <i class="bi bi-calendar-check me-2"></i>
-                <span class="fw-bold">{{ fechaActual }}</span>
+              <div class="date-ultra text-dark">
+                <i class="bi bi-calendar-heart me-2 fs-4 icon-bounce"></i>
+                <span class="fw-bold fs-5">{{ fechaActual }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas de Estadísticas -->
+    <div class="col-12 mb-4">
+      <div class="row g-4">
+        <!-- Clima -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card border-0 shadow-lg ultra-card weather-card">
+            <div class="card-body text-center py-4">
+              <div class="weather-icon mb-3">
+                <i class="bi bi-sun-fill icon-bounce" style="font-size: 3rem; color: #ffa500;"></i>
+              </div>
+              <h3 class="fw-bold mb-2" style="color: white;">26°C</h3>
+              <p class="text-white mb-1">🌤️ Soleado</p>
+              <small class="text-white" style="opacity: 0.8;">Machala, Ecuador</small>
+              <div class="mt-3">
+                <span class="badge bg-success px-3 py-2">
+                  <i class="bi bi-check-circle me-1"></i>
+                  Perfecto para entrenar
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Miembros -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card border-0 shadow-lg ultra-card members-card">
+            <div class="card-body text-center py-4">
+              <div class="members-icon mb-3">
+                <i class="bi bi-people-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
+              </div>
+              <h3 class="fw-bold mb-2 counter" data-target="347" style="color: white;">0</h3>
+              <p class="text-white mb-1">👥 Miembros Activos</p>
+              <div class="mt-3">
+                <span class="badge bg-warning text-dark px-3 py-2">
+                  <i class="bi bi-trending-up me-1"></i>
+                  +12 este mes
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entrenamientos Hoy -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card border-0 shadow-lg ultra-card training-card">
+            <div class="card-body text-center py-4">
+              <div class="training-icon mb-3">
+                <i class="bi bi-lightning-charge-fill icon-bounce" style="font-size: 3rem; color: #ffff00;"></i>
+              </div>
+              <h3 class="fw-bold mb-2 counter" data-target="89" style="color: white;">0</h3>
+              <p class="text-white mb-1">🏋️ Entrenamientos Hoy</p>
+              <div class="mt-3">
+                <span class="badge bg-light text-dark px-3 py-2">
+                  <i class="bi bi-clock me-1"></i>
+                  En progreso
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tu Progreso -->
+        <div class="col-md-6 col-lg-3">
+          <div class="card border-0 shadow-lg ultra-card progress-card">
+            <div class="card-body text-center py-4">
+              <div class="progress-icon mb-3">
+                <i class="bi bi-trophy-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
+              </div>
+              <h3 class="fw-bold mb-2" style="color: white;">85%</h3>
+              <p class="text-white mb-1">🎯 Meta Mensual</p>
+              <div class="progress mt-3" style="height: 8px; border-radius: 10px;">
+                <div class="progress-bar bg-success progress-animated" role="progressbar" 
+                     style="width: 85%; border-radius: 10px;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
+                </div>
+              </div>
+              <small class="text-white mt-2 d-block" style="opacity: 0.9;">¡Excelente progreso! 🔥</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reglas del Gimnasio Mejoradas -->
+    <div class="col-12 mb-4">
+      <div class="card border-0 shadow-lg ultra-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+        <div class="card-body py-5">
+          <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3" style="color:#2c3e50; font-size: 2.5rem;">
+              <i class="bi bi-shield-check text-primary me-3 icon-bounce" style="font-size: 2rem;"></i>
+              ⭐ Reglas de Oro del Gimnasio ⭐
+              <i class="bi bi-shield-check text-primary ms-3 icon-bounce" style="font-size: 2rem;"></i>
+            </h2>
+            <p class="text-muted mb-4 fs-5">✨ Juntos creamos un ambiente de respeto y excelencia ✨</p>
+          </div>
+          
+          <div class="row">
+            <div class="col-lg-10 mx-auto">
+              <div class="mb-5">
+                <div class="rule-ultra">
+                  <i class="bi bi-droplet-fill text-info me-3 icon-bounce" style="font-size: 1.5rem;"></i>
+                  <strong style="font-size: 1.1rem;">💧 Usa siempre una toalla</strong> en los equipos para mantener la higiene perfecta
+                </div>
+                <div class="rule-ultra">
+                  <i class="bi bi-spray text-success me-3 icon-bounce" style="font-size: 1.5rem;"></i>
+                  <strong style="font-size: 1.1rem;">🧼 Limpia el equipo</strong> después de usarlo, cuida nuestro espacio común
+                </div>
+                <div class="rule-ultra">
+                  <i class="bi bi-volume-down text-warning me-3 icon-bounce" style="font-size: 1.5rem;"></i>
+                  <strong style="font-size: 1.1rem;">🤫 Mantén el respeto</strong>, no grites ni tires las pesas bruscamente
+                </div>
+                <div class="rule-ultra">
+                  <i class="bi bi-people-fill me-3 icon-bounce" style="font-size: 1.5rem; color: #6f42c1;"></i>
+                  <strong style="font-size: 1.1rem;">👥 Respeta los turnos</strong> y el espacio personal de los demás
+                </div>
+                <div class="rule-ultra">
+                  <i class="bi bi-house-gear text-danger me-3 icon-bounce" style="font-size: 1.5rem;"></i>
+                  <strong style="font-size: 1.1rem;">🏠 Guarda los implementos</strong> en su lugar después de usarlos
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="quote-spectacular text-center text-white fw-semibold position-relative" style="font-size:1.3rem; z-index: 1;">
+            <div class="position-relative" style="z-index: 2;">
+              <i class="bi bi-lightbulb-fill me-3 icon-bounce" style="font-size: 2rem;"></i>
+              <div class="mb-3">
+                "💪 La disciplina es el puente entre tus metas y tus logros. ¡Entrena con pasión y determinación! 🔥"
+              </div>
+              <div class="mt-3">
+                <small style="opacity: 0.9; font-size: 1rem;">
+                  ⭐ Tu equipo de Coach Utmach Gym ⭐
+                </small>
               </div>
             </div>
           </div>
@@ -41,3 +413,31 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Animación de contadores
+  function animateCounters() {
+    const counters = document.querySelectorAll('.counter');
+    
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      const duration = 2000; // 2 segundos
+      const increment = target / (duration / 16); // 60fps
+      let current = 0;
+      
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          current = target;
+          clearInterval(timer);
+        }
+        counter.textContent = Math.floor(current);
+      }, 16);
+    });
+  }
+
+  // Ejecutar cuando se carga la página
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(animateCounters, 500); // Delay de 0.5s para que se vea mejor
+  });
+</script>
