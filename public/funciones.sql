@@ -881,7 +881,7 @@ BEGIN
         'Pago de Mensualidad del ' || TO_CHAR(NEW.fecha_inicio, 'YYYY-MM-DD') || ' al ' || TO_CHAR(NEW.fecha_fin, 'YYYY-MM-DD'),
         NEW.monto,
         0.15,
-        'Pendiente',
+        'EFECTIVO',
         TRUE,
         CURRENT_DATE
     );
