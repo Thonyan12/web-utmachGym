@@ -1,43 +1,125 @@
-<div class="container py-4">
-  <h3 class="mb-4 d-flex align-items-center" style="color:#14213d;">
-    <i class="bi bi-bell-fill me-2" style="color:#fca311;"></i> Notificaciones
-  </h3>
-  <div *ngIf="loading" class="text-center py-5">
-    <div class="spinner-border text-warning"></div>
-  </div>
-  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
-  <div *ngIf="!loading && notificaciones.length === 0" class="alert alert-info">
-    No tienes notificaciones nuevas.
-  </div>
-  <ul class="list-group border-0">
-    <li *ngFor="let n of notificaciones"
-        class="list-group-item border-0 mb-2 shadow-sm rounded-3 px-4 py-3 position-relative notification-item"
-        [ngClass]="{'bg-light': n.leido, 'bg-white': !n.leido}">
-      <div class="d-flex align-items-start">
-        <div class="me-3 mt-1">
-          <i class="bi" [ngClass]="n.leido ? 'bi-envelope-open text-secondary' : 'bi-envelope-fill text-warning'" style="font-size:1.5rem"></i>
-        </div>
-        <div class="flex-grow-1">
-          <span [class.fw-bold]="!n.leido" [style.color]="n.leido ? '#6c757d' : '#14213d'">
-            <span [innerHTML]="n.contenido"></span>
-          </span>
-          <div>
-            <small class="text-muted">
-              <i class="bi bi-clock me-1"></i>{{ n.fecha_envio | date:'medium' }}
-            </small>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm">
+        
+        <!-- Header con botones de debug -->
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">
+            <i class="bi bi-bell-fill me-2"></i>
+            Mis Notificaciones
+          </h4>
+          
+          <!-- Botones de debug y control -->
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline-light" 
+                    (click)="recargarNotificaciones()"
+                    title="Recargar notificaciones">
+              <i class="bi bi-arrow-clockwise me-1"></i>
+              Recargar
+            </button>
+            
+            <button class="btn btn-sm btn-outline-light" 
+                    (click)="forzarVerificacionEntrenador()"
+                    title="Verificar coach asignado">
+              <i class="bi bi-person-check me-1"></i>
+              Coach
+            </button>
           </div>
         </div>
-        <div class="ms-3 d-flex flex-column align-items-end">
-          <button *ngIf="!n.leido"
-                  class="btn btn-sm btn-outline-warning px-3"
-                  (click)="marcarComoLeida(n)">
-            <i class="bi bi-check2-circle me-1"></i> Marcar como leído
-          </button>
-          <span *ngIf="n.leido" class="badge rounded-pill bg-success mt-1">
-            <i class="bi bi-check2"></i> Leído
-          </span>
+
+        <div class="card-body">
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-3 text-muted">Cargando notificaciones...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="error && !loading" class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            {{ error }}
+            <button class="btn btn-sm btn-outline-danger ms-2" (click)="recargarNotificaciones()">
+              Reintentar
+            </button>
+          </div>
+
+          <!-- Sin notificaciones -->
+          <div *ngIf="!loading && !error && notificaciones.length === 0" class="text-center py-5">
+            <i class="bi bi-bell-slash display-4 text-muted"></i>
+            <h5 class="mt-3 text-muted">No tienes notificaciones</h5>
+            <p class="text-muted">Las notificaciones aparecerán aquí cuando las recibas.</p>
+          </div>
+
+          <!-- Lista de notificaciones -->
+          <div *ngIf="!loading && !error && notificaciones.length > 0">
+            <div *ngFor="let notificacion of notificaciones; trackBy: trackByNotificacion"
+                 class="border rounded-3 p-3 mb-3 position-relative"
+                 [ngClass]="{
+                   'border-success bg-light': notificacion.tipo === 'asignacion_coach' && !notificacion.leido,
+                   'border-secondary': notificacion.leido,
+                   'shadow-sm': !notificacion.leido
+                 }"
+                 (click)="marcarComoLeida(notificacion)">
+              
+              <!-- Badge de nuevo -->
+              <span *ngIf="!notificacion.leido" 
+                    class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                Nuevo
+              </span>
+
+              <!-- Badge de reciente -->
+              <span *ngIf="esReciente(notificacion.fecha_envio)" 
+                    class="position-absolute top-0 end-0 badge bg-warning text-dark me-2 mt-2">
+                Reciente
+              </span>
+              <!-- Contenido de la notificación -->
+              
+
+
+              <div class="d-flex align-items-start">
+                <!-- Icono -->
+                <div class="me-3">
+                  <i class="bi {{getIconoTipo(notificacion.tipo)}} fs-4 {{getColorTipo(notificacion.tipo)}}"></i>
+                </div>
+
+                <!-- Contenido -->
+                <div class="flex-grow-1">
+                  <h6 class="mb-1 fw-bold">{{getTitulo(notificacion)}}</h6>
+                  <p class="mb-2 text-muted">{{notificacion.contenido}}</p>
+                  
+                  <!-- Footer -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                      <i class="bi bi-clock me-1"></i>
+                      {{formatearFecha(notificacion.fecha_envio)}}
+                    </small>
+                    
+                    <div class="d-flex align-items-center">
+                      <!-- Coach name si existe -->
+                      <span *ngIf="notificacion.coach_nombre" 
+                            class="badge bg-success me-2">
+                        <i class="bi bi-person me-1"></i>{{notificacion.coach_nombre}}
+                      </span>
+                      
+                      <!-- Estado de lectura -->
+                      <span *ngIf="notificacion.leido" class="text-success">
+                        <i class="bi bi-check2-circle"></i> Leída
+                      </span>
+                      <span *ngIf="!notificacion.leido" class="text-primary">
+                        <i class="bi bi-circle"></i> Nueva
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
-    </li>
-  </ul>
+    </div>
+  </div>
 </div>
