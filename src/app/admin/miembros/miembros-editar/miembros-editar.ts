@@ -31,7 +31,7 @@ export class MiembrosEditarComponent {
     buscarMiembro(): void {
         this.mensaje = '';
         this.miembro = null;
-        this.cargando = true;
+        this.cargando = false;
         const valor = this.busqueda.trim();
         if (!valor) {
             this.mensaje = 'Ingrese un ID, cédula o nombre para buscar.';
@@ -43,7 +43,7 @@ export class MiembrosEditarComponent {
         if (!isNaN(id)) {
             this.service.getById(id).subscribe({
                 next: (data) => {
-                    this.miembro = data;
+                    this.miembro = data ?? null;
                     this.cargando = false;
                 },
                 error: () => {
