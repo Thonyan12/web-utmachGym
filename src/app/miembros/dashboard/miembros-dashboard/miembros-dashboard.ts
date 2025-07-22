@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthService, User } from '../../../services/auth';
+import { NotificacionesServiceDashboard, Notificacion } from '../../services/notificaciones';
 
 @Component({
   selector: 'app-miembros-dashboard',
@@ -12,51 +13,64 @@ import { AuthService, User } from '../../../services/auth';
 })
 export class MiembrosDashboard implements OnInit {
   currentUser: User | null = null;
-  fechaActual: string = ''; // ✅ Nueva propiedad para la fecha
-  
-  // Datos de ejemplo (luego vendrán del backend)
-  estadoMensualidad = {
-    activa: true,
-    diasRestantes: 15,
-    fechaVencimiento: '2025-01-28'
-  };
+  fechaActual: string = ''; 
 
-  proximasClases = [
-    { 
-      fecha: '2025-01-14', 
-      hora: '08:00', 
-      tipo: 'Cardio Intensivo', 
-      entrenador: 'Jean Carlo Velasco' 
-    },
-    { 
-      fecha: '2025-01-15', 
-      hora: '10:00', 
-      tipo: 'Fuerza y Resistencia', 
-      entrenador: 'Carolina Aguirre' 
-    }
-  ];
+  notificacionesEnviadas: Notificacion[] = [];
+  notificacionesRecibidas: Notificacion[] = [];
+  loadingNotificaciones = true;
 
-  progresoSemanal = {
-    clases: 3,
-    meta: 5
-  };
-
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private notiService: NotificacionesServiceDashboard
+  ) {}
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
     });
-    
-    // ✅ Configurar la fecha actual al inicializar
+
     this.fechaActual = new Date().toLocaleDateString('es-ES');
+    this.cargarNotificaciones();
   }
 
-  // ✅ Método para obtener el primer nombre
+  cargarNotificaciones() {
+    this.loadingNotificaciones = true;
+    this.notiService.getTodasMisNotificaciones().subscribe({
+      next: res => {
+        this.notificacionesEnviadas = (res.sent || []).sort((a, b) =>
+          new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime()
+        );
+        this.notificacionesRecibidas = (res.received || []).sort((a, b) =>
+          new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime()
+        );
+        this.loadingNotificaciones = false;
+      },
+      error: () => {
+        this.notificacionesEnviadas = [];
+        this.notificacionesRecibidas = [];
+        this.loadingNotificaciones = false;
+      }
+    });
+  }
+
+  marcarComoLeida(notif: Notificacion) {
+    if (!notif.leido) {
+      this.notiService.marcarComoLeida(notif.id_notificacion).subscribe({
+        next: () => {
+          notif.leido = true;
+        }
+      });
+    }
+  }
+
   obtenerPrimerNombre(): string {
     if (!this.currentUser?.nombre_completo) {
       return 'Miembro';
     }
     return this.currentUser.nombre_completo.split(' ')[0] || 'Miembro';
+  }
+
+  trackByNotificacion(index: number, notif: Notificacion): number {
+    return notif.id_notificacion;
   }
 }

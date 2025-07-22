@@ -19,7 +19,7 @@ export class NotificacionesMiembroService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/api/notificaciones-miembro';
 
-  // ✅ MÉTODO PARA OBTENER HEADERS CON TOKEN
+  // MÉTODO PARA OBTENER HEADERS CON TOKEN
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     console.log('🔑 Token desde localStorage:', token ? 'Token presente' : 'No hay token');
@@ -30,7 +30,7 @@ export class NotificacionesMiembroService {
     });
   }
 
-  // ✅ CORREGIDO - Con headers
+  
   getMisNotificaciones(): Observable<{ success: boolean, data: NotificacionMiembro[] }> {
     console.log('📡 Llamando getMisNotificaciones con headers...');
     return this.http.get<{ success: boolean, data: NotificacionMiembro[] }>(
@@ -39,7 +39,7 @@ export class NotificacionesMiembroService {
     );
   }
 
-  // ✅ CORREGIDO - Con headers
+  
   marcarComoLeida(id: number): Observable<any> {
     console.log('📡 Marcando como leída con headers:', id);
     return this.http.put(
@@ -49,7 +49,7 @@ export class NotificacionesMiembroService {
     );
   }
 
-  // ✅ CORREGIDO - Con headers y mejor logging
+  
   generarNotificacionEntrenador(): Observable<{ success: boolean, message: string, notificacion?: any }> {
     console.log('📡 Llamando generarNotificacionEntrenador con headers...');
     
@@ -63,7 +63,7 @@ export class NotificacionesMiembroService {
     );
   }
 
-  // ✅ MÉTODO DE TEST PARA EL SERVICIO
+  
   testearConexion(): Observable<any> {
     console.log('🧪 Testeando conexión desde servicio...');
     return this.http.get(`${this.apiUrl}/test`, { headers: this.getHeaders() });

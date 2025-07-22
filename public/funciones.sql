@@ -683,7 +683,7 @@ CREATE TRIGGER recalc_total_after_del
   FOR EACH ROW
   EXECUTE FUNCTION trg_recalc_total_pago();
 
--- ✅ SOLUCIÓN DEFINITIVA: Eliminar triggers duplicados y crear uno solo inteligente
+
 
 -- 1) Eliminar todos los triggers de carrito existentes
 DROP TRIGGER IF EXISTS new_cart_trigger ON Carrito;
@@ -949,44 +949,7 @@ FOR EACH ROW
 EXECUTE FUNCTION trigger_asignar_rutina_por_nuevo_perfil();
 
 
--- Función para notificar al miembro cuando se le asigna un entrenador
-CREATE OR REPLACE FUNCTION trg_notificar_asignacion_entrenador()
-RETURNS TRIGGER AS $$
-DECLARE
-  v_user_id INT;
-  v_entrenador_nombre VARCHAR;
-BEGIN
-  -- Buscar el usuario asociado al miembro
-  SELECT id_usuario INTO v_user_id
-  FROM Usuario
-  WHERE id_miembro = NEW.id_miembro AND estado = TRUE;
 
-  -- Obtener nombre del entrenador
-  SELECT nombre || ' ' || apellido INTO v_entrenador_nombre
-  FROM Entrenador
-  WHERE id_entrenador = NEW.id_entrenador;
-
-  -- Si existe usuario, insertar notificación
-  IF v_user_id IS NOT NULL THEN
-    INSERT INTO Notificacion (
-      id_usuario, id_usuario_remitente, tipo, contenido, fecha_envio, leido, estado, f_registro
-    ) VALUES (
-      v_user_id, NULL, 'asignacion_entrenador',
-      'Se te ha asignado el entrenador: ' || v_entrenador_nombre,
-      CURRENT_DATE, FALSE, TRUE, CURRENT_DATE
-    );
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Trigger para llamar a la función después de asignar un entrenador
-DROP TRIGGER IF EXISTS trigger_notificar_asignacion_entrenador ON Asignacion_entrenador;
-CREATE TRIGGER trigger_notificar_asignacion_entrenador
-AFTER INSERT ON Asignacion_entrenador
-FOR EACH ROW
-EXECUTE FUNCTION trg_notificar_asignacion_entrenador();
 
 CREATE OR REPLACE FUNCTION notificar_asistencia_clase()
 RETURNS TRIGGER AS $$
@@ -1023,87 +986,6 @@ CREATE TRIGGER trigger_notificar_asistencia_clase
 AFTER INSERT ON Registro_de_clases
 FOR EACH ROW
 EXECUTE FUNCTION notificar_asistencia_clase();
-
-CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
-RETURNS TRIGGER AS $$
-DECLARE
-  v_entrenador_id INT;
-BEGIN
-  -- Selecciona un entrenador aleatorio activo
-  SELECT id_entrenador INTO v_entrenador_id
-  FROM Entrenador
-  WHERE estado = TRUE
-  ORDER BY RANDOM()
-  LIMIT 1;
-
-  -- Si hay entrenador disponible, crea la asignación
-  IF v_entrenador_id IS NOT NULL THEN
-    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
-    VALUES (NEW.id_miembro, v_entrenador_id);
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
-CREATE TRIGGER trigger_asignar_entrenador_aleatorio
-AFTER INSERT ON Miembro
-FOR EACH ROW
-EXECUTE FUNCTION asignar_entrenador_aleatorio();
-
-
-
-
-CREATE OR REPLACE FUNCTION asignar_entrenador_aleatorio()
-RETURNS TRIGGER AS $$
-DECLARE
-  v_entrenador_id INT;
-  v_entrenador_nombre TEXT;
-  v_usuario_id INT;
-BEGIN
-  -- Selecciona un entrenador aleatorio activo
-  SELECT id_entrenador, nombre INTO v_entrenador_id, v_entrenador_nombre
-  FROM Entrenador
-  WHERE estado = TRUE
-  ORDER BY RANDOM()
-  LIMIT 1;
-
-  -- Si hay entrenador disponible, crea la asignación
-  IF v_entrenador_id IS NOT NULL THEN
-    INSERT INTO Asignacion_entrenador (id_miembro, id_entrenador)
-    VALUES (NEW.id_miembro, v_entrenador_id);
-
-    -- Busca el usuario asociado al miembro
-    SELECT id_usuario INTO v_usuario_id
-    FROM Usuario
-    WHERE id_miembro = NEW.id_miembro;
-
-    -- Notifica al miembro quién es su entrenador
-    IF v_usuario_id IS NOT NULL THEN
-      INSERT INTO Notificacion (
-        id_usuario, tipo, contenido, fecha_envio, leido, estado, f_registro
-      ) VALUES (
-        v_usuario_id,
-        'asignacion_entrenador',
-        '¡Bienvenido! Tu entrenador asignado es: ' || v_entrenador_nombre || '.',
-        CURRENT_DATE,
-        FALSE,
-        TRUE,
-        CURRENT_DATE
-      );
-    END IF;
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-DROP TRIGGER IF EXISTS trigger_asignar_entrenador_aleatorio ON Miembro;
-CREATE TRIGGER trigger_asignar_entrenador_aleatorio
-AFTER INSERT ON Miembro
-FOR EACH ROW
-EXECUTE FUNCTION asignar_entrenador_aleatorio();
-
 
 
 -- Elimina todas las versiones anteriores de la función y el trigger antes de crear la nueva versión

@@ -29,7 +29,7 @@ export class Notifiacion implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO AGREGADO para verificar autenticación
+  // para verificar autenticación
   verificarAutenticacion() {
     const token = localStorage.getItem('token');
     const userInfo = localStorage.getItem('userInfo');
@@ -56,7 +56,7 @@ export class Notifiacion implements OnInit, OnDestroy {
     return true;
   }
 
-  // ✅ MÉTODO AGREGADO para testear conexión con el backend
+  //  para testear conexión con el backend
   testearConexion() {
     console.log('🌐 Probando conexión con el backend...');
     
@@ -104,7 +104,7 @@ export class Notifiacion implements OnInit, OnDestroy {
     });
   }
 
-  // ✅ MÉTODO CORREGIDO para verificar entrenador con autenticación
+  // para verificar entrenador con autenticación
   verificarEntrenadorAsignado() {
     console.log('🔄 Verificando entrenador asignado...');
     
@@ -226,11 +226,10 @@ export class Notifiacion implements OnInit, OnDestroy {
     this.verificarEntrenadorAsignado();
   }
 
-  // ✅ MÉTODO CORREGIDO para testear conexión
+  // MÉTODO CORREGIDO para testear conexión
   testearConexionManual() {
     console.log('🧪 Testeando conexión manual...');
 
-    // En lugar de llamar a un método que no existe, vamos a probar la carga de notificaciones
     this.notiService.getMisNotificaciones().subscribe({
       next: (response: any) => {
         console.log('✅ Test de conexión exitoso:', response);
@@ -254,7 +253,7 @@ export class Notifiacion implements OnInit, OnDestroy {
     this.cargarNotificaciones();
   }
 
-  // ✅ MÉTODOS DE FECHA CORREGIDOS:
+  // MÉTODOS DE FECHA CORREGIDOS:
 
   formatearFecha(fecha: string): string {
     if (!fecha) return 'Fecha no disponible';
@@ -333,7 +332,7 @@ export class Notifiacion implements OnInit, OnDestroy {
       return this.formatearFecha(fecha);
     }
   }
-  // ✅ MÉTODO CORREGIDO - Manejar tipo undefined
+  // Manejar tipo undefined
   getIconoTipo(tipo: string | undefined): string {
     if (!tipo) return 'bi-bell-fill'; // Ícono por defecto
 
@@ -353,7 +352,7 @@ export class Notifiacion implements OnInit, OnDestroy {
     }
   }
 
-  // ✅ MÉTODO CORREGIDO - Manejar tipo undefined
+  // Manejar tipo undefined
   getColorTipo(tipo: string | undefined): string {
     if (!tipo) return 'text-secondary'; // Color por defecto
 
