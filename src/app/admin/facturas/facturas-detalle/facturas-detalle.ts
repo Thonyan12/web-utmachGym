@@ -20,6 +20,16 @@ export class FacturasDetalle implements OnInit {
   facturasFiltradas: Factura[] = [];
   filtro: string = '';
 
+  detalleTipos: string[] = [
+    'pago mensual',
+    'compra producto',
+    'compra suplemento',
+    'servicio adicional'
+  ];
+
+  
+  tipoDetalle: string = '';
+
   abrirModal(factura: Factura): void {
     this.facturaSeleccionada = factura;
     this.mostrarModal = true;

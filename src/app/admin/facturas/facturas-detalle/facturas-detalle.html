@@ -9,6 +9,14 @@
         No se encontraron facturas.
       </div>
   
+      <div class="mb-3">
+        <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
+        <select [(ngModel)]="tipoDetalle" name="tipoDetalle" id="tipoDetalle" class="form-select">
+          <option value="" disabled selected>Seleccione tipo de detalle</option>
+          <option *ngFor="let tipo of detalleTipos" [value]="tipo">{{ tipo }}</option>
+        </select>
+      </div>
+  
       <ul class="list-group shadow-sm">
         <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
             *ngFor="let factura of facturasFiltradas">

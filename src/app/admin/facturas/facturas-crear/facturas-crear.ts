@@ -25,16 +25,23 @@ export class FacturasCrearComponent {
 
   detalle: any = {
     tipo_detalle: '',
-    referencia_id: null, // ID de referencia opcional
+    referencia_id: null, 
     descripcion: '',
     monto: 0,
     iva: 0,
-    metodo_pago: '', // Método de pago
-    estado_registro: true, // Estado del registro (Activo por defecto)
-    f_registro: '' // Fecha de registro
+    metodo_pago: '', 
+    estado_registro: true, 
+    f_registro: '' 
   };
 
   mensaje: string = '';
+
+  detalleTipos: string[] = [
+    'pago mensual',
+    'compra producto',
+    'compra suplemento',
+    'servicio adicional'
+  ];
 
   // Inyectar FacturasService en el constructor
   constructor(private facturasService: FacturasService) {}

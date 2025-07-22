@@ -117,14 +117,16 @@
         <form #detalleForm="ngForm">
           <div class="mb-3">
             <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
-            <input
-              type="text"
+            <select
               id="tipoDetalle"
               class="form-control"
               [(ngModel)]="detalle.tipo_detalle"
               name="tipo_detalle"
               required
-            />
+            >
+              <option value="" disabled selected>Seleccione tipo de detalle</option>
+              <option *ngFor="let tipo of detalleTipos" [value]="tipo">{{ tipo }}</option>
+            </select>
           </div>
           <div class="mb-3">
             <label for="referenciaId" class="form-label">Referencia ID</label>
