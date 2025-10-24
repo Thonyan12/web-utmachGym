@@ -18,7 +18,7 @@
             <table class="table table-hover table-bordered align-middle mb-0">
               <thead style="background-color: #14213d; color: #fff;">
                 <tr>
-                  <th scope="col">ID</th>
+                  <!--<th scope="col">ID</th>-->
                   <th scope="col">ID Miembro</th>
                   <th scope="col">Fecha Inicio</th>
                   <th scope="col">Fecha Fin</th>
@@ -29,8 +29,8 @@
               </thead>
               <tbody>
                 <tr *ngFor="let mensualidad of mensualidades" class="align-middle">
-                  <td class="fw-bold text-center">{{ mensualidad.id_mensualidad }}</td>
-                  <td class="text-center">{{ mensualidad.id_miembro }}</td>
+                  <!--<td class="fw-bold text-center">{{ mensualidad.id_mensualidad }}</td>-->
+                  <td class="text-center">{{ getMemberName(mensualidad.id_miembro) }}</td>
                   <td class="text-center">{{ mensualidad.fecha_inicio }}</td>
                   <td class="text-center">{{ mensualidad.fecha_fin }}</td>
                   <td class="text-end">${{ mensualidad.monto }}</td>
