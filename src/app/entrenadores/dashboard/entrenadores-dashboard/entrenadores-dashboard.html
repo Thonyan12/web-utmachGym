@@ -1,253 +1,51 @@
-<div class="container-fluid py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); min-height: calc(100vh - 76px); position: relative; overflow: hidden;">
-  <!-- Elementos decorativos de fondo -->
-  <div class="bg-particles">
-    <div class="particle" style="--delay: 0s; --duration: 20s;"></div>
-    <div class="particle" style="--delay: 2s; --duration: 25s;"></div>
-    <div class="particle" style="--delay: 4s; --duration: 18s;"></div>
-    <div class="particle" style="--delay: 6s; --duration: 22s;"></div>
-    <div class="particle" style="--delay: 8s; --duration: 30s;"></div>
-  </div>
+<div class="container-fluid py-4" style="background: transparent; min-height: calc(100vh - 76px); position: relative;">
 
   <style>
-    /* Partículas flotantes de fondo */
-    .bg-particles {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
+    /* Estilos formales y sobrios para el dashboard de entrenadores */
+    .formal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(20, 33, 61, 0.08);
+      border: 1px solid rgba(20,33,61,0.06);
+      color: #14213d;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
-    .particle {
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      animation: float-particle var(--duration) var(--delay) infinite linear;
-    }
-    .particle:nth-child(1) { left: 10%; }
-    .particle:nth-child(2) { left: 25%; }
-    .particle:nth-child(3) { left: 50%; }
-    .particle:nth-child(4) { left: 75%; }
-    .particle:nth-child(5) { left: 90%; }
+    .formal-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(20,33,61,0.12); }
 
-    @keyframes float-particle {
-      0% { 
-        transform: translateY(100vh) rotate(0deg);
-        opacity: 0;
-      }
-      10% { opacity: 1; }
-      90% { opacity: 1; }
-      100% { 
-        transform: translateY(-100px) rotate(360deg);
-        opacity: 0;
-      }
+    .welcome-card {
+      background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+      border-left: 4px solid #fca311; /* accent */
+      padding: 1.8rem;
+      border-radius: 12px;
     }
 
-    /* Efectos de hover mejorados */
-    .ultra-card {
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      border-radius: 25px !important;
-      backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      position: relative;
-      z-index: 2;
-      overflow: hidden;
-    }
-    .ultra-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: left 0.5s;
-    }
-    .ultra-card:hover::before {
-      left: 100%;
-    }
-    .ultra-card:hover {
-      transform: translateY(-15px) scale(1.02);
-      box-shadow: 0 25px 50px rgba(0,0,0,0.25) !important;
-    }
+    .stat-card { padding: 1.5rem; border-radius: 10px; }
+    .stat-accent { height: 6px; border-radius: 6px 6px 0 0; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: #14213d; }
+    .stat-label { color: #3b4a5a; opacity: 0.9; }
 
-    /* Tarjeta de bienvenida súper mejorada */
-    .mega-welcome {
-      background: linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #ffecd2 100%);
-      background-size: 400% 400%;
-      animation: gradient-shift 8s ease infinite;
-      position: relative;
-      overflow: hidden;
-    }
-    @keyframes gradient-shift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
+    .accent-navy { background: linear-gradient(90deg, #0a1a2e, #14213d); }
+    .accent-amber { background: linear-gradient(90deg, #fca311, #ffb84d); }
+    .accent-green { background: linear-gradient(90deg, #2d6a4f, #2f9e44); }
 
-    /* Efectos en las reglas */
-    .rule-ultra {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px !important;
-      border: none !important;
-      margin-bottom: 1rem;
-      padding: 1.5rem !important;
-      transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      position: relative;
-      overflow: hidden;
-    }
-    .rule-ultra::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-    .rule-ultra:hover::before {
-      transform: scaleX(1);
-    }
-    .rule-ultra:hover {
-      transform: translateX(20px) translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-    }
+    .section-title { color: #14213d; font-weight: 700; }
 
-    /* Frase motivacional mejorada */
-    .quote-spectacular {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      border-radius: 30px;
-      padding: 2.5rem;
-      position: relative;
-      overflow: hidden;
-      border: 3px solid rgba(255, 255, 255, 0.3);
-    }
-    .quote-spectacular::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: conic-gradient(from 0deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-      animation: rotate-glow 4s linear infinite;
-    }
-    @keyframes rotate-glow {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
+    .rules-list { gap: 1rem; }
+    .rule-item { background: #fbfdff; border-radius: 10px; padding: 1rem; border: 1px solid rgba(20,33,61,0.05); }
 
-    /* Badge de fecha mejorado */
-    .date-ultra {
-      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
-      border: 3px solid rgba(255, 255, 255, 0.5);
-      border-radius: 25px;
-      padding: 1rem 2rem;
-      animation: float-badge 3s ease-in-out infinite;
-      box-shadow: 0 10px 25px rgba(255, 154, 158, 0.4);
-    }
-    @keyframes float-badge {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-10px) rotate(1deg); }
-    }
-
-    /* Iconos con efectos */
-    .icon-bounce {
-      display: inline-block;
-      animation: bounce-icon 2s infinite;
-    }
-    @keyframes bounce-icon {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-10px); }
-      60% { transform: translateY(-5px); }
-    }
-
-    /* Texto con efectos */
-    .text-glow {
-      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-    }
-
-    /* Efecto de ondas en el saludo */
-    .wave-hand {
-      display: inline-block;
-      animation: wave-animation 2.5s ease-in-out infinite;
-      transform-origin: 70% 70%;
-    }
-    @keyframes wave-animation {
-      0%, 100% { transform: rotate(0deg); }
-      10%, 30%, 50%, 70% { transform: rotate(14deg); }
-      20%, 40%, 60% { transform: rotate(-8deg); }
-      80% { transform: rotate(14deg); }
-      90% { transform: rotate(-4deg); }
-    }
-
-    /* Tarjetas de estadísticas */
-    .weather-card {
-      background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
-      color: white;
-    }
-    .members-card {
-      background: linear-gradient(135deg, #a29bfe 0%, #6c5ce7 100%);
-      color: white;
-    }
-    .training-card {
-      background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
-      color: white;
-    }
-    .progress-card {
-      background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
-      color: white;
-    }
-
-    /* Contador animado */
-    .counter {
-      font-size: 2.5rem !important;
-      font-weight: 900 !important;
-    }
-
-    /* Progreso animado */
-    .progress-animated {
-      animation: progress-fill 2s ease-in-out;
-    }
-    @keyframes progress-fill {
-      0% { width: 0%; }
-      100% { width: 85%; }
-    }
-
-    /* Efectos hover para las tarjetas de stats */
-    .weather-card:hover, .members-card:hover, 
-    .training-card:hover, .progress-card:hover {
-      transform: translateY(-10px) scale(1.05) !important;
-    }
-
-    /* Animación de los iconos de stats */
-    .weather-icon i, .members-icon i, 
-    .training-icon i, .progress-icon i {
-      transition: transform 0.3s ease;
-    }
-    .weather-card:hover .weather-icon i,
-    .members-card:hover .members-icon i,
-    .training-card:hover .training-icon i,
-    .progress-card:hover .progress-icon i {
-      transform: scale(1.2) rotate(5deg);
-    }
+    .small-muted { color: #6c7a89; }
   </style>
   
   <div class="row position-relative" style="z-index: 2;">
     <!-- Bienvenida Espectacular -->
     <div class="col-12 mb-4">
-      <div class="card border-0 shadow-lg ultra-card mega-welcome" style="color: white;">
+      <div class="card border-0 shadow-lg formal-card welcome-card" style="color: #14213d;">
         <div class="card-body py-5 position-relative">
           <div class="row align-items-center">
             <div class="col-md-8">
-              <h1 class="fw-bold mb-3 text-glow" style="font-size: 3rem;">
-                ¡Hola, {{ obtenerPrimerNombre() }}! 
-                <span class="wave-hand">👋</span>
+              <h1 class="fw-bold mb-3 section-title" style="font-size: 2.4rem;">
+                ¡Hola, {{ obtenerPrimerNombre() }}!
+                <span class="me-2">👋</span>
               </h1>
               <p class="mb-3 fs-4" style="opacity: 0.95; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
                 🚀 ¡Bienvenido de vuelta a tu área personal! 
@@ -263,7 +61,7 @@
               </div>
             </div>
             <div class="col-md-4 text-md-end">
-              <div class="date-ultra text-dark">
+              <div class="small-muted text-dark">
                 <i class="bi bi-calendar-heart me-2 fs-4 icon-bounce"></i>
                 <span class="fw-bold fs-5">{{ fechaActual }}</span>
               </div>
@@ -278,7 +76,7 @@
       <div class="row g-4">
         <!-- Clima -->
         <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg ultra-card weather-card">
+          <div class="card border-0 shadow-lg formal-card stat-card accent-navy text-white">
             <div class="card-body text-center py-4">
               <div class="weather-icon mb-3">
                 <i class="bi bi-sun-fill icon-bounce" style="font-size: 3rem; color: #ffa500;"></i>
@@ -298,7 +96,7 @@
 
         <!-- Total Miembros -->
         <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg ultra-card members-card">
+          <div class="card border-0 shadow-lg formal-card stat-card accent-amber text-white">
             <div class="card-body text-center py-4">
               <div class="members-icon mb-3">
                 <i class="bi bi-people-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
@@ -317,7 +115,7 @@
 
         <!-- Entrenamientos Hoy -->
         <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg ultra-card training-card">
+          <div class="card border-0 shadow-lg formal-card stat-card accent-green text-white">
             <div class="card-body text-center py-4">
               <div class="training-icon mb-3">
                 <i class="bi bi-lightning-charge-fill icon-bounce" style="font-size: 3rem; color: #ffff00;"></i>
@@ -336,7 +134,7 @@
 
         <!-- Tu Progreso -->
         <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg ultra-card progress-card">
+          <div class="card border-0 shadow-lg formal-card stat-card accent-amber text-white">
             <div class="card-body text-center py-4">
               <div class="progress-icon mb-3">
                 <i class="bi bi-trophy-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
@@ -357,7 +155,7 @@
 
     <!-- Reglas del Gimnasio Mejoradas -->
     <div class="col-12 mb-4">
-      <div class="card border-0 shadow-lg ultra-card" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);">
+      <div class="card border-0 shadow-lg formal-card">
         <div class="card-body py-5">
           <div class="text-center mb-5">
             <h2 class="fw-bold mb-3" style="color:#2c3e50; font-size: 2.5rem;">
@@ -371,23 +169,23 @@
           <div class="row">
             <div class="col-lg-10 mx-auto">
               <div class="mb-5">
-                <div class="rule-ultra">
+                <div class="rule-item">
                   <i class="bi bi-droplet-fill text-info me-3 icon-bounce" style="font-size: 1.5rem;"></i>
                   <strong style="font-size: 1.1rem;">💧 Usa siempre una toalla</strong> en los equipos para mantener la higiene perfecta
                 </div>
-                <div class="rule-ultra">
+                <div class="rule-item">
                   <i class="bi bi-spray text-success me-3 icon-bounce" style="font-size: 1.5rem;"></i>
                   <strong style="font-size: 1.1rem;">🧼 Limpia el equipo</strong> después de usarlo, cuida nuestro espacio común
                 </div>
-                <div class="rule-ultra">
+                <div class="rule-item">
                   <i class="bi bi-volume-down text-warning me-3 icon-bounce" style="font-size: 1.5rem;"></i>
                   <strong style="font-size: 1.1rem;">🤫 Mantén el respeto</strong>, no grites ni tires las pesas bruscamente
                 </div>
-                <div class="rule-ultra">
+                <div class="rule-item">
                   <i class="bi bi-people-fill me-3 icon-bounce" style="font-size: 1.5rem; color: #6f42c1;"></i>
                   <strong style="font-size: 1.1rem;">👥 Respeta los turnos</strong> y el espacio personal de los demás
                 </div>
-                <div class="rule-ultra">
+                <div class="rule-item">
                   <i class="bi bi-house-gear text-danger me-3 icon-bounce" style="font-size: 1.5rem;"></i>
                   <strong style="font-size: 1.1rem;">🏠 Guarda los implementos</strong> en su lugar después de usarlos
                 </div>
@@ -395,7 +193,7 @@
             </div>
           </div>
           
-          <div class="quote-spectacular text-center text-white fw-semibold position-relative" style="font-size:1.3rem; z-index: 1;">
+          <div class="formal-card text-center text-dark fw-semibold position-relative" style="font-size:1.05rem; z-index: 1; padding: 1rem;">
             <div class="position-relative" style="z-index: 2;">
               <i class="bi bi-lightbulb-fill me-3 icon-bounce" style="font-size: 2rem;"></i>
               <div class="mb-3">
