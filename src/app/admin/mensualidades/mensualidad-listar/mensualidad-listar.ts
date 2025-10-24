@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-mensualidad-listar',
@@ -17,7 +19,10 @@ export class MensualidadListar implements OnInit {
   mensualidades: Mensualidad[] = [];
   searchText: string = '';
 
-  constructor(private mensualidadesService: Mensualidades) { }
+  // mapa id_miembro -> nombre
+  memberMap: Record<number, string> = {};
+
+  constructor(private mensualidadesService: Mensualidades, private http: HttpClient) { }
 
   ngOnInit(): void {
     this.mensualidadesService.getMensualidades()
@@ -31,5 +36,30 @@ export class MensualidadListar implements OnInit {
         console.log('Mensualidades obtenidas:', data); // Verifica los datos en la consola
         this.mensualidades = data;
       });
+
+    this.loadMembers();
+  }
+
+  private loadMembers() {
+    // Ajusta la ruta según tu API
+    this.http.get<any[]>(`${environment.apiUrl}/api/miembros`)
+      .pipe(
+        catchError(err => {
+          console.error('Error al obtener miembros:', err);
+          return of([]);
+        })
+      )
+      .subscribe(members => {
+        // Espera que cada miembro tenga id_miembro y nombre_completo
+        members.forEach(m => {
+          this.memberMap[m.id_miembro] = m.nombre_completo || `${m.nombre || ''} ${m.apellido || ''}`.trim();
+        });
+      });
+  }
+
+  getMemberName(id?: number | string | null): string {
+    if (id == null) return ''; // maneja undefined o null
+    const key = Number(id);
+    return this.memberMap[key] || String(key);
   }
 }
