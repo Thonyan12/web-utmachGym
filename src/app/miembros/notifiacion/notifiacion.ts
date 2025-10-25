@@ -12,6 +12,9 @@ import { SocketService } from '../../services/socket.service';
 })
 export class Notifiacion implements OnInit, OnDestroy {
   notificaciones: NotificacionMiembro[] = [];
+  resumenNotificaciones: any = null;
+  ordenActual: 'fecha-desc' | 'fecha-asc' | 'no-leidas' = 'fecha-desc';
+  filtroTipo: string = 'todas'; // Para filtrar por tipo
 
   loading = true;
   error: string | null = null;
@@ -121,41 +124,120 @@ export class Notifiacion implements OnInit, OnDestroy {
   }
 
   cargarNotificaciones() {
-    console.log('📋 Cargando notificaciones...');
+    console.log('📋 Cargando notificaciones UNIFICADAS...');
     this.loading = true;
     this.error = null;
 
     this.notiService.getMisNotificaciones().subscribe({
       next: (res: any) => {
-        console.log('📡 Respuesta del servidor:', res);
+        console.log('📡 Respuesta del servidor (unificada):', res);
         if (res.success) {
-          // Mapear propiedades del backend a la interfaz esperada por el frontend
-          this.notificaciones = (res.data || []).map((n: any) => {
-            // Normalizar campos: algunos endpoints usan id_usuario en vez de id_miembro
-            const fecha = n.fecha_envio ? new Date(n.fecha_envio).toISOString() : new Date().toISOString();
-            return {
-              ...n,
-              id_notificacion: (n.id_notificacion ?? n.id) || Date.now(),
-              id_miembro: n.id_miembro ?? n.id_usuario ?? n.id_usuario_destino ?? null,
-              fecha_envio: fecha,
-              titulo: n.titulo ?? this.getTituloFromTipo(n.tipo),
-            } as NotificacionMiembro;
-          }).sort((a: NotificacionMiembro, b: NotificacionMiembro) => {
-            return new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime();
-          });
+          this.notificaciones = (res.data || []).map((n: any) => this.normalizeNotification(n));
+          this.resumenNotificaciones = res.resumen || null;
+          this.aplicarOrdenamiento();
           this.loading = false;
           console.log('✅ Notificaciones cargadas:', this.notificaciones.length);
+          console.log('📊 Resumen:', this.resumenNotificaciones);
         } else {
           this.error = 'No se pudieron cargar las notificaciones';
           this.loading = false;
         }
       },
       error: (err: any) => {
-        this.error = 'Error al cargar notificaciones';
+        this.error = 'Error al cargar notificaciones. Verifica la conexión con el servidor.';
         this.loading = false;
         console.error('❌ Error al cargar notificaciones:', err);
       }
     });
+  }
+
+  ordenarPor(tipo: 'fecha-desc' | 'fecha-asc' | 'no-leidas') {
+    this.ordenActual = tipo;
+    this.aplicarOrdenamiento();
+  }
+
+  filtrarPorTipo(tipo: string) {
+    this.filtroTipo = tipo;
+    if (tipo === 'todas') {
+      this.cargarNotificaciones();
+    } else if (tipo === 'no-leidas') {
+      this.cargarNoLeidas();
+    } else {
+      this.cargarPorTipo(tipo);
+    }
+  }
+
+  cargarNoLeidas() {
+    console.log('📋 Cargando solo notificaciones NO LEÍDAS...');
+    this.loading = true;
+    this.error = null;
+
+    this.notiService.getNoLeidas().subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notificaciones = (res.data || []).map((n: any) => this.normalizeNotification(n));
+          this.aplicarOrdenamiento();
+          this.loading = false;
+          console.log('✅ Notificaciones no leídas cargadas:', this.notificaciones.length);
+        } else {
+          this.error = 'No se pudieron cargar las notificaciones';
+          this.loading = false;
+        }
+      },
+      error: (err: any) => {
+        this.error = 'Error al cargar notificaciones no leídas';
+        this.loading = false;
+        console.error('❌ Error:', err);
+      }
+    });
+  }
+
+  cargarPorTipo(tipo: string) {
+    console.log('📋 Cargando notificaciones por tipo:', tipo);
+    this.loading = true;
+    this.error = null;
+
+    this.notiService.getPorTipo(tipo).subscribe({
+      next: (res: any) => {
+        if (res.success) {
+          this.notificaciones = (res.data || []).map((n: any) => this.normalizeNotification(n));
+          this.aplicarOrdenamiento();
+          this.loading = false;
+          console.log('✅ Notificaciones filtradas cargadas:', this.notificaciones.length);
+        } else {
+          this.error = 'No se pudieron cargar las notificaciones';
+          this.loading = false;
+        }
+      },
+      error: (err: any) => {
+        this.error = 'Error al filtrar notificaciones';
+        this.loading = false;
+        console.error('❌ Error:', err);
+      }
+    });
+  }
+
+  private aplicarOrdenamiento() {
+    switch (this.ordenActual) {
+      case 'fecha-desc':
+        this.notificaciones.sort((a, b) => 
+          new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime()
+        );
+        break;
+      case 'fecha-asc':
+        this.notificaciones.sort((a, b) => 
+          new Date(a.fecha_envio).getTime() - new Date(b.fecha_envio).getTime()
+        );
+        break;
+      case 'no-leidas':
+        this.notificaciones.sort((a, b) => {
+          if (a.leido === b.leido) {
+            return new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime();
+          }
+          return a.leido ? 1 : -1;
+        });
+        break;
+    }
   }
 
   // Generar un título por tipo cuando no venga en la notificación
@@ -186,7 +268,8 @@ export class Notifiacion implements OnInit, OnDestroy {
       id_notificacion,
       id_miembro,
       fecha_envio: fecha,
-      titulo: n.titulo ?? this.getTituloFromTipo(n.tipo)
+      titulo: n.titulo ?? this.getTituloFromTipo(n.tipo),
+      origen: n.origen || 'general'
     } as NotificacionMiembro;
   }
 
@@ -297,10 +380,10 @@ export class Notifiacion implements OnInit, OnDestroy {
 
   marcarComoLeida(notificacion: NotificacionMiembro) {
     if (!notificacion.leido) {
-      this.notiService.marcarComoLeida(notificacion.id_notificacion).subscribe({
+      this.notiService.marcarComoLeida(notificacion.id_notificacion, notificacion.origen).subscribe({
         next: () => {
           notificacion.leido = true;
-          console.log(`✅ Notificación ${notificacion.id_notificacion} marcada como leída`);
+          console.log(`✅ Notificación ${notificacion.id_notificacion} (${notificacion.origen}) marcada como leída`);
         },
         error: (err: any) => {
           console.error('❌ Error al marcar como leída:', err);

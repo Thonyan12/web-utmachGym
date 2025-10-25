@@ -3,14 +3,17 @@
     <div class="col-12">
       <div class="card border-0 shadow-sm">
         
-        <!-- Header con botones de debug -->
+        <!-- Header con botones de control -->
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
           <h4 class="mb-0">
             <i class="bi bi-bell-fill me-2"></i>
             Mis Notificaciones
+            <span *ngIf="!loading && notificaciones.length > 0" class="badge bg-light text-primary ms-2">
+              {{ notificaciones.length }}
+            </span>
           </h4>
           
-          <!-- Botones de debug y control -->
+          <!-- Botones de control -->
           <div class="btn-group">
             <button class="btn btn-sm btn-outline-light" 
                     (click)="recargarNotificaciones()"
@@ -19,16 +22,70 @@
               Recargar
             </button>
             
-            <button class="btn btn-sm btn-outline-light" 
-                    (click)="forzarVerificacionEntrenador()"
-                    title="Verificar coach asignado">
-              <i class="bi bi-person-check me-1"></i>
-              Coach
+            <!-- Filtro por tipo -->
+            <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                    type="button" 
+                    data-bs-toggle="dropdown">
+              <i class="bi bi-funnel me-1"></i>
+              Filtrar
             </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">Filtrar por:</h6></li>
+              <li><a class="dropdown-item" (click)="filtrarPorTipo('todas')">
+                <i class="bi bi-list-ul me-2"></i>Todas las notificaciones
+              </a></li>
+              <li><a class="dropdown-item" (click)="filtrarPorTipo('no-leidas')">
+                <i class="bi bi-circle-fill text-primary me-2"></i>Solo no leídas
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="filtrarPorTipo('asignacion_entrenador')">
+                <i class="bi bi-person-badge me-2"></i>Asignación entrenador
+              </a></li>
+              <li><a class="dropdown-item" (click)="filtrarPorTipo('informacion')">
+                <i class="bi bi-info-circle me-2"></i>Información
+              </a></li>
+            </ul>
+            
+            <!-- Ordenamiento -->
+            <button class="btn btn-sm btn-outline-light dropdown-toggle" 
+                    type="button" 
+                    data-bs-toggle="dropdown">
+              <i class="bi bi-sort-down me-1"></i>
+              Ordenar
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" (click)="ordenarPor('fecha-desc')">
+                <i class="bi bi-arrow-down-circle me-2"></i>Más recientes primero
+              </a></li>
+              <li><a class="dropdown-item" (click)="ordenarPor('fecha-asc')">
+                <i class="bi bi-arrow-up-circle me-2"></i>Más antiguas primero
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" (click)="ordenarPor('no-leidas')">
+                <i class="bi bi-circle-fill text-primary me-2"></i>No leídas primero
+              </a></li>
+            </ul>
           </div>
         </div>
 
         <div class="card-body">
+          <!-- Resumen -->
+          <div *ngIf="resumenNotificaciones && !loading" class="alert alert-info mb-3">
+            <div class="row text-center">
+              <div class="col-md-4">
+                <strong>{{ resumenNotificaciones.total }}</strong>
+                <small class="d-block text-muted">Total</small>
+              </div>
+              <div class="col-md-4">
+                <strong>{{ resumenNotificaciones.sistema || 0 }}</strong>
+                <small class="d-block text-muted">Del sistema</small>
+              </div>
+              <div class="col-md-4">
+                <strong>{{ resumenNotificaciones.entrenadores || 0 }}</strong>
+                <small class="d-block text-muted">De entrenadores</small>
+              </div>
+            </div>
+          </div>
           <!-- Loading -->
           <div *ngIf="loading" class="text-center py-5">
             <div class="spinner-border text-primary" role="status">
@@ -97,10 +154,18 @@
                       {{formatearFecha(notificacion.fecha_envio)}}
                     </small>
                     
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                      <!-- Badge de origen -->
+                      <span *ngIf="notificacion.origen === 'miembro'" class="badge bg-secondary">
+                        <i class="bi bi-gear me-1"></i>Sistema
+                      </span>
+                      <span *ngIf="notificacion.origen === 'general'" class="badge bg-info">
+                        <i class="bi bi-person-badge me-1"></i>Entrenador
+                      </span>
+                      
                       <!-- Coach name si existe -->
                       <span *ngIf="notificacion.coach_nombre" 
-                            class="badge bg-success me-2">
+                            class="badge bg-success">
                         <i class="bi bi-person me-1"></i>{{notificacion.coach_nombre}}
                       </span>
                       
