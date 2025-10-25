@@ -1,30 +1,113 @@
-<div class="container mt-4">
-    <h2>Historial de Asistencia</h2>
-    <table class="table table-bordered table-striped mt-3">
-        <thead>
+<div class="historial-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0 text-navy">
+      <i class="bi bi-calendar-check me-2" style="color: #fca311;"></i>
+      Historial de Asistencia
+    </h2>
+    <button type="button" (click)="irARegistrar()" class="btn btn-warning">
+      <i class="bi bi-plus-circle me-2"></i>
+      Registrar Asistencia
+    </button>
+  </div>
+
+  <!-- Filtro por miembro -->
+  <div class="formal-card mb-4">
+    <div class="card-body p-4">
+      <div class="row align-items-end">
+        <div class="col-md-8">
+          <label for="filtroMiembro" class="form-label text-navy fw-semibold mb-2">
+            <i class="bi bi-funnel me-2" style="color: #fca311;"></i>
+            Filtrar por Miembro
+          </label>
+          <select 
+            class="form-select" 
+            id="filtroMiembro" 
+            [(ngModel)]="miembroSeleccionado" 
+            (change)="filtrarAsistencias()">
+            <option [ngValue]="null">Todos mis miembros</option>
+            <option *ngFor="let miembro of miembros" [ngValue]="miembro.id_miembro">
+              {{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4 mt-3 mt-md-0">
+          <div class="stats-box">
+            <i class="bi bi-list-check"></i>
+            <div>
+              <div class="text-muted small">Total de registros</div>
+              <h3>{{ asistenciasFiltradas.length }}</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de asistencias -->
+  <div class="formal-card">
+    <div class="card-header-custom">
+      <h4>
+        <i class="bi bi-table me-2"></i>
+        Registros de Asistencia
+      </h4>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table formal-table mb-0">
+          <thead>
             <tr>
-                <th>#</th>
-                <th>Miembro</th>
-                <th>Horario</th>
-                <th>Fecha</th>
-                <th>Estado</th>
+              <th style="width: 60px;">#</th>
+              <th style="width: 35%;">MIEMBRO</th>
+              <th style="width: 20%;">HORARIO</th>
+              <th style="width: 20%;">FECHA</th>
+              <th class="text-center" style="width: 15%;">ESTADO</th>
             </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let asistencia of asistencias; let i = index">
-                <td>{{ i + 1 }}</td>
-                <td>{{ asistencia.nombre }} {{ asistencia.apellido1 }} {{ asistencia.apellido2 }}</td>
-                <td>{{ asistencia.horario }}</td>
-                <td>{{ asistencia.fecha_asistencia | date:'yyyy-MM-dd' }}</td>
-                <td>
-                    <span [ngClass]="asistencia.estado ? 'text-success' : 'text-danger'">
-                        {{ asistencia.estado ? 'Presente' : 'Ausente' }}
-                    </span>
-                </td>
+          </thead>
+          <tbody>
+            <tr *ngFor="let asistencia of asistenciasFiltradas; let i = index" class="table-row">
+              <td class="text-muted">{{ i + 1 }}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-circle me-3">
+                    <i class="bi bi-person-fill"></i>
+                  </div>
+                  <div>
+                    <div class="fw-semibold text-navy">{{ obtenerNombreMiembro(asistencia.id_miembro) }}</div>
+                    <small class="text-muted">Cédula: {{ obtenerCedulaMiembro(asistencia.id_miembro) }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge-horario">
+                  <i class="bi bi-clock me-1"></i>
+                  {{ asistencia.horario }}
+                </span>
+              </td>
+              <td>
+                <span class="fecha-badge">
+                  <i class="bi bi-calendar3 me-1"></i>
+                  {{ asistencia.fecha_asistencia | date:'dd/MM/yyyy' }}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge" [ngClass]="asistencia.estado ? 'badge-presente' : 'badge-ausente'">
+                  <i [class]="asistencia.estado ? 'bi bi-check-circle-fill me-1' : 'bi bi-x-circle-fill me-1'"></i>
+                  {{ asistencia.estado ? 'Presente' : 'Ausente' }}
+                </span>
+              </td>
             </tr>
-            <tr *ngIf="asistencias.length === 0">
-                <td colspan="5" class="text-center">No hay registros de asistencia.</td>
+            <tr *ngIf="asistenciasFiltradas.length === 0">
+              <td colspan="5" class="text-center py-5">
+                <div class="empty-state">
+                  <i class="bi bi-inbox display-4 text-muted d-block mb-3"></i>
+                  <p class="text-muted mb-0 fw-semibold">No hay registros de asistencia</p>
+                  <small class="text-muted">Los registros aparecerán aquí una vez que registres asistencias.</small>
+                </div>
+              </td>
             </tr>
-        </tbody>
-    </table>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>

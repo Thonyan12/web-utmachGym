@@ -3,7 +3,6 @@
   <table class="table table-striped">
     <thead>
       <tr>
-        <th>#</th>
         <th>Nombre</th>
         <th>Cédula</th>
         <th>Correo</th>
@@ -13,13 +12,12 @@
     </thead>
     <tbody>
       <tr *ngFor="let miembro of miembros; let i = index">
-        <td>{{ i + 1 }}</td>
         <td>{{ miembro.nombre }}</td>
         <td>{{ miembro.cedula }}</td>
         <td>{{ miembro.correo }}</td>
         <td>
-          <span [ngClass]="miembro.estado === 'Activo' ? 'text-success' : 'text-danger'">
-            {{ miembro.estado }}
+          <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
+            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
           </span>
         </td>
         <td>

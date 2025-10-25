@@ -1,0 +1,101 @@
+/* Estilos para el formulario de registrar asistencia */
+.btn-outline-primary {
+  border-color: #14213d;
+  color: #14213d;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #14213d;
+  border-color: #14213d;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.3);
+}
+
+.card {
+  border-radius: 12px;
+  border-left: 4px solid #fca311;
+}
+
+.form-label {
+  color: #14213d;
+  margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: #fca311;
+  box-shadow: 0 0 0 0.2rem rgba(252, 163, 17, 0.25);
+}
+
+.btn-warning {
+  background: linear-gradient(135deg, #fca311 0%, #e89c0c 100%);
+  border: none;
+  color: #14213d;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(252, 163, 17, 0.3);
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e89c0c 0%, #d88b0a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(252, 163, 17, 0.4);
+  color: #14213d;
+}
+
+.btn-warning:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-outline-secondary {
+  border-color: #6c757d;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  color: white;
+  transform: translateY(-2px);
+}
+
+.alert {
+  border-radius: 10px;
+  border: none;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+small.text-muted {
+  font-size: 0.85rem;
+  display: block;
+  margin-top: 0.25rem;
+}
+
+/* Mejoras responsive */
+@media (max-width: 768px) {
+  .d-flex.gap-2 {
+    flex-direction: column;
+  }
+  
+  .d-flex.gap-2 button {
+    width: 100%;
+  }
+}

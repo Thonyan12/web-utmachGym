@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class MiembrosService {
-  private apiUrl = 'http://localhost:3000/api/miembros'; // Cambia la URL según tu backend
+  private apiUrl = 'http://localhost:3000/api/miembros';
 
   constructor(private http: HttpClient) {}
 
