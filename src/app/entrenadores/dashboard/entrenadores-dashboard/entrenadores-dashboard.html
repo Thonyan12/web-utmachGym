@@ -37,32 +37,32 @@
   </style>
   
   <div class="row position-relative" style="z-index: 2;">
-    <!-- Bienvenida Espectacular -->
+    <!-- Bienvenida -->
     <div class="col-12 mb-4">
       <div class="card border-0 shadow-lg formal-card welcome-card" style="color: #14213d;">
-        <div class="card-body py-5 position-relative">
+        <div class="card-body py-5">
           <div class="row align-items-center">
             <div class="col-md-8">
               <h1 class="fw-bold mb-3 section-title" style="font-size: 2.4rem;">
                 ¡Hola, {{ obtenerPrimerNombre() }}!
                 <span class="me-2">👋</span>
               </h1>
-              <p class="mb-3 fs-4" style="opacity: 0.95; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+              <p class="mb-3 fs-4" style="opacity: 0.95;">
                 🚀 ¡Bienvenido de vuelta a tu área personal! 
               </p>
               <p class="fs-5" style="opacity: 0.9;">
-                ¡Sigamos trabajando hacia tus objetivos de fitness con energía y determinación!
+                ¡Sigamos trabajando con energía y determinación!
               </p>
               <div class="mt-4">
                 <span class="badge bg-light text-dark px-3 py-2 fs-6">
-                  <i class="bi bi-star-fill text-warning me-2 icon-bounce"></i>
-                  Tu progreso es nuestra motivación
+                  <i class="bi bi-star-fill text-warning me-2"></i>
+                  Tu trabajo es nuestra motivación
                 </span>
               </div>
             </div>
             <div class="col-md-4 text-md-end">
               <div class="small-muted text-dark">
-                <i class="bi bi-calendar-heart me-2 fs-4 icon-bounce"></i>
+                <i class="bi bi-calendar3 me-2 fs-4"></i>
                 <span class="fw-bold fs-5">{{ fechaActual }}</span>
               </div>
             </div>
@@ -74,135 +74,116 @@
     <!-- Tarjetas de Estadísticas -->
     <div class="col-12 mb-4">
       <div class="row g-4">
-        <!-- Clima -->
-        <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg formal-card stat-card accent-navy text-white">
+        <!-- Miembros Asignados -->
+        <div class="col-md-6 col-lg-6">
+          <div class="card border-0 shadow-lg formal-card stat-card">
+            <div class="stat-accent accent-navy"></div>
             <div class="card-body text-center py-4">
-              <div class="weather-icon mb-3">
-                <i class="bi bi-sun-fill icon-bounce" style="font-size: 3rem; color: #ffa500;"></i>
+              <div class="mb-3">
+                <i class="bi bi-people-fill" style="font-size: 3rem; color: #14213d;"></i>
               </div>
-              <h3 class="fw-bold mb-2" style="color: white;">26°C</h3>
-              <p class="text-white mb-1">🌤️ Soleado</p>
-              <small class="text-white" style="opacity: 0.8;">Machala, Ecuador</small>
-              <div class="mt-3">
-                <span class="badge bg-success px-3 py-2">
-                  <i class="bi bi-check-circle me-1"></i>
-                  Perfecto para entrenar
-                </span>
-              </div>
+              <h3 class="stat-value mb-2">{{ totalMiembrosAsignados }}</h3>
+              <p class="stat-label mb-0">Miembros Asignados</p>
             </div>
           </div>
         </div>
 
-        <!-- Total Miembros -->
-        <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg formal-card stat-card accent-amber text-white">
+        <!-- Registros del Mes -->
+        <div class="col-md-6 col-lg-6">
+          <div class="card border-0 shadow-lg formal-card stat-card">
+            <div class="stat-accent accent-amber"></div>
             <div class="card-body text-center py-4">
-              <div class="members-icon mb-3">
-                <i class="bi bi-people-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
+              <div class="mb-3">
+                <i class="bi bi-clipboard-data-fill" style="font-size: 3rem; color: #fca311;"></i>
               </div>
-              <h3 class="fw-bold mb-2 counter" data-target="347" style="color: white;">0</h3>
-              <p class="text-white mb-1">👥 Miembros Activos</p>
-              <div class="mt-3">
-                <span class="badge bg-warning text-dark px-3 py-2">
-                  <i class="bi bi-trending-up me-1"></i>
-                  +12 este mes
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Entrenamientos Hoy -->
-        <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg formal-card stat-card accent-green text-white">
-            <div class="card-body text-center py-4">
-              <div class="training-icon mb-3">
-                <i class="bi bi-lightning-charge-fill icon-bounce" style="font-size: 3rem; color: #ffff00;"></i>
-              </div>
-              <h3 class="fw-bold mb-2 counter" data-target="89" style="color: white;">0</h3>
-              <p class="text-white mb-1">🏋️ Entrenamientos Hoy</p>
-              <div class="mt-3">
-                <span class="badge bg-light text-dark px-3 py-2">
-                  <i class="bi bi-clock me-1"></i>
-                  En progreso
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tu Progreso -->
-        <div class="col-md-6 col-lg-3">
-          <div class="card border-0 shadow-lg formal-card stat-card accent-amber text-white">
-            <div class="card-body text-center py-4">
-              <div class="progress-icon mb-3">
-                <i class="bi bi-trophy-fill icon-bounce" style="font-size: 3rem; color: #ffd700;"></i>
-              </div>
-              <h3 class="fw-bold mb-2" style="color: white;">85%</h3>
-              <p class="text-white mb-1">🎯 Meta Mensual</p>
-              <div class="progress mt-3" style="height: 8px; border-radius: 10px;">
-                <div class="progress-bar bg-success progress-animated" role="progressbar" 
-                     style="width: 85%; border-radius: 10px;" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100">
-                </div>
-              </div>
-              <small class="text-white mt-2 d-block" style="opacity: 0.9;">¡Excelente progreso! 🔥</small>
+              <h3 class="stat-value mb-2">{{ registrosDelMes }}</h3>
+              <p class="stat-label mb-0">Registros de Asistencia este Mes</p>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Reglas del Gimnasio Mejoradas -->
+    <!-- Reglas del Gimnasio -->
     <div class="col-12 mb-4">
       <div class="card border-0 shadow-lg formal-card">
         <div class="card-body py-5">
           <div class="text-center mb-5">
-            <h2 class="fw-bold mb-3" style="color:#2c3e50; font-size: 2.5rem;">
-              <i class="bi bi-shield-check text-primary me-3 icon-bounce" style="font-size: 2rem;"></i>
-              ⭐ Reglas de Oro del Gimnasio ⭐
-              <i class="bi bi-shield-check text-primary ms-3 icon-bounce" style="font-size: 2rem;"></i>
+            <h2 class="fw-bold mb-3 section-title" style="font-size: 2rem;">
+              <i class="bi bi-shield-check text-primary me-3" style="font-size: 1.8rem;"></i>
+              Reglas de Oro del Gimnasio
+              <i class="bi bi-shield-check text-primary ms-3" style="font-size: 1.8rem;"></i>
             </h2>
-            <p class="text-muted mb-4 fs-5">✨ Juntos creamos un ambiente de respeto y excelencia ✨</p>
+            <p class="text-muted mb-4 fs-5">Juntos creamos un ambiente de respeto y excelencia</p>
           </div>
           
           <div class="row">
             <div class="col-lg-10 mx-auto">
-              <div class="mb-5">
-                <div class="rule-item">
-                  <i class="bi bi-droplet-fill text-info me-3 icon-bounce" style="font-size: 1.5rem;"></i>
-                  <strong style="font-size: 1.1rem;">💧 Usa siempre una toalla</strong> en los equipos para mantener la higiene perfecta
+              <div class="mb-4">
+                <div class="rule-item mb-3">
+                  <i class="bi bi-droplet-fill text-info me-3" style="font-size: 1.3rem;"></i>
+                  <strong style="font-size: 1rem;">Usa siempre una toalla</strong> en los equipos para mantener la higiene
                 </div>
-                <div class="rule-item">
-                  <i class="bi bi-spray text-success me-3 icon-bounce" style="font-size: 1.5rem;"></i>
-                  <strong style="font-size: 1.1rem;">🧼 Limpia el equipo</strong> después de usarlo, cuida nuestro espacio común
+                <div class="rule-item mb-3">
+                  <i class="bi bi-spray text-success me-3" style="font-size: 1.3rem;"></i>
+                  <strong style="font-size: 1rem;">Limpia el equipo</strong> después de usarlo, cuida nuestro espacio común
                 </div>
-                <div class="rule-item">
-                  <i class="bi bi-volume-down text-warning me-3 icon-bounce" style="font-size: 1.5rem;"></i>
-                  <strong style="font-size: 1.1rem;">🤫 Mantén el respeto</strong>, no grites ni tires las pesas bruscamente
+                <div class="rule-item mb-3">
+                  <i class="bi bi-volume-down text-warning me-3" style="font-size: 1.3rem;"></i>
+                  <strong style="font-size: 1rem;">Mantén el respeto</strong>, no grites ni tires las pesas bruscamente
                 </div>
-                <div class="rule-item">
-                  <i class="bi bi-people-fill me-3 icon-bounce" style="font-size: 1.5rem; color: #6f42c1;"></i>
-                  <strong style="font-size: 1.1rem;">👥 Respeta los turnos</strong> y el espacio personal de los demás
+                <div class="rule-item mb-3">
+                  <i class="bi bi-people-fill text-primary me-3" style="font-size: 1.3rem;"></i>
+                  <strong style="font-size: 1rem;">Respeta los turnos</strong> y el espacio personal de los demás
                 </div>
-                <div class="rule-item">
-                  <i class="bi bi-house-gear text-danger me-3 icon-bounce" style="font-size: 1.5rem;"></i>
-                  <strong style="font-size: 1.1rem;">🏠 Guarda los implementos</strong> en su lugar después de usarlos
+                <div class="rule-item mb-3">
+                  <i class="bi bi-house-gear text-danger me-3" style="font-size: 1.3rem;"></i>
+                  <strong style="font-size: 1rem;">Guarda los implementos</strong> en su lugar después de usarlos
                 </div>
               </div>
             </div>
           </div>
           
-          <div class="formal-card text-center text-dark fw-semibold position-relative" style="font-size:1.05rem; z-index: 1; padding: 1rem;">
-            <div class="position-relative" style="z-index: 2;">
-              <i class="bi bi-lightbulb-fill me-3 icon-bounce" style="font-size: 2rem;"></i>
-              <div class="mb-3">
-                "💪 La disciplina es el puente entre tus metas y tus logros. ¡Entrena con pasión y determinación! 🔥"
+          <div class="text-center mt-4 p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border-left: 4px solid #fca311;">
+            <i class="bi bi-lightbulb-fill text-warning me-2" style="font-size: 1.5rem;"></i>
+            <div class="fw-semibold" style="font-size: 1.1rem; color: #14213d;">
+              "💪 La disciplina es el puente entre tus metas y tus logros. ¡Entrena con pasión y determinación!"
+            </div>
+            <div class="mt-3">
+              <small style="color: #6c7a89; font-size: 0.95rem;">
+                Tu equipo de Coach Utmach Gym
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Información Adicional -->
+    <div class="col-12">
+      <div class="card border-0 shadow-lg formal-card">
+        <div class="card-body p-4">
+          <div class="text-center">
+            <i class="bi bi-info-circle-fill text-primary me-2" style="font-size: 1.5rem;"></i>
+            <h5 class="d-inline-block mb-3 section-title">Información del Panel</h5>
+          </div>
+          <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+              <div class="rule-item">
+                <i class="bi bi-people-fill text-primary me-2"></i>
+                <strong>Miembros Asignados:</strong> Gestiona y visualiza los miembros a tu cargo
               </div>
-              <div class="mt-3">
-                <small style="opacity: 0.9; font-size: 1rem;">
-                  ⭐ Tu equipo de Coach Utmach Gym ⭐
-                </small>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="rule-item">
+                <i class="bi bi-calendar-check-fill text-success me-2"></i>
+                <strong>Asistencias:</strong> Registra y consulta el historial de entrenamientos
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="rule-item">
+                <i class="bi bi-bell-fill text-warning me-2"></i>
+                <strong>Notificaciones:</strong> Envía mensajes a tus miembros asignados
               </div>
             </div>
           </div>
@@ -211,31 +192,3 @@
     </div>
   </div>
 </div>
-
-<script>
-  // Animación de contadores
-  function animateCounters() {
-    const counters = document.querySelectorAll('.counter');
-    
-    counters.forEach(counter => {
-      const target = parseInt(counter.getAttribute('data-target'));
-      const duration = 2000; // 2 segundos
-      const increment = target / (duration / 16); // 60fps
-      let current = 0;
-      
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-          current = target;
-          clearInterval(timer);
-        }
-        counter.textContent = Math.floor(current);
-      }, 16);
-    });
-  }
-
-  // Ejecutar cuando se carga la página
-  document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(animateCounters, 500); // Delay de 0.5s para que se vea mejor
-  });
-</script>

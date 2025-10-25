@@ -1,58 +1,82 @@
 <div class="container mt-4">
-  <h2>Registrar Asistencia</h2>
-  <form (ngSubmit)="registrarAsistencia()" #asistenciaForm="ngForm" class="mb-3">
-    <div class="mb-3">
-      <label for="busqueda" class="form-label">Buscar Miembro</label>
-      <input
-        type="text"
-        id="busqueda"
-        class="form-control"
-        [(ngModel)]="busqueda"
-        (input)="filtrarMiembros()"
-        placeholder="Buscar por nombre o cédula"
-        autocomplete="off"
-        required
-        name="busqueda"
-      >
-      <ul *ngIf="miembrosFiltrados.length && busqueda" class="list-group position-absolute w-50 zindex-dropdown">
-        <li
-          class="list-group-item list-group-item-action"
-          style="cursor:pointer"
-          *ngFor="let m of miembrosFiltrados"
-          (click)="seleccionarMiembro(m)"
-        >
-          {{ m.nombre }} - {{ m.cedula }}
-        </li>
-      </ul>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0" style="color: #14213d;">
+      <i class="bi bi-clipboard-check me-2" style="color: #fca311;"></i>
+      Registrar Asistencia
+    </h2>
+    <a routerLink="/entrenadores/asistencia/historial" class="btn btn-outline-primary">
+      <i class="bi bi-calendar3 me-2"></i>
+      Ver Historial
+    </a>
+  </div>
+
+  <div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+      <form (ngSubmit)="registrarAsistencia()" #asistenciaForm="ngForm">
+        <div class="mb-3">
+          <label for="idMiembro" class="form-label fw-semibold">
+            <i class="bi bi-person-check me-2 text-primary"></i>
+            Seleccionar Miembro
+          </label>
+          <select 
+            class="form-select" 
+            id="idMiembro" 
+            [(ngModel)]="idMiembro" 
+            name="idMiembro" 
+            required>
+            <option [ngValue]="null" disabled selected>-- Seleccione un miembro --</option>
+            <option *ngFor="let miembro of miembros" [ngValue]="miembro.id_miembro">
+              {{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }} - Cédula: {{ miembro.cedula }}
+            </option>
+          </select>
+          <small class="text-muted">Seleccione el miembro para registrar su asistencia</small>
+        </div>
+
+        <div class="mb-3">
+          <label for="horario" class="form-label fw-semibold">
+            <i class="bi bi-clock me-2 text-warning"></i>
+            Horario
+          </label>
+          <input 
+            type="text" 
+            id="horario" 
+            class="form-control" 
+            [(ngModel)]="horario" 
+            name="horario" 
+            placeholder="Ej: 08:00 - 10:00"
+            required>
+        </div>
+
+        <div class="mb-4">
+          <label for="fecha" class="form-label fw-semibold">
+            <i class="bi bi-calendar-event me-2 text-success"></i>
+            Fecha de Asistencia
+          </label>
+          <input 
+            type="date" 
+            id="fecha" 
+            class="form-control" 
+            [(ngModel)]="fecha_asistencia" 
+            name="fecha_asistencia" 
+            required>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-warning px-4 fw-semibold" [disabled]="asistenciaForm.invalid">
+            <i class="bi bi-check-circle me-2"></i>
+            Registrar Asistencia
+          </button>
+          <button type="button" class="btn btn-outline-secondary" (click)="limpiarFormulario()">
+            <i class="bi bi-x-circle me-2"></i>
+            Limpiar
+          </button>
+        </div>
+      </form>
     </div>
-    <div class="mb-3">
-      <label for="idMiembro" class="form-label">ID Seleccionado</label>
-      <input
-        type="text"
-        id="idMiembro"
-        class="form-control"
-        [value]="idMiembro"
-        readonly
-        tabindex="-1"
-      >
-      <input
-        type="hidden"
-        [(ngModel)]="idMiembro"
-        name="idMiembro"
-        required
-      >
-    </div>
-    <div class="mb-3">
-      <label for="horario" class="form-label">Horario</label>
-      <input type="text" id="horario" class="form-control" [(ngModel)]="horario" name="horario" required>
-    </div>
-    <div class="mb-3">
-      <label for="fecha" class="form-label">Fecha de Asistencia</label>
-      <input type="date" id="fecha" class="form-control" [(ngModel)]="fecha_asistencia" name="fecha_asistencia" required>
-    </div>
-    <button type="submit" class="btn btn-primary" [disabled]="asistenciaForm.invalid">Registrar</button>
-  </form>
-  <div *ngIf="mensaje" class="alert alert-info mt-3">
+  </div>
+
+  <div *ngIf="mensaje" class="alert mt-4" [ngClass]="mensaje.includes('correctamente') ? 'alert-success' : 'alert-danger'">
+    <i [class]="mensaje.includes('correctamente') ? 'bi bi-check-circle-fill me-2' : 'bi bi-exclamation-triangle-fill me-2'"></i>
     {{ mensaje }}
   </div>
 </div>
