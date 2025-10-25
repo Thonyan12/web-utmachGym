@@ -1,109 +1,61 @@
-<div class="container mt-4">
-    <h2 class="text-center">Registrar Detalle de Factura</h2>
-    <form #detalleForm="ngForm" (ngSubmit)="guardar(detalleForm)">
-      <div class="mb-3">
-        <label for="idFactura" class="form-label">ID Factura</label>
-        <input
-          type="number"
-          id="idFactura"
-          class="form-control"
-          [(ngModel)]="detalle.id_factura"
-          name="id_factura"
-          required
-        />
+<!-- ...existing code... -->
+<!-- Modal mostrado inmediatamente (sin botón de trigger) -->
+<div *ngIf="showModal" class="modal-backdrop" style="position:fixed;inset:0;z-index:1050;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+  <div class="modal-dialog" style="max-width:600px;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nuevo detalle de factura</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="cancelar()"></button>
       </div>
-      <div class="mb-3">
-        <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
-        <input
-          type="text"
-          id="tipoDetalle"
-          class="form-control"
-          [(ngModel)]="detalle.tipo_detalle"
-          name="tipo_detalle"
-          required
-        />
+      
+
+      <div class="modal-body">
+        <form #detalleForm="ngForm" (ngSubmit)="guardar(detalleForm)" novalidate>
+          <!-- hidden inputs -->
+          <input type="hidden" name="id_factura" [(ngModel)]="detalle.id_factura" />
+          <input type="hidden" name="referencia_id" [(ngModel)]="detalle.referencia_id" />
+          <input type="hidden" name="estado_registro" [(ngModel)]="detalle.estado_registro" />
+          <input type="hidden" name="f_registro" [(ngModel)]="detalle.f_registro" />
+
+          <div class="mb-3">
+            <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
+            <select id="tipoDetalle" class="form-select" [(ngModel)]="detalle.tipo_detalle" name="tipo_detalle" required>
+              <option value="pago mensual">Pago Mensual</option>
+              <option value="compra producto">Compra Producto</option>
+              <option value="compra suplemento">Compra Suplemento</option>
+              <option value="servicio adicional">Servicio Adicional</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea id="descripcion" class="form-control" [(ngModel)]="detalle.descripcion" name="descripcion" rows="2" required></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="monto" class="form-label">Monto</label>
+            <input id="monto" class="form-control" type="number" step="0.01" min="0" [(ngModel)]="detalle.monto" name="monto" (input)="calcularIVA()" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="iva" class="form-label">IVA</label>
+            <input id="iva" class="form-control" type="number" step="0.01" [value]="detalle.iva | number:'1.2-2'" readonly />
+          </div>
+
+          <div class="mb-3">
+            <label for="metodo_pago" class="form-label">Método de pago</label>
+            <select id="metodo_pago" class="form-select" [(ngModel)]="detalle.metodo_pago" name="metodo_pago" required>
+              <option *ngFor="let opt of metodoPagoOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-secondary" (click)="cancelar()">Cerrar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="detalleForm.invalid">Guardar detalle</button>
+          </div>
+        </form>
       </div>
-      <div class="mb-3">
-        <label for="referenciaId" class="form-label">Referencia ID</label>
-        <input
-          type="number"
-          id="referenciaId"
-          class="form-control"
-          [(ngModel)]="detalle.referencia_id"
-          name="referencia_id"
-        />
-      </div>
-      <div class="mb-3">
-        <label for="descripcion" class="form-label">Descripción</label>
-        <textarea
-          id="descripcion"
-          class="form-control"
-          [(ngModel)]="detalle.descripcion"
-          name="descripcion"
-          required
-        ></textarea>
-      </div>
-      <div class="mb-3">
-        <label for="monto" class="form-label">Monto</label>
-        <input
-          type="number"
-          id="monto"
-          class="form-control"
-          [(ngModel)]="detalle.monto"
-          name="monto"
-          (input)="calcularIVA()"
-          required
-        />
-      </div>
-      <div class="mb-3">
-        <label for="iva" class="form-label">IVA</label>
-        <input
-          type="number"
-          id="iva"
-          class="form-control"
-          [(ngModel)]="detalle.iva"
-          name="iva"
-          readonly
-        />
-      </div>
-      <div class="mb-3">
-        <label for="metodoPago" class="form-label">Método de Pago</label>
-        <select
-          id="metodoPago"
-          class="form-select"
-          [(ngModel)]="detalle.metodo_pago"
-          name="metodo_pago"
-          required
-        >
-          <option value="Efectivo">Efectivo</option>
-          <option value="Tarjeta">Tarjeta</option>
-          <option value="Transferencia">Transferencia</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="estadoRegistro" class="form-label">Estado</label>
-        <select
-          id="estadoRegistro"
-          class="form-select"
-          [(ngModel)]="detalle.estado_registro"
-          name="estado_registro"
-          required
-        >
-          <option [value]="true">Activo</option>
-          <option [value]="false">Inactivo</option>
-        </select>
-      </div>
-      <div class="mb-3">
-        <label for="fRegistro" class="form-label">Fecha de Registro</label>
-        <input
-          type="date"
-          id="fRegistro"
-          class="form-control"
-          [(ngModel)]="detalle.f_registro"
-          name="f_registro"
-          readonly
-        />
-      </div>
-      <button type="submit" class="btn btn-primary">Guardar</button>
-    </form>
+    </div>
   </div>
+</div>
+<!-- ...existing code... -->

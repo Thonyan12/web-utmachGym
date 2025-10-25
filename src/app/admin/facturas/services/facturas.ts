@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { catchError, Observable, throwError } from 'rxjs';
 
 export interface Factura {
   id_factura?: number; // ID opcional para creación
@@ -19,6 +19,14 @@ export class FacturasService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/api/facturas'; // URL base de la API
 
+private headers(): HttpHeaders {
+    const token = localStorage.getItem('token') || '';
+    let h = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (token) h = h.set('Authorization', `Bearer ${token}`);
+    return h;
+  }
+
+
   // Obtener todas las facturas
   getFacturas(): Observable<Factura[]> {
     return this.http.get<Factura[]>(this.apiUrl);
@@ -36,7 +44,10 @@ export class FacturasService {
 
   // Actualizar una factura existente
   updateFactura(factura: Factura): Observable<Factura> {
-    return this.http.put<Factura>(`${this.apiUrl}/${factura.id_factura}`, factura);
+    if (!factura.id_factura) return throwError(() => new Error('id_factura es requerido'));
+    return this.http.put<Factura>(`${this.apiUrl}/${factura.id_factura}`, factura, { headers: this.headers() }).pipe(
+      catchError(err => throwError(() => err))
+    );
   }
 
   // Eliminar una factura por ID

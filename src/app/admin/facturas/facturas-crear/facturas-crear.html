@@ -1,220 +1,102 @@
+<!-- ...existing code... -->
 <div class="d-flex" style="min-height: 100vh;">
   <app-facturas-sidebar></app-facturas-sidebar>
-  <div class="container mt-4">
-    <h2>Registrar Factura</h2>
-    <form (ngSubmit)="abrirModal(form)" #form="ngForm" novalidate>
-      <!-- Campos de la factura -->
-      <div class="mb-3">
-        <label>ID Miembro</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="factura.id_miembro"
-          name="id_miembro"
-          required
-          min="1"
-          #idMiembro="ngModel"
-        />
-        <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
-          <span *ngIf="idMiembro.errors?.['required']">El ID del miembro es obligatorio.</span>
-          <span *ngIf="idMiembro.errors?.['min']">Debe ser mayor o igual a 1.</span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label>ID Administrador</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="factura.id_admin"
-          name="id_admin"
-          required
-          min="1"
-          #idAdmin="ngModel"
-        />
-        <div class="text-danger" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
-          <span *ngIf="idAdmin.errors?.['required']">El ID del administrador es obligatorio.</span>
-          <span *ngIf="idAdmin.errors?.['min']">Debe ser mayor o igual a 1.</span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label>Fecha de Emisión</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="factura.fecha_emision"
-          name="fecha_emision"
-          required
-          #fechaEmision="ngModel"
-        />
-        <div class="text-danger" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
-          <span *ngIf="fechaEmision.errors?.['required']">La fecha de emisión es obligatoria.</span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label>Total</label>
-        <input
-          type="number"
-          class="form-control"
-          [(ngModel)]="factura.total"
-          name="total"
-          required
-          step="0.01"
-          min="0.01"
-          #total="ngModel"
-        />
-        <div class="text-danger" *ngIf="total.invalid && (total.dirty || total.touched)">
-          <span *ngIf="total.errors?.['required']">El total es obligatorio.</span>
-          <span *ngIf="total.errors?.['min']">Debe ser mayor a 0.</span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label>Estado</label>
-        <select
-          class="form-control"
-          [(ngModel)]="factura.estado_registro"
-          name="estado_registro"
-          required
-          #estadoRegistro="ngModel"
-        >
-          <option [ngValue]="true">Activo</option>
-          <option [ngValue]="false">Inactivo</option>
-        </select>
-        <div class="text-danger" *ngIf="estadoRegistro.invalid && (estadoRegistro.dirty || estadoRegistro.touched)">
-          <span *ngIf="estadoRegistro.errors?.['required']">El estado es obligatorio.</span>
-        </div>
-      </div>
-      <div class="mb-3">
-        <label>Fecha de Registro</label>
-        <input
-          type="date"
-          class="form-control"
-          [(ngModel)]="factura.f_registro"
-          name="f_registro"
-          required
-          #fechaRegistro="ngModel"
-        />
-        <div class="text-danger" *ngIf="fechaRegistro.invalid && (fechaRegistro.dirty || fechaRegistro.touched)">
-          <span *ngIf="fechaRegistro.errors?.['required']">La fecha de registro es obligatoria.</span>
-        </div>
-      </div>
-      <div *ngIf="form.invalid && form.submitted" class="alert alert-danger">
-        Por favor, corrige los errores antes de guardar.
-      </div>
-      <button type="submit" class="btn btn-primary" [disabled]="form.invalid">Guardar</button>
-    </form>
-  </div>
-</div>
 
-<!-- Modal para Detalle Factura -->
-<div class="modal fade" id="detalleFacturaModal" tabindex="-1" aria-labelledby="detalleFacturaModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="detalleFacturaModalLabel">Registrar Detalle de Factura</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form #detalleForm="ngForm">
-          <div class="mb-3">
-            <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
-            <select
-              id="tipoDetalle"
-              class="form-control"
-              [(ngModel)]="detalle.tipo_detalle"
-              name="tipo_detalle"
-              required
-            >
-              <option value="" disabled selected>Seleccione tipo de detalle</option>
-              <option *ngFor="let tipo of detalleTipos" [value]="tipo">{{ tipo }}</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="referenciaId" class="form-label">Referencia ID</label>
-            <input
-              type="number"
-              id="referenciaId"
-              class="form-control"
-              [(ngModel)]="detalle.referencia_id"
-              name="referencia_id"
-            />
-          </div>
-          <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea
-              id="descripcion"
-              class="form-control"
-              [(ngModel)]="detalle.descripcion"
-              name="descripcion"
-              required
-            ></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="monto" class="form-label">Monto</label>
-            <input
-              type="number"
-              id="monto"
-              class="form-control"
-              [(ngModel)]="detalle.monto"
-              name="monto"
-              required
-              (input)="calcularIVA()"
-            />
-          </div>
-          <div class="mb-3">
-            <label for="iva" class="form-label">IVA</label>
-            <input
-              type="number"
-              id="iva"
-              class="form-control"
-              [(ngModel)]="detalle.iva"
-              name="iva"
-              readonly
-            />
-          </div>
-          <div class="mb-3">
-            <label for="metodoPago" class="form-label">Método de Pago</label>
-            <select
-              id="metodoPago"
-              class="form-control"
-              [(ngModel)]="detalle.metodo_pago"
-              name="metodo_pago"
-              required
-            >
-              <option value="Efectivo">EFECTIVO</option>
-              <option value="Tarjeta">TARJETA</option>
-              <option value="Transferencia">Transferencia</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="estadoRegistro" class="form-label">Estado</label>
-            <select
-              id="estadoRegistro"
-              class="form-control"
-              [(ngModel)]="detalle.estado_registro"
-              name="estado_registro"
-              required
-            >
-              <option [ngValue]="true">Activo</option>
-              <option [ngValue]="false">Inactivo</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="fechaRegistro" class="form-label">Fecha de Registro</label>
-            <input
-              type="date"
-              id="fechaRegistro"
-              class="form-control"
-              [(ngModel)]="detalle.f_registro"
-              name="f_registro"
-              required
-            />
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" (click)="guardarDetalleFactura(detalleForm)">Guardar Detalle</button>
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="container mt-4">
+      <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
+        <i class="bi bi-file-earmark-text me-2"></i> Crear Factura
+      </h3>
+
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <form (ngSubmit)="guardar(form)" #form="ngForm" novalidate>
+            <!-- Buscar miembro por cédula -->
+            <div class="mb-3">
+              <label class="form-label">Cédula del Miembro</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  name="cedula"
+                  [(ngModel)]="cedula"
+                  required
+                  placeholder="Ingrese cédula"
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="buscarMiembroPorCedula()"
+                  [disabled]="!cedula || buscandoMiembro"
+                >
+                  {{ buscandoMiembro ? 'Buscando...' : 'Buscar' }}
+                </button>
+              </div>
+              <div class="text-danger mt-1" *ngIf="errorBusqueda">{{ errorBusqueda }}</div>
+            </div>
+
+            <!-- Nombre y apellido autocompletados (readonly) -->
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" [value]="nombreMiembro" readonly />
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Apellido</label>
+                <input type="text" class="form-control" [value]="apellidoMiembro" readonly />
+              </div>
+            </div>
+
+            <!-- Campos ocultos: id_admin, fecha_emision, f_registro, estado, total, id_miembro -->
+            <input type="hidden" name="id_admin" [(ngModel)]="factura.id_admin" />
+            <input type="hidden" name="fecha_emision" [(ngModel)]="factura.fecha_emision" />
+            <input type="hidden" name="f_registro" [(ngModel)]="factura.f_registro" />
+            <input type="hidden" name="estado_registro" [(ngModel)]="factura.estado_registro" />
+            <input type="hidden" name="total" [(ngModel)]="factura.total" />
+            <input type="hidden" name="id_miembro" [(ngModel)]="factura.id_miembro" />
+
+            <!-- Mensaje y botones -->
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <button type="button" class="btn btn-secondary" (click)="cancelar()">Volver</button>
+              <button type="submit" class="btn btn-primary" [disabled]="!miembroEncontrado || sending">
+                {{ sending ? 'Guardando...' : 'Guardar y Añadir Detalle' }}
+              </button>
+            </div>
+
+            <div *ngIf="mensaje" class="mt-3">
+              <div class="alert alert-info">{{ mensaje }}</div>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
+
+  
+  <!-- Modal emergente para añadir detalle (usa componente standalone) -->
+  <ng-container *ngIf="showDetalleModal">
+    <!-- backdrop -->
+    <div class="modal-backdrop fade show" style="z-index:1040" (click)="showDetalleModal = false"></div>
+
+    <!-- modal -->
+    <div class="modal d-block" tabindex="-1" style="z-index:1050">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Añadir Detalle - Factura {{ detalleFacturaId }}</h5>
+            <button type="button" class="btn-close" aria-label="Cerrar" (click)="showDetalleModal = false"></button>
+          </div>
+          <div class="modal-body">
+            <!-- componente detalle: recibe idFactura y emite close -->
+            <app-detallefactura-crear
+  *ngIf="showDetalleModal && detalleFacturaId !== null"
+  [idFactura]="detalleFacturaId"
+  (close)="onDetalleClose($event)">
+</app-detallefactura-crear>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
 </div>
+<!-- ...existing code... -->
