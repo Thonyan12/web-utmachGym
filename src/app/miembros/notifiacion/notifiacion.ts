@@ -1,31 +1,72 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NotificacionesMiembroService, NotificacionMiembro } from '../services/notificaciones-miembro';
+import { SocketService } from '../../services/socket.service';
 
 @Component({
   selector: 'app-notifiacion',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './notifiacion.html',
-  styleUrl: './notifiacion.css'
+  styleUrls: ['./notifiacion.css']
 })
 export class Notifiacion implements OnInit, OnDestroy {
   notificaciones: NotificacionMiembro[] = [];
 
   loading = true;
   error: string | null = null;
-  private intervalo: any;
+  private intervalo: number | null = null;
+  private socketSub: import('rxjs').Subscription | null = null;
 
-  constructor(private notiService: NotificacionesMiembroService) { }
+  constructor(
+    private notiService: NotificacionesMiembroService,
+    private socketService: SocketService
+  ) { }
 
   ngOnInit() {
     console.log('🚀 Iniciando componente de notificaciones...');
     this.cargarNotificaciones();
     this.verificarAutenticacion();
+
+    // Conectar Socket (si está disponible) y escuchar nuevas notificaciones
+    try {
+      if (this.socketService && typeof this.socketService.connect === 'function') {
+        this.socketService.connect();
+        this.socketSub = this.socketService.on && this.socketService.on('nueva-notificacion')
+          ? this.socketService.on('nueva-notificacion').subscribe((notif: any) => {
+              try {
+                console.log('🔔 Notificación en tiempo real recibida:', notif);
+                const mapped = this.normalizeNotification(notif);
+                if (!this.notificaciones.find(n => n.id_notificacion === mapped.id_notificacion)) {
+                  this.notificaciones = [mapped, ...this.notificaciones];
+                  this.mostrarNotificacionBrowser(mapped.titulo || this.getTitulo(mapped), mapped.contenido || '');
+                }
+              } catch (e) {
+                console.warn('Error manejando notificación socket:', e);
+              }
+            })
+          : null;
+      }
+    } catch (e) {
+      console.warn('SocketService no disponible o fallo al conectar:', e);
+    }
   }
 
   ngOnDestroy() {
     if (this.intervalo) {
-      clearInterval(this.intervalo);
+      clearInterval(this.intervalo as number);
+      this.intervalo = null;
+    }
+    if (this.socketSub) {
+      this.socketSub.unsubscribe();
+      this.socketSub = null;
+    }
+    try {
+      if (this.socketService && typeof this.socketService.disconnect === 'function') {
+        this.socketService.disconnect();
+      }
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -88,7 +129,20 @@ export class Notifiacion implements OnInit, OnDestroy {
       next: (res: any) => {
         console.log('📡 Respuesta del servidor:', res);
         if (res.success) {
-          this.notificaciones = res.data || [];
+          // Mapear propiedades del backend a la interfaz esperada por el frontend
+          this.notificaciones = (res.data || []).map((n: any) => {
+            // Normalizar campos: algunos endpoints usan id_usuario en vez de id_miembro
+            const fecha = n.fecha_envio ? new Date(n.fecha_envio).toISOString() : new Date().toISOString();
+            return {
+              ...n,
+              id_notificacion: (n.id_notificacion ?? n.id) || Date.now(),
+              id_miembro: n.id_miembro ?? n.id_usuario ?? n.id_usuario_destino ?? null,
+              fecha_envio: fecha,
+              titulo: n.titulo ?? this.getTituloFromTipo(n.tipo),
+            } as NotificacionMiembro;
+          }).sort((a: NotificacionMiembro, b: NotificacionMiembro) => {
+            return new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime();
+          });
           this.loading = false;
           console.log('✅ Notificaciones cargadas:', this.notificaciones.length);
         } else {
@@ -102,6 +156,38 @@ export class Notifiacion implements OnInit, OnDestroy {
         console.error('❌ Error al cargar notificaciones:', err);
       }
     });
+  }
+
+  // Generar un título por tipo cuando no venga en la notificación
+  private getTituloFromTipo(tipo: string | undefined): string {
+    if (!tipo) return '📢 Notificación';
+    switch (tipo) {
+      case 'asignacion_coach': return '🎯 Coach Asignado';
+      case 'informacion': return '📋 Información Importante';
+      case 'bienvenida': return '🎉 ¡Bienvenido!';
+      case 'recordatorio': return '⏰ Recordatorio';
+      case 'promocion': return '🎁 Promoción';
+      case 'nuevo_miembro': return '🆕 Nuevo Miembro';
+      case 'checkout': return '🧾 Checkout';
+      case 'nuevo_carrito': return '🛒 Nuevo Carrito';
+      case 'stock_bajo': return '⚠️ Stock Bajo';
+      case 'miembro_activado': return '✅ Miembro Activado';
+      default: return '📢 Notificación';
+    }
+  }
+
+  // Normalizar notificación entrante del backend a la interfaz usada en frontend
+  private normalizeNotification(n: any): NotificacionMiembro {
+    const fecha = n.fecha_envio ? new Date(n.fecha_envio).toISOString() : new Date().toISOString();
+    const id_notificacion = (n.id_notificacion ?? n.id) || Date.now();
+    const id_miembro = n.id_miembro ?? n.id_usuario ?? n.id_usuario_destino ?? null;
+    return {
+      ...n,
+      id_notificacion,
+      id_miembro,
+      fecha_envio: fecha,
+      titulo: n.titulo ?? this.getTituloFromTipo(n.tipo)
+    } as NotificacionMiembro;
   }
 
   // para verificar entrenador con autenticación
@@ -162,7 +248,9 @@ export class Notifiacion implements OnInit, OnDestroy {
           );
 
           if (nuevasNotificaciones.length > 0) {
-            this.notificaciones = [...nuevasNotificaciones, ...this.notificaciones];
+            // Mapear y normalizar nuevas notificaciones y mantener orden por fecha (más recientes primero)
+            const mapped = nuevasNotificaciones.map((n: any) => this.normalizeNotification ? this.normalizeNotification(n) : n);
+            this.notificaciones = [...mapped, ...this.notificaciones].sort((a: NotificacionMiembro, b: NotificacionMiembro) => new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime());
             console.log('🔔 Nuevas notificaciones detectadas:', nuevasNotificaciones.length);
 
             nuevasNotificaciones.forEach((notif: NotificacionMiembro) => {
@@ -339,6 +427,14 @@ export class Notifiacion implements OnInit, OnDestroy {
     switch (tipo) {
       case 'asignacion_coach':
         return 'bi-person-check-fill';
+      case 'nuevo_miembro':
+        return 'bi-person-plus-fill';
+      case 'checkout':
+        return 'bi-receipt';
+      case 'nuevo_carrito':
+        return 'bi-cart-plus';
+      case 'stock_bajo':
+        return 'bi-exclamation-triangle-fill';
       case 'informacion':
         return 'bi-info-circle-fill';
       case 'bienvenida':
@@ -359,6 +455,14 @@ export class Notifiacion implements OnInit, OnDestroy {
     switch (tipo) {
       case 'asignacion_coach':
         return 'text-success';
+      case 'nuevo_miembro':
+        return 'text-primary';
+      case 'checkout':
+        return 'text-dark';
+      case 'nuevo_carrito':
+        return 'text-info';
+      case 'stock_bajo':
+        return 'text-danger';
       case 'informacion':
         return 'text-info';
       case 'bienvenida':

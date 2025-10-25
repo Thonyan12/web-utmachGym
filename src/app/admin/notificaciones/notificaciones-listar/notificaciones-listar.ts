@@ -10,7 +10,7 @@ import { Router, RouterModule } from '@angular/router';
     standalone: true,
     imports: [NotificacionesSidebarComponent, CommonModule, FormsModule, RouterModule],
     templateUrl: './notificaciones-listar.html',
-    styleUrl: './notificaciones-listar.css'
+    styleUrls: ['./notificaciones-listar.css']
 })
 export class NotificacionesListarComponent implements OnInit {
     notificaciones: Notificacion[] = [];
@@ -26,7 +26,25 @@ export class NotificacionesListarComponent implements OnInit {
 
     cargarTodasLasNotificaciones(): void {
         this.notificacionesService.getAllUserNotifications().subscribe(res => {
-            this.notificaciones = [...res.sent, ...res.received];
+            // El backend puede devolver { sent: [], received: [] } o un array directamente.
+            if (Array.isArray(res)) {
+                this.notificaciones = res as any[];
+            } else if (res && (res.sent || res.received)) {
+                this.notificaciones = [...(res.sent || []), ...(res.received || [])];
+            } else {
+                // Fallback: intentar interpretar como objeto con data
+                const maybeData = (res as any).data;
+                if (Array.isArray(maybeData)) this.notificaciones = maybeData;
+                else this.notificaciones = [];
+            }
+            // Ordenar por fecha_envio desc (más recientes primero) si el campo existe
+            try {
+                this.notificaciones.sort((a: any, b: any) => new Date(b.fecha_envio).getTime() - new Date(a.fecha_envio).getTime());
+            } catch (e) { /* ignore sort errors */ }
+            this.aplicarFiltros();
+        }, err => {
+            console.error('Error cargando notificaciones (all):', err);
+            this.notificaciones = [];
             this.aplicarFiltros();
         });
     }
