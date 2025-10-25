@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MiembrosSidebarComponent } from '../miembros-sidebar/miembros-sidebar';
 import { Miembro, MiembrosService } from '../services/miembros';
 import { CommonModule } from '@angular/common';
@@ -12,7 +12,6 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./miembros-listar.css']
 })
 export class MiembrosListarComponent implements OnInit {
-  private service = inject(MiembrosService);
   miembros: Miembro[] = [];
   searchText: string = '';
 
@@ -20,15 +19,40 @@ export class MiembrosListarComponent implements OnInit {
 
   ngOnInit(): void {
     this.miembrosService.getMiembros().subscribe(data => {
-      this.miembros = data;
+      try {
+        // Intentar ordenar por fecha de registro/f_registro (más recientes primero)
+        this.miembros = (data || []).slice().sort((a: any, b: any) => {
+          const fa = a.f_registro ? new Date(a.f_registro).getTime() : (a.fecha_inscripcion ? new Date(a.fecha_inscripcion).getTime() : 0);
+          const fb = b.f_registro ? new Date(b.f_registro).getTime() : (b.fecha_inscripcion ? new Date(b.fecha_inscripcion).getTime() : 0);
+          return fb - fa;
+        });
+      } catch (e) {
+        // Fallback: asignar sin ordenar si hay error
+        console.warn('Error ordenando miembros por fecha:', e);
+        this.miembros = data;
+      }
     });
   }
 
-  cambiarEstado(miembro: any, nuevoEstado: boolean) {
-    const miembroActualizado = { ...miembro, estado: nuevoEstado };
-    this.service.update(miembroActualizado).subscribe({
+  private sortMembersInPlace() {
+    try {
+      this.miembros.sort((a: any, b: any) => {
+        const fa = a.f_registro ? new Date(a.f_registro).getTime() : (a.fecha_inscripcion ? new Date(a.fecha_inscripcion).getTime() : 0);
+        const fb = b.f_registro ? new Date(b.f_registro).getTime() : (b.fecha_inscripcion ? new Date(b.fecha_inscripcion).getTime() : 0);
+        return fb - fa;
+      });
+    } catch (e) {
+      console.warn('Error al ordenar miembros in-place:', e);
+    }
+  }
+
+  cambiarEstado(miembro: Miembro, nuevoEstado: boolean) {
+    const miembroActualizado: Miembro = { ...miembro, estado: nuevoEstado };
+    this.miembrosService.update(miembroActualizado).subscribe({
       next: () => {
         miembro.estado = nuevoEstado;
+        // Reordenar la lista por fecha en caso de que la actualización afecte el orden
+        this.sortMembersInPlace();
       },
       error: () => {
         alert('Error al actualizar el estado');

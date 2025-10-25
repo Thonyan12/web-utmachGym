@@ -12,12 +12,14 @@ export interface NotificacionMiembro {
   titulo?: string;
   coach_nombre?: string;
   estado?: boolean;
+  origen?: 'miembro' | 'general'; // Para identificar de qué tabla viene
+  id_usuario_remitente?: number; // Para notificaciones de entrenadores
 }
 
 @Injectable({ providedIn: 'root' })
 export class NotificacionesMiembroService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/api/notificaciones-miembro';
+  private apiUrl = 'http://localhost:3000/api/notificaciones-unificadas';
 
   // MÉTODO PARA OBTENER HEADERS CON TOKEN
   private getHeaders(): HttpHeaders {
@@ -31,20 +33,46 @@ export class NotificacionesMiembroService {
   }
 
   
-  getMisNotificaciones(): Observable<{ success: boolean, data: NotificacionMiembro[] }> {
-    console.log('📡 Llamando getMisNotificaciones con headers...');
-    return this.http.get<{ success: boolean, data: NotificacionMiembro[] }>(
+  getMisNotificaciones(): Observable<{ success: boolean, data: NotificacionMiembro[], resumen?: any }> {
+    console.log('📡 Llamando getMisNotificaciones UNIFICADAS con headers...');
+    return this.http.get<{ success: boolean, data: NotificacionMiembro[], resumen?: any }>(
       `${this.apiUrl}`, 
       { headers: this.getHeaders() }
     );
   }
 
   
-  marcarComoLeida(id: number): Observable<any> {
-    console.log('📡 Marcando como leída con headers:', id);
+  marcarComoLeida(id: number, origen?: 'miembro' | 'general'): Observable<any> {
+    console.log('📡 Marcando como leída con headers:', id, 'origen:', origen);
+    
+    // La ruta ahora es: /:origen/:id_notificacion/leida
+    if (!origen) {
+      origen = 'general'; // Por defecto
+    }
+    
+    const url = `${this.apiUrl}/${origen}/${id}/leida`;
+    
     return this.http.put(
-      `${this.apiUrl}/${id}/leido`, 
+      url, 
       {}, 
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // Método adicional para obtener solo no leídas
+  getNoLeidas(): Observable<{ success: boolean, data: NotificacionMiembro[], total?: number }> {
+    console.log('📡 Obteniendo notificaciones no leídas...');
+    return this.http.get<{ success: boolean, data: NotificacionMiembro[], total?: number }>(
+      `${this.apiUrl}/no-leidas`, 
+      { headers: this.getHeaders() }
+    );
+  }
+
+  // Método adicional para filtrar por tipo
+  getPorTipo(tipo: string): Observable<{ success: boolean, data: NotificacionMiembro[], total?: number }> {
+    console.log('📡 Filtrando notificaciones por tipo:', tipo);
+    return this.http.get<{ success: boolean, data: NotificacionMiembro[], total?: number }>(
+      `${this.apiUrl}/tipo/${tipo}`, 
       { headers: this.getHeaders() }
     );
   }

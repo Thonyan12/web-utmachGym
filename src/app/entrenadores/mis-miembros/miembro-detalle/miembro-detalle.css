@@ -1,0 +1,263 @@
+/* Paleta de colores del sitio */
+:root {
+  --navy: #14213d;
+  --amber: #fca311;
+  --light-bg: #f8f9fa;
+  --card-shadow: 0 4px 12px rgba(20, 33, 61, 0.08);
+}
+
+.container-detalle {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Texto navy */
+.text-navy {
+  color: var(--navy);
+}
+
+/* Header Card */
+.header-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-left: 5px solid var(--amber) !important;
+  transition: transform 0.2s ease;
+}
+
+.header-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Badge de estado */
+.badge-estado {
+  padding: 0.5rem 1.2rem;
+  border-radius: 25px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-activo {
+  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.badge-inactivo {
+  background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Cards de información */
+.info-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: #ffffff;
+}
+
+.info-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 24px rgba(20, 33, 61, 0.12);
+}
+
+.card-header-custom {
+  background: linear-gradient(135deg, var(--navy) 0%, #1a2a4d 100%);
+  color: white;
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-bottom: 3px solid var(--amber);
+}
+
+/* Filas de información */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+}
+
+.info-value {
+  color: var(--navy);
+  font-weight: 500;
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+/* Cajas de estadísticas */
+.stat-box {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--light-bg);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.stat-box:hover {
+  background: #e9ecef;
+  transform: scale(1.02);
+}
+
+.stat-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.stat-icon.bg-primary {
+  background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+}
+
+.stat-icon.bg-warning {
+  background: linear-gradient(135deg, var(--amber) 0%, #e89c0c 100%);
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.2rem;
+}
+
+.stat-value {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+/* Caja de objetivo */
+.objetivo-box {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+  border-radius: 10px;
+  border: 2px solid var(--amber);
+}
+
+.objetivo-icon {
+  font-size: 3rem;
+  color: var(--amber);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.objetivo-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.5;
+}
+
+/* Botón de volver */
+.btn-volver {
+  background: linear-gradient(135deg, var(--amber) 0%, #fca311 100%);
+  color: var(--navy);
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(20, 33, 61, 0.2);
+}
+
+.btn-volver:hover {
+  background: linear-gradient(135deg, #fca311 0%, #e89c0c 100%);
+  color: var(--navy);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(20, 33, 61, 0.3);
+}
+
+/* Spinner de carga */
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  border-width: 0.3rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-card .d-flex {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .badge-estado {
+    align-self: flex-start;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+
+  .stat-box {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .objetivo-icon {
+    font-size: 2.5rem;
+  }
+
+  .objetivo-text {
+    font-size: 1rem;
+  }
+}
+
+/* Animaciones sutiles */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container-detalle > * {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.container-detalle > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.container-detalle > *:nth-child(3) {
+  animation-delay: 0.2s;
+}
