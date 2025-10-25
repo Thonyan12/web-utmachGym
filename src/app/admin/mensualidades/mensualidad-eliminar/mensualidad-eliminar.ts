@@ -1,78 +1,176 @@
-import { Component, inject } from '@angular/core';
-import { MensualidadSidebar } from '../mensualidad-sidebar/mensualidad-sidebar'; // Asegúrate de que la ruta sea correcta
+import { Component, inject, OnInit } from '@angular/core';
+import { MensualidadSidebar } from '../mensualidad-sidebar/mensualidad-sidebar';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Mensualidades, Mensualidad } from '../services/mensualidades'; // Asegúrate de que la ruta sea correcta y que Mensualidades sea tu servicio
+import { Mensualidades, Mensualidad } from '../services/mensualidades';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-mensualidad-eliminar',
-  imports: [CommonModule, FormsModule, MensualidadSidebar],
+  standalone: true,
+  imports: [CommonModule, FormsModule, MensualidadSidebar, HttpClientModule],
   templateUrl: './mensualidad-eliminar.html',
-  styleUrl: './mensualidad-eliminar.css' // Asegúrate de que este archivo CSS exista si lo usas
+  styleUrl: './mensualidad-eliminar.css'
 })
-export class MensualidadEliminarComponent { // Cambiado el nombre de la clase a MensualidadEliminarComponent
-  private service = inject(Mensualidades); // Inyección del servicio de mensualidades
-  idMensualidad: number = 0; // Propiedad para el ID de la mensualidad a buscar
-  mensualidad: Mensualidad | null = null; // Corregido: Propiedad 'mensualidades' a 'mensualidad' (singular)
-  mensaje: string = ''; // Mensajes para el usuario (éxito, error, etc.)
-  mostrarConfirmacion: boolean = false; // Controla la visibilidad del mensaje de confirmación
+export class MensualidadEliminarComponent implements OnInit {
+  private service = inject(Mensualidades);
+  private http = inject(HttpClient);
 
-  /**
-   * Busca una mensualidad por su ID.
-   */
-  buscar(): void {
-    if (this.idMensualidad <= 0) {
-      this.mensaje = 'El ID de la mensualidad debe ser un número positivo.';
-      this.mensualidad = null; // Usar 'mensualidad' singular
-      return;
-    }
-    this.service.getById(this.idMensualidad).subscribe({
-      next: (data) => {
-        this.mensualidad = data; // Usar 'mensualidad' singular
-        this.mensaje = ''; // Limpiar mensajes anteriores
-        this.mostrarConfirmacion = false; // Ocultar confirmación si se busca de nuevo
-      },
-      error: () => {
-        this.mensualidad = null; // Usar 'mensualidad' singular
-        this.mensaje = 'No se encontró una mensualidad con ese ID.';
-        this.mostrarConfirmacion = false;
-      }
-    });
+  // búsqueda por cédula o nombre
+  consulta: string = '';
+  cargando = false;
+  mensaje: string = '';
+
+  // miembros y resultados
+  members: any[] = [];
+  mensualidad: Mensualidad | null = null;
+  mensualidadesEncontradas: Mensualidad[] = [];
+  mostrarConfirmacion: boolean = false;
+
+  // Getter seguro para evitar acceso directo a .length en la plantilla
+  get foundCount(): number {
+    return (this.mensualidadesEncontradas ?? []).length;
+  }
+
+  ngOnInit(): void {
+    this.loadMembers();
+  }
+
+  private loadMembers(): void {
+    const url = `${environment.apiUrl}/api/miembros`;
+    this.http.get<any[]>(url)
+      .pipe(catchError(err => {
+        console.warn('No se pudieron cargar miembros:', err);
+        return of([]);
+      }))
+      .subscribe(list => {
+        this.members = list || [];
+      });
+  }
+
+  // Helper: devolver miembro o null
+  getMemberById(id: number | string | undefined | null) {
+    if (id == null) return null;
+    return this.members.find(m => {
+      const mid = m.id_miembro ?? m.id ?? m._id;
+      return String(mid) === String(id);
+    }) || null;
+  }
+
+  // Helper: devolver nombre desplegable seguro
+  getMemberDisplayName(id: number | string | undefined | null): string {
+    const m = this.getMemberById(id);
+    if (!m) return `Miembro #${id ?? ''}`.trim();
+    const nombreCompleto = m.nombre_completo ?? ((`${m.nombre ?? ''} ${m.apellido1 ?? m.apellido ?? ''}`).trim());
+    return nombreCompleto || (m.username ?? `Miembro #${id ?? ''}`);
   }
 
   /**
-   * Muestra el cuadro de diálogo de confirmación para eliminar.
+   * Busca mensualidades asociadas a la cédula o nombre de miembro.
+   * Si hay varias mensualidades toma la primera por defecto y avisa al usuario.
    */
+  buscarPorCedulaONombre(): void {
+    this.mensaje = '';
+    this.mensualidad = null;
+    this.mensualidadesEncontradas = [];
+    this.mostrarConfirmacion = false;
+
+    const raw = (this.consulta || '').trim();
+    if (!raw) {
+      this.mensaje = 'Ingrese cédula o nombre para buscar.';
+      return;
+    }
+    const q = raw.toLowerCase();
+
+    const getCedula = (m: any) => String(m.cedula ?? m.identificacion ?? m.dni ?? '').trim().toLowerCase();
+    const getFullName = (m: any) => String(m.nombre_completo ?? ((`${m.nombre || ''} ${m.apellido1 || m.apellido || ''}`).trim()) ?? '').trim().toLowerCase();
+
+    // buscar exacto por cédula primero
+    let matchedMember = this.members.find(m => getCedula(m) === q);
+    if (!matchedMember) {
+      // luego buscar nombre exacto
+      matchedMember = this.members.find(m => getFullName(m) === q);
+    }
+    if (!matchedMember) {
+      // fallback: búsqueda parcial en nombre o cédula
+      matchedMember = this.members.find(m => {
+        const name = getFullName(m);
+        const ced = getCedula(m);
+        return name.includes(q) || ced.includes(q);
+      });
+    }
+
+    if (!matchedMember) {
+      this.mensaje = 'No se encontró ningún miembro con esa cédula o nombre.';
+      return;
+    }
+
+    const memberId = matchedMember.id_miembro ?? matchedMember.id ?? matchedMember._id;
+    if (memberId == null) {
+      this.mensaje = 'El miembro encontrado no tiene un identificador válido.';
+      return;
+    }
+
+    this.cargando = true;
+    // obtener todas las mensualidades y filtrar por id_miembro (compatibilidad con cualquier backend)
+    this.service.getMensualidades()
+      .pipe(
+        catchError(err => {
+          console.error('Error al obtener mensualidades:', err);
+          this.cargando = false;
+          this.mensaje = 'Error al consultar mensualidades en el servidor.';
+          return of([]);
+        })
+      )
+      .subscribe((list: Mensualidad[]) => {
+        this.cargando = false;
+        const encontrados = (list || []).filter(m => String(m.id_miembro) === String(memberId));
+        if (encontrados.length === 0) {
+          this.mensaje = 'No se encontraron mensualidades para el miembro indicado.';
+          return;
+        }
+        this.mensualidadesEncontradas = encontrados;
+        this.mensualidad = encontrados[0]; // seleccionar la primera por defecto
+        if (encontrados.length > 1) {
+          this.mensaje = `Se encontraron ${encontrados.length} mensualidades; se cargó la primera.`;
+        } else {
+          this.mensaje = 'Mensualidad encontrada y cargada para eliminar.';
+        }
+      });
+  }
+
   confirmarEliminar(): void {
+    if (!this.mensualidad || !this.mensualidad.id_mensualidad) {
+      this.mensaje = 'No hay una mensualidad seleccionada para eliminar.';
+      return;
+    }
     this.mostrarConfirmacion = true;
   }
 
-  /**
-   * Cancela el proceso de eliminación y oculta el cuadro de confirmación.
-   */
   cancelarEliminar(): void {
     this.mostrarConfirmacion = false;
   }
 
-  /**
-   * Elimina la mensualidad seleccionada.
-   */
   eliminar(): void {
-    if (!this.mensualidad || !this.mensualidad.id_mensualidad) { // Usar 'mensualidad' singular
-      this.mensaje = 'Primero busque una mensualidad válida para eliminar.';
+    if (!this.mensualidad || !this.mensualidad.id_mensualidad) {
+      this.mensaje = 'Primero busque y seleccione una mensualidad válida.';
       return;
     }
-    this.service.delete(this.mensualidad.id_mensualidad).subscribe({ // Usar 'mensualidad' singular
+    this.service.delete(this.mensualidad.id_mensualidad).subscribe({
       next: () => {
         this.mensaje = 'Mensualidad eliminada correctamente.';
-        this.mensualidad = null; // Usar 'mensualidad' singular
-        this.idMensualidad = 0; // Reiniciar el campo de ID
-        this.mostrarConfirmacion = false; // Ocultar confirmación
+        this.mensualidad = null;
+        this.mensualidadesEncontradas = [];
+        this.consulta = '';
+        this.mostrarConfirmacion = false;
       },
       error: (err) => {
+        console.error('Error al eliminar mensualidad:', err);
         this.mensaje = 'Error al eliminar la mensualidad.';
         this.mostrarConfirmacion = false;
-        console.error('Error al eliminar mensualidad:', err);
       }
     });
   }

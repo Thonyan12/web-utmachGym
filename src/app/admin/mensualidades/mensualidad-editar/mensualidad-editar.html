@@ -1,41 +1,37 @@
+<!-- ...existing code... -->
 <div class="d-flex" style="min-height: 100vh;">
   <!-- Sidebar reutilizable para Mensualidades -->
   <app-mensualidad-sidebar></app-mensualidad-sidebar>
 
-  <!-- Contenido principal del formulario de edición -->
   <div class="flex-grow-1 p-4 bg-light">
     <div class="container mt-4">
       <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
         <i class="bi bi-pencil-square me-2"></i> Editar Mensualidad
       </h3>
 
-      <!-- Formulario de búsqueda de mensualidad -->
+      <!-- Búsqueda por cédula o nombre -->
       <form class="mb-4" (ngSubmit)="buscarMensualidad()" #buscarForm="ngForm">
         <div class="row">
-          <div class="col-md-4 mb-2">
-            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID de Mensualidad o ID de Miembro" required>
+          <div class="col-md-8 mb-2">
+            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="Cédula o nombre del miembro" required>
           </div>
           <div class="col-md-2 mb-2">
-            <button type="submit" class="btn btn-info w-100">Buscar</button>
+            <button type="submit" class="btn btn-info w-100" [disabled]="cargando">
+              {{ cargando ? 'Buscando...' : 'Buscar' }}
+            </button>
           </div>
         </div>
       </form>
 
-      <!-- Formulario de edición de mensualidad (se muestra si se encuentra una mensualidad) -->
+      <!-- Formulario de edición (se muestra si se encuentra una mensualidad) -->
       <form *ngIf="mensualidad" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
-        <!-- ID de la Mensualidad (solo lectura) -->
+        <!-- ID Mensualidad oculto: se mantiene en el objeto pero no se muestra -->
+        <!-- Mostrar nombre del miembro en lugar del ID -->
         <div class="mb-3">
-          <label class="form-label">ID de la Mensualidad</label>
-          <input [(ngModel)]="mensualidad.id_mensualidad" name="id_mensualidad" type="number" class="form-control" readonly>
+          <label class="form-label">Miembro</label>
+          <input type="text" class="form-control" [value]="memberNameSelected" readonly>
         </div>
-        <!-- ID del Miembro -->
-        <div class="mb-3">
-          <label class="form-label">ID del Miembro</label>
-          <input [(ngModel)]="mensualidad.id_miembro" name="id_miembro" type="number" class="form-control" required min="1" #idMiembro="ngModel">
-          <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
-            El ID del Miembro es obligatorio y debe ser positivo.
-          </div>
-        </div>
+
         <!-- Fecha de Inicio -->
         <div class="mb-3">
           <label class="form-label">Fecha Inicio</label>
@@ -72,26 +68,23 @@
             El estado de la mensualidad es obligatorio.
           </div>
         </div>
+
         <!-- Fecha de Registro (solo lectura) -->
         <div class="mb-3">
           <label class="form-label">Fecha de Registro</label>
           <input [(ngModel)]="mensualidad.f_registro" name="f_registro" type="text" class="form-control" readonly>
         </div>
 
-        <!-- Botón de Actualizar -->
-        <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
+        <!-- Botón de Actualizar y Volver -->
+        <div class="d-flex gap-2">
+          <button type="button" class="btn btn-secondary" routerLink="/admin/mensualidades">Volver</button>
+          <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
+        </div>
       </form>
 
-      <!-- Mensajes de estado -->
-      <div *ngIf="mensaje" class="alert alert-info mt-3">
-        {{ mensaje }}
-      </div>
-      <div *ngIf="!mensualidad && mensaje && !cargando" class="text-danger mt-3">
-        No se encontró la mensualidad.
-      </div>
-      <div *ngIf="cargando" class="text-secondary mt-3">
-        Buscando mensualidad...
-      </div>
+      <!-- Mensajes -->
+      <div *ngIf="mensaje" class="alert alert-info mt-3">{{ mensaje }}</div>
     </div>
   </div>
 </div>
+<!-- ...existing code... -->
