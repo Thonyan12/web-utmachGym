@@ -48,17 +48,27 @@ export class EnviarNotificacion implements OnInit {
       return;
     }
 
+    console.log('🚀 Preparando para enviar notificación...');
+    console.log('👤 id_usuario:', this.id_usuario);
+    console.log('📝 tipo:', this.tipo);
+    console.log('💬 contenido:', this.contenido);
+
     this.notiService.enviarNotificacion({
       id_usuario: this.id_usuario,
       tipo: this.tipo,
       contenido: this.contenido
     }).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Respuesta exitosa:', response);
         this.mensaje = 'Notificación enviada correctamente.';
         this.limpiarFormulario();
       },
-      error: () => {
-        this.mensaje = 'Error al enviar la notificación.';
+      error: (err) => {
+        console.error('❌ Error al enviar:', err);
+        console.error('Status:', err.status);
+        console.error('Message:', err.message);
+        console.error('Error completo:', err.error);
+        this.mensaje = `Error al enviar la notificación: ${err.error?.message || err.message}`;
       }
     });
   }

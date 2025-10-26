@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -10,13 +10,19 @@ import { AuthService } from '../../services/auth';
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit {
   usuario = '';
   contrasenia = '';
   loading = false;
   error = '';
 
   constructor(private authService: AuthService, private router: Router) {}
+
+  ngOnInit() {
+    // Limpiar cualquier sesión anterior al cargar la página de login
+    console.log('🧹 Limpiando sesión anterior...');
+    this.authService.logout();
+  }
 
   onSubmit() {
     if (!this.usuario || !this.contrasenia) {
@@ -48,7 +54,12 @@ export class Login {
         },
         error: (error) => {
           this.loading = false;
+          
+          // 🧹 IMPORTANTE: Limpiar tokens inválidos
+          this.authService.logout();
+          
           this.error = error.error?.message || 'Credenciales incorrectas';
+          console.error('Error de login:', error);
         }
       });
   }

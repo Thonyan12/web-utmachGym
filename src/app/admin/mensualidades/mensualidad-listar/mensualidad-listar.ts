@@ -25,16 +25,32 @@ export class MensualidadListar implements OnInit {
   constructor(private mensualidadesService: Mensualidades, private http: HttpClient) { }
 
   ngOnInit(): void {
+    console.log('🔄 Iniciando carga de mensualidades...');
+    console.log('🔑 Token:', localStorage.getItem('token') ? 'Presente' : 'No presente');
+    
     this.mensualidadesService.getMensualidades()
       .pipe(
         catchError((error) => {
-          console.error('Error al obtener las mensualidades:', error);
+          console.error('❌ Error al obtener las mensualidades:', error);
+          console.error('Status:', error.status);
+          console.error('Message:', error.message);
+          console.error('Error completo:', error);
           return of([]); // Devuelve un array vacío en caso de error
         })
       )
-      .subscribe((data) => {
-        console.log('Mensualidades obtenidas:', data); // Verifica los datos en la consola
-        this.mensualidades = data;
+      .subscribe({
+        next: (data) => {
+          console.log('✅ Mensualidades obtenidas del backend:', data);
+          console.log('📊 Cantidad de mensualidades:', data?.length || 0);
+          this.mensualidades = data || [];
+          console.log('📋 Mensualidades asignadas al componente:', this.mensualidades);
+        },
+        error: (err) => {
+          console.error('❌ Error en suscripción:', err);
+        },
+        complete: () => {
+          console.log('✔️ Suscripción completada');
+        }
       });
 
     this.loadMembers();
