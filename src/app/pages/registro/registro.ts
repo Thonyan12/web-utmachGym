@@ -88,34 +88,116 @@ export class Registro {
     this.error = '';
 
     // Conectar con tu backend
-    this.http.post<RegistroResponse>(`${environment.apiUrl}/api/members/register`, this.registroForm.value)
+    // Be tolerant with backend response shape: some services return { success: true, data: ... }
+    // while others may return the created member object directly. We'll accept both.
+    this.http.post<any>(`${environment.apiUrl}/api/members/register`, this.registroForm.value)
       .subscribe({
         next: (response) => {
           this.loading = false;
-          if (response.success) {
-            // Mostrar modal con credenciales
-            this.datosRegistroExitoso = response.data;
+          const body = response as any;
+
+          // Case A: backend returns { success: true, data: { ... } }
+          if (body && body.success === true) {
+            // Normalize backend shape: backend may return usuario/contrasenia at top-level of data
+            const data = body.data || {};
+            if (data.usuario || data.contrasenia) {
+              // convert to expected shape { credenciales: { usuario, contrasenia } }
+              data.credenciales = data.credenciales || { usuario: data.usuario || '', contrasenia: data.contrasenia || '' };
+            }
+            // also ensure nombre_completo exists
+            data.nombre_completo = data.nombre_completo || `${data.nombre || ''} ${data.apellido1 || ''}`.trim();
+            console.log('[Registro] backend success response:', body);
+            console.log('[Registro] normalized data to show in modal:', data);
+            this.datosRegistroExitoso = data;
             this.showSuccessModal = true;
-          } else {
-            this.error = response.error || 'Error en el registro';
+            return;
+          }
+
+          // Case B: backend returns the created member object (e.g. { id_miembro: 1, nombre: ... })
+          if (body && (body.id_miembro || body.data?.id_miembro)) {
+            // Normalize into the shape the UI expects (minimal)
+            this.datosRegistroExitoso = body.data || {
+              id_miembro: body.id_miembro || body.data?.id_miembro,
+              nombre_completo: `${body.nombre} ${body.apellido1 || ''}`.trim(),
+              credenciales: { usuario: '', contrasenia: '' },
+              mensaje_principal: 'Registro completado',
+              instrucciones: []
+            };
+            console.log('[Registro] received member object, showing modal with:', this.datosRegistroExitoso);
+            this.showSuccessModal = true;
+            return;
+          }
+
+          // Otherwise show any error message returned, or a generic one
+          this.error = (body && (body.error || body.message)) || 'Error en el registro';
+          // If the backend returned an id but no credentials, try to fetch credentials
+          const maybeId = body?.data?.id_miembro || body?.id_miembro;
+          if (maybeId) {
+            this.tryFetchCredentials(maybeId).catch(() => {/* ignore */});
           }
         },
         error: (error) => {
           this.loading = false;
           console.error('Error al registrar:', error);
-          
-          // Manejo de errores específicos de tu backend
-          if (error.error?.message === 'CEDULA_DUPLICADA') {
+
+          // Log useful debugging info to console to help backend debugging
+          try {
+            console.log('HTTP status:', error.status);
+            console.log('Response body:', error.error);
+          } catch (e) { /* ignore */ }
+
+          // Manejo de errores específicos de tu backend (por message code)
+          const errMsg = error?.error?.message || error?.error?.error || null;
+          if (errMsg === 'CEDULA_DUPLICADA') {
             this.error = 'Ya existe un miembro registrado con esta cédula';
-          } else if (error.error?.message === 'CORREO_DUPLICADO') {
+          } else if (errMsg === 'CORREO_DUPLICADO') {
             this.error = 'Ya existe un miembro registrado con este correo electrónico';
-          } else if (error.error?.message === 'CAMPOS_REQUERIDOS') {
-            this.error = error.error.error || 'Campos requeridos faltantes';
+          } else if (errMsg === 'CAMPOS_REQUERIDOS') {
+            this.error = error.error?.error || 'Campos requeridos faltantes';
+          } else if (error?.status === 400) {
+            // if backend returned validation errors, surface them
+            this.error = error.error?.error || 'Datos inválidos. Revise el formulario.';
           } else {
             this.error = error.error?.error || 'Error al registrar miembro. Intente nuevamente.';
           }
         }
       });
+  }
+
+  // Try several possible endpoints to retrieve the generated credentials for a member
+  private async tryFetchCredentials(idMiembro: number) {
+    const attempts = [
+      `${environment.apiUrl}/api/members/${idMiembro}/credentials`,
+      `${environment.apiUrl}/api/members/${idMiembro}/user`,
+      `${environment.apiUrl}/api/miembros/${idMiembro}/usuario`,
+      `${environment.apiUrl}/api/miembros/${idMiembro}/credenciales`,
+      `${environment.apiUrl}/api/miembros/${idMiembro}/user`
+    ];
+
+    for (const url of attempts) {
+      try {
+        const resp: any = await this.http.get(url).toPromise();
+        if (!resp) continue;
+
+        // Accept either { usuario, contrasenia } or { data: { credenciales: { usuario, contrasenia } } }
+        let creds = null as any;
+        if (resp.usuario && resp.contrasenia) creds = { usuario: resp.usuario, contrasenia: resp.contrasenia };
+        if (resp.data?.credenciales) creds = resp.data.credenciales;
+        if (resp.data?.usuario && resp.data?.contrasenia) creds = { usuario: resp.data.usuario, contrasenia: resp.data.contrasenia };
+
+        if (creds) {
+          // Merge into datosRegistroExitoso so modal shows credentials
+          this.datosRegistroExitoso = this.datosRegistroExitoso || {};
+          this.datosRegistroExitoso.credenciales = creds;
+          this.showSuccessModal = true;
+          return;
+        }
+      } catch (e) {
+        // ignore and try next
+      }
+    }
+    // If none found, leave as-is; frontend will show generic success without credentials
+    return;
   }
 
   private markFormGroupTouched() {

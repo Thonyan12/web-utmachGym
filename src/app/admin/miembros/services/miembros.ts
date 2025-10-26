@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export interface Miembro {
     id_miembro?: number;
@@ -27,7 +28,9 @@ export interface Miembro {
 })
 export class MiembrosService {
     private http = inject(HttpClient);
-    private apiUrl = 'http://localhost:3000/api/miembros';
+    // Use environment.apiUrl so requests go through the gateway.
+    // Gateway maps `/api/members` -> members-service (backend), so use that prefix.
+    private apiUrl = `${environment.apiUrl}/api/members`;
 
     getMiembros(): Observable<Miembro[]> {
         return this.http.get<Miembro[]>(this.apiUrl);
