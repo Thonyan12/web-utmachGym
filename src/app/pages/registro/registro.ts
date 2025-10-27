@@ -87,35 +87,31 @@ export class Registro {
     this.loading = true;
     this.error = '';
 
-    // Conectar con tu backend
-    // Be tolerant with backend response shape: some services return { success: true, data: ... }
-    // while others may return the created member object directly. We'll accept both.
     this.http.post<any>(`${environment.apiUrl}/api/members/register`, this.registroForm.value)
       .subscribe({
         next: (response) => {
           this.loading = false;
           const body = response as any;
 
-          // Case A: backend returns { success: true, data: { ... } }
+          // Caso A: backend retorna { success: true, data: { ... } }
           if (body && body.success === true) {
-            // Normalize backend shape: backend may return usuario/contrasenia at top-level of data
             const data = body.data || {};
+            
+            // Normalizar credenciales si vienen en formato diferente
             if (data.usuario || data.contrasenia) {
-              // convert to expected shape { credenciales: { usuario, contrasenia } }
               data.credenciales = data.credenciales || { usuario: data.usuario || '', contrasenia: data.contrasenia || '' };
             }
-            // also ensure nombre_completo exists
+            
+            // Asegurar que existe nombre_completo
             data.nombre_completo = data.nombre_completo || `${data.nombre || ''} ${data.apellido1 || ''}`.trim();
-            console.log('[Registro] backend success response:', body);
-            console.log('[Registro] normalized data to show in modal:', data);
+            
             this.datosRegistroExitoso = data;
             this.showSuccessModal = true;
             return;
           }
 
-          // Case B: backend returns the created member object (e.g. { id_miembro: 1, nombre: ... })
+          // Caso B: backend retorna el objeto del miembro directamente
           if (body && (body.id_miembro || body.data?.id_miembro)) {
-            // Normalize into the shape the UI expects (minimal)
             this.datosRegistroExitoso = body.data || {
               id_miembro: body.id_miembro || body.data?.id_miembro,
               nombre_completo: `${body.nombre} ${body.apellido1 || ''}`.trim(),
@@ -123,48 +119,49 @@ export class Registro {
               mensaje_principal: 'Registro completado',
               instrucciones: []
             };
-            console.log('[Registro] received member object, showing modal with:', this.datosRegistroExitoso);
             this.showSuccessModal = true;
             return;
           }
 
-          // Otherwise show any error message returned, or a generic one
+          // Si hay algún error en la respuesta
           this.error = (body && (body.error || body.message)) || 'Error en el registro';
-          // If the backend returned an id but no credentials, try to fetch credentials
+          
+          // Intentar obtener credenciales si se creó el usuario pero no llegaron
           const maybeId = body?.data?.id_miembro || body?.id_miembro;
           if (maybeId) {
-            this.tryFetchCredentials(maybeId).catch(() => {/* ignore */});
+            this.tryFetchCredentials(maybeId).catch(() => {});
           }
         },
         error: (error) => {
           this.loading = false;
           console.error('Error al registrar:', error);
 
-          // Log useful debugging info to console to help backend debugging
-          try {
-            console.log('HTTP status:', error.status);
-            console.log('Response body:', error.error);
-          } catch (e) { /* ignore */ }
-
-          // Manejo de errores específicos de tu backend (por message code)
+          // Manejo de errores específicos del backend
           const errMsg = error?.error?.message || error?.error?.error || null;
-          if (errMsg === 'CEDULA_DUPLICADA') {
-            this.error = 'Ya existe un miembro registrado con esta cédula';
-          } else if (errMsg === 'CORREO_DUPLICADO') {
-            this.error = 'Ya existe un miembro registrado con este correo electrónico';
+          const errString = typeof errMsg === 'string' ? errMsg.toLowerCase() : '';
+          
+          if (errMsg === 'CEDULA_DUPLICADA' || errString.includes('cedula') || errString.includes('duplicate key') && errString.includes('cedula')) {
+            this.error = '❌ Esta cédula ya está registrada en nuestro sistema. Si ya eres miembro, inicia sesión.';
+          } else if (errMsg === 'CORREO_DUPLICADO' || errString.includes('correo') || errString.includes('email')) {
+            this.error = '❌ Este correo electrónico ya está en uso. Por favor, utiliza otro correo.';
+          } else if (errString.includes('duplicate') || errString.includes('duplicada') || errString.includes('ya existe')) {
+            this.error = '❌ Los datos que ingresaste ya están registrados. Verifica tu cédula o correo e intenta nuevamente.';
           } else if (errMsg === 'CAMPOS_REQUERIDOS') {
-            this.error = error.error?.error || 'Campos requeridos faltantes';
+            this.error = '❌ Por favor completa todos los campos obligatorios del formulario.';
           } else if (error?.status === 400) {
-            // if backend returned validation errors, surface them
-            this.error = error.error?.error || 'Datos inválidos. Revise el formulario.';
+            this.error = error.error?.error || '❌ Los datos ingresados no son válidos. Por favor revisa el formulario.';
+          } else if (error?.status === 500) {
+            this.error = '❌ Hubo un problema en el servidor. Por favor intenta nuevamente en unos momentos.';
+          } else if (error?.status === 0) {
+            this.error = '❌ No se pudo conectar con el servidor. Verifica tu conexión a internet.';
           } else {
-            this.error = error.error?.error || 'Error al registrar miembro. Intente nuevamente.';
+            this.error = error.error?.error || '❌ No se pudo completar el registro. Por favor intenta nuevamente.';
           }
         }
       });
   }
 
-  // Try several possible endpoints to retrieve the generated credentials for a member
+  // Intentar obtener credenciales desde varios endpoints posibles
   private async tryFetchCredentials(idMiembro: number) {
     const attempts = [
       `${environment.apiUrl}/api/members/${idMiembro}/credentials`,
@@ -179,24 +176,22 @@ export class Registro {
         const resp: any = await this.http.get(url).toPromise();
         if (!resp) continue;
 
-        // Accept either { usuario, contrasenia } or { data: { credenciales: { usuario, contrasenia } } }
+        // Buscar credenciales en diferentes formatos de respuesta
         let creds = null as any;
         if (resp.usuario && resp.contrasenia) creds = { usuario: resp.usuario, contrasenia: resp.contrasenia };
         if (resp.data?.credenciales) creds = resp.data.credenciales;
         if (resp.data?.usuario && resp.data?.contrasenia) creds = { usuario: resp.data.usuario, contrasenia: resp.data.contrasenia };
 
         if (creds) {
-          // Merge into datosRegistroExitoso so modal shows credentials
           this.datosRegistroExitoso = this.datosRegistroExitoso || {};
           this.datosRegistroExitoso.credenciales = creds;
           this.showSuccessModal = true;
           return;
         }
       } catch (e) {
-        // ignore and try next
+        continue;
       }
     }
-    // If none found, leave as-is; frontend will show generic success without credentials
     return;
   }
 
@@ -206,13 +201,22 @@ export class Registro {
     });
   }
 
-  // Funciones para el modal de éxito
+  // Copiar texto al portapapeles y mostrar confirmación
   copiarTexto(texto: string) {
+    if (!texto) return;
+    
     navigator.clipboard.writeText(texto).then(() => {
-      console.log('Texto copiado al portapapeles');
-      // Aquí podrías mostrar un toast de confirmación
+      const tooltip = document.createElement('div');
+      tooltip.textContent = '✓ Copiado!';
+      tooltip.className = 'copy-tooltip';
+      document.body.appendChild(tooltip);
+      
+      setTimeout(() => {
+        document.body.removeChild(tooltip);
+      }, 2000);
     }).catch(err => {
       console.error('Error al copiar texto:', err);
+      alert('No se pudo copiar el texto. Por favor, cópialo manualmente.');
     });
   }
 

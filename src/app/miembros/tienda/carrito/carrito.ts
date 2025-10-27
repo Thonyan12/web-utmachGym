@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule }      from '@angular/common';
 import { RouterLink }        from '@angular/router';
 import { CarritoService, Cart, CartItem } from '../services/carrito';
+import { Productos } from '../../../admin/productos/services/productos';
+import { forkJoin } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -15,6 +17,7 @@ export class CarritoComponent implements OnInit {
 
   constructor(
     private carritoSvc: CarritoService,
+    private productosSvc: Productos,
   ) {}
 
   ngOnInit() {
@@ -22,7 +25,25 @@ export class CarritoComponent implements OnInit {
   }
 
   load() {
-    this.carritoSvc.getCart().subscribe(c => this.cartData = c);
+    this.carritoSvc.getCart().subscribe(cart => {
+      // Cargar los datos de productos que no vengan completos
+      const itemsNeedingProducts = cart.items.filter(item => !item.producto);
+      
+      if (itemsNeedingProducts.length > 0) {
+        const productRequests = itemsNeedingProducts.map(item => 
+          this.productosSvc.getById(item.id_producto)
+        );
+        
+        forkJoin(productRequests).subscribe(productos => {
+          itemsNeedingProducts.forEach((item, index) => {
+            item.producto = productos[index];
+          });
+          this.cartData = cart;
+        });
+      } else {
+        this.cartData = cart;
+      }
+    });
   }
 
   update(item: CartItem, qty: number) {

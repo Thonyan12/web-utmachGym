@@ -1,77 +1,100 @@
-<nav class="navbar navbar-expand-lg navbar-dark shadow-sm"
-  style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+<nav
+  class="navbar navbar-expand-lg navbar-dark shadow-sm"
+  style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%)"
+>
   <div class="container-fluid">
-    <a class="navbar-brand fw-bold d-flex align-items-center" routerLink="/admin/dashboard" style="cursor:pointer;">
-      <img src="logomain.png" alt="Logo" width="40" class="me-2">
+    <a
+      class="navbar-brand fw-bold d-flex align-items-center"
+      routerLink="/admin/dashboard"
+      style="cursor: pointer"
+    >
+      <img src="logomain.png" alt="Logo" width="40" class="me-2" />
       <span>Admin <span class="text-warning">Utmach</span> Gym</span>
     </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar">
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#adminNavbar"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="adminNavbar">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link disabled d-flex align-items-center" href="#">
-            <i class="bi bi-people-fill me-1"></i> 
-          </a>
-        </li>
-        
-        <li class="nav-item">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/detallefactura" style="color: #fca311;">
-            <i class="bi bi-file-earmark-text me-1"></i> 
-          </a>
-        </li>
-
-        <li class="nav-item">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/facturas" style="color: #fca311;">
+          <a
+            class="nav-link d-flex align-items-center"
+            routerLink="/admin/facturas"
+            style="color: #fca311"
+          >
             <i class="bi bi-receipt me-1"></i> Facturas
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/mensualidades" style="color: #fca311;">
+          <a
+            class="nav-link d-flex align-items-center"
+            routerLink="/admin/mensualidades"
+            style="color: #fca311"
+          >
             <i class="bi bi-calendar-check me-1"></i> Mensualidades
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/miembros" style="color: #fca311;">
+          <a
+            class="nav-link d-flex align-items-center"
+            routerLink="/admin/miembros"
+            style="color: #fca311"
+          >
             <i class="bi bi-person-vcard me-1"></i> Miembros
           </a>
         </li>
-        <!-- Solo mostrar productos si es admin -->
         <li class="nav-item" *ngIf="currentUser?.rol === 'admin'">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/productos" style="color: #fca311;">
+          <a
+            class="nav-link d-flex align-items-center"
+            routerLink="/admin/productos"
+            style="color: #fca311"
+          >
             <i class="bi bi-box-seam me-1"></i> Productos
           </a>
         </li>
-      </ul>
-      <!-- ...existing code... -->
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <!-- ...otros ítems... -->
-        <li class="nav-item" *ngIf="currentUser?.rol === 'admin' || currentUser?.rol === 'coach'">
-          <a class="nav-link d-flex align-items-center" routerLink="/admin/notificaciones" style="color: #fca311;">
+        <li
+          class="nav-item"
+          *ngIf="currentUser?.rol === 'admin' || currentUser?.rol === 'coach'"
+        >
+          <a
+            class="nav-link d-flex align-items-center"
+            routerLink="/admin/notificaciones"
+            style="color: #fca311"
+          >
             <i class="bi bi-bell-fill me-1"></i> Notificaciones
           </a>
         </li>
-        <!-- ...otros ítems... -->
       </ul>
-      <!-- ...existing code... -->
-      <!-- Información del usuario y logout -->
       <div class="d-flex align-items-center">
-        <!-- Mostrar usuario logueado -->
-        <div *ngIf="currentUser" class="navbar-text text-white me-3 d-none d-md-block">
+        <div
+          *ngIf="currentUser"
+          class="navbar-text text-white me-3 d-none d-md-block"
+        >
           <i class="bi bi-person-circle me-1"></i>
           {{ currentUser.nombre_completo }}
-          <span class="badge bg-warning text-dark ms-1">{{ currentUser.rol }}</span>
+          <span class="badge bg-warning text-dark ms-1"
+            >{{ currentUser.rol }}</span
+          >
         </div>
 
-        <!-- Botones de acción -->
-        <button class="btn btn-sm btn-outline-secondary me-2" (click)="volverInicio()">
+        <button
+          class="btn btn-sm btn-outline-secondary me-2"
+          (click)="volverInicio()"
+        >
           <i class="bi bi-house me-1"></i> Inicio
         </button>
 
-        <button class="btn btn-sm btn-outline-warning" (click)="mostrarDialogoSalir = true">
+        <button
+          class="btn btn-sm btn-outline-warning"
+          (click)="mostrarDialogoSalir = true"
+        >
           <i class="bi bi-box-arrow-right me-1"></i> Cerrar Sesión
         </button>
       </div>
@@ -79,23 +102,36 @@
   </div>
 </nav>
 
-<!-- Modal de confirmación para cerrar sesión -->
-<div *ngIf="mostrarDialogoSalir" class="modal fade show d-block" tabindex="-1"
-  style="background: rgba(0,0,0,0.4); z-index: 1050;">
+<div
+  *ngIf="mostrarDialogoSalir"
+  class="modal fade show d-block"
+  tabindex="-1"
+  style="background: rgba(0, 0, 0, 0.4); z-index: 1050"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-warning text-dark">
         <h5 class="modal-title">
           <i class="bi bi-exclamation-triangle me-2"></i>¿Cerrar sesión?
         </h5>
-        <button type="button" class="btn-close" (click)="mostrarDialogoSalir = false"></button>
+        <button
+          type="button"
+          class="btn-close"
+          (click)="mostrarDialogoSalir = false"
+        ></button>
       </div>
       <div class="modal-body">
         <p class="mb-2">¿Estás seguro de que deseas cerrar sesión?</p>
-        <small class="text-muted">Serás redirigido a la página principal.</small>
+        <small class="text-muted"
+          >Serás redirigido a la página principal.</small
+        >
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="mostrarDialogoSalir = false">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="mostrarDialogoSalir = false"
+        >
           Cancelar
         </button>
         <button type="button" class="btn btn-warning" (click)="logout()">

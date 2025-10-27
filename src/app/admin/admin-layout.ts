@@ -27,7 +27,6 @@ export class AdminLayout implements OnInit {
   logout() {
     this.mostrarDialogoSalir = false;
     this.authService.logout();
-    // ✅ Redirección manual después del logout
     this.router.navigate(['/']);
   }
 
