@@ -1,52 +1,66 @@
 <div class="d-flex" style="min-height: 100vh;">
   <app-miembros-sidebar></app-miembros-sidebar>
 
-  <div class="container mt-4">
-    <h2 class="mb-4">Lista de Miembros</h2>
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold m-0" style="color: #14213d;">
+        <i class="bi bi-search me-2"></i> Lista de Miembros
+      </h3>
+    </div>
 
-    <div class="row mb-3 g-2 align-items-center">
-      <div class="col-md-6">
-        <input type="text" class="form-control" placeholder="Buscar por cédula o nombre..."
-               [(ngModel)]="filtro" (input)="filtrarMiembros()" name="filtro">
-      </div>
-
-      <div class="col-md-4">
-        <!-- Select inicialmente vacío; se llena solo después de buscar -->
-        <select class="form-select" [(ngModel)]="selectedMiembroId" (change)="onSelectChange()" name="miembroSelect">
-          <option [ngValue]="null">-- Seleccione un miembro --</option>
-          <option *ngFor="let m of miembrosFiltrados" [ngValue]="m.id_miembro">
-            {{ m.cedula }} — {{ m.nombre }} {{ m.apellido1 }} {{ m.apellido2 }}
-          </option>
-        </select>
+    <!-- Buscador -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input
+            type="text"
+            class="form-control border-start-0"
+            placeholder="Buscar por cédula, nombre o apellido..."
+            [(ngModel)]="filtro"
+            (input)="filtrarMiembros()"
+            name="filtro"
+            style="box-shadow: none;">
+        </div>
       </div>
     </div>
 
-    <div class="card bg-white border-0 shadow-sm">
+    <!-- Tabla de miembros -->
+    <div class="card border-0 shadow-sm">
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover table-bordered align-middle mb-0 bg-white">
-            <thead>
+          <table class="table table-hover align-middle mb-0 bg-white">
+            <thead style="background-color: #14213d; color: #fff;">
               <tr>
-                <th>Cédula / Nombre</th>
-                <th style="width:130px">Acciones</th>
+                <th scope="col">Cédula</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Apellidos</th>
+                <th scope="col" class="text-center">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let miembro of miembrosFiltrados">
-                <td>
-                  <div><strong>{{ miembro.cedula }}</strong></div>
-                  <div>{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</div>
-                </td>
+              <tr *ngFor="let m of miembrosFiltrados">
+                <td class="fw-medium">{{ m.cedula || '—' }}</td>
+                <td>{{ m.nombre || '—' }}</td>
+                <td>{{ (m.apellido1 || '') + ' ' + (m.apellido2 || '') }}</td>
                 <td class="text-center">
-                  <button type="button" class="btn btn-sm btn-outline-info" (click)="abrirModal(miembro)">
-                    <i class="bi bi-eye"></i> Ver
+                  <button
+                    class="btn btn-sm"
+                    style="background-color: #fca311; color: #0a1a2e;"
+                    (click)="abrirModal(m)"
+                    title="Ver detalles">
+                    <i class="bi bi-eye"></i>
                   </button>
                 </td>
               </tr>
 
               <tr *ngIf="miembrosFiltrados.length === 0">
-                <td colspan="2" class="text-center text-muted py-4">
-                  <i class="bi bi-search"></i> Realiza una búsqueda para ver resultados.
+                <td colspan="4" class="text-center text-muted py-5">
+                  <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                  <p class="mb-0 mt-3" *ngIf="!filtro">Escribe en el buscador para encontrar miembros...</p>
+                  <p class="mb-0 mt-3" *ngIf="filtro">No se encontraron miembros con "{{ filtro }}"</p>
                 </td>
               </tr>
             </tbody>
@@ -54,47 +68,88 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Modal detalle -->
-    <div class="modal" tabindex="-1" [ngClass]="{show: mostrarModal}" [ngStyle]="{display: mostrarModal ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Detalle de Miembro</h5>
-            <button type="button" class="btn-close" (click)="cerrarModal()"></button>
-          </div>
-          <div class="modal-body" *ngIf="miembroSeleccionado">
-            <div class="row">
-              <div class="col-md-6">
-                <p><strong>Cédula:</strong> {{ miembroSeleccionado.cedula }}</p>
-                <p><strong>Nombre:</strong> {{ miembroSeleccionado.nombre }}</p>
-                <p><strong>Apellido 1:</strong> {{ miembroSeleccionado.apellido1 }}</p>
-                <p><strong>Apellido 2:</strong> {{ miembroSeleccionado.apellido2 }}</p>
-                <p><strong>Edad:</strong> {{ miembroSeleccionado.edad }}</p>
-                <p><strong>Sexo:</strong> {{ miembroSeleccionado.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
-              </div>
-              <div class="col-md-6">
-                <p><strong>Correo:</strong> {{ miembroSeleccionado.correo }}</p>
-                <p><strong>Dirección:</strong> {{ miembroSeleccionado.direccion }}</p>
-                <p><strong>Altura:</strong> {{ miembroSeleccionado.altura }}</p>
-                <p><strong>Peso:</strong> {{ miembroSeleccionado.peso }}</p>
-                <p><strong>Contextura:</strong> {{ miembroSeleccionado.contextura }}</p>
-                <p><strong>Objetivo:</strong> {{ miembroSeleccionado.objetivo }}</p>
-                <p><strong>Estado:</strong>
-                  <span [ngClass]="miembroSeleccionado.estado ? 'text-success' : 'text-danger'">
-                    {{ miembroSeleccionado.estado ? 'Activo' : 'Inactivo' }}
-                  </span>
-                </p>
-                <p><strong>Fecha de Registro:</strong> {{ miembroSeleccionado.f_registro | date:'dd/MM/yyyy' }}</p>
-              </div>
+<!-- Modal de detalles del miembro -->
+<div *ngIf="mostrarModal" class="modal fade show d-block" tabindex="-1"
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <!-- Header -->
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-person-lines-fill me-2"></i> Detalle del Miembro
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body p-4" *ngIf="miembroSeleccionado">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Cédula</small>
+              <span class="fw-bold" style="color: #14213d; font-size: 1.1rem;">
+                {{ miembroSeleccionado.cedula || 'N/A' }}
+              </span>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Nombre</small>
+              <span class="fw-bold" style="color: #14213d; font-size: 1.1rem;">
+                {{ miembroSeleccionado.nombre || 'N/A' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Apellidos</small>
+              <span class="fw-medium" style="color: #14213d;">
+                {{ miembroSeleccionado.apellido1 || '' }} {{ miembroSeleccionado.apellido2 || '' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #fff3cd; border: 1px solid #fca311;">
+              <small class="text-muted d-block mb-1">Correo</small>
+              <span class="fw-bold" style="color: #0a1a2e;">
+                {{ miembroSeleccionado.correo || 'N/A' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Estado</small>
+              <span [style.color]="miembroSeleccionado.estado ? '#28a745' : '#dc3545'" class="fw-bold">
+                {{ miembroSeleccionado.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Fecha de Registro</small>
+              <span class="fw-medium" style="color: #14213d;">
+                <i class="bi bi-calendar-event me-2"></i>
+                {{ formatearFecha(miembroSeleccionado.f_registro) }}
+              </span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
+      <!-- Footer -->
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn" style="background-color: #14213d; color: white;" (click)="cerrarModal()">
+          <i class="bi bi-x-lg me-2"></i> Cerrar
+        </button>
+      </div>
+    </div>
   </div>
 </div>

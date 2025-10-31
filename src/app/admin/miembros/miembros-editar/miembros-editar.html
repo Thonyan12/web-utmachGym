@@ -2,18 +2,38 @@
     <app-miembros-sidebar></app-miembros-sidebar>
     <div class="container mt-4">
         <h2>Editar Miembro</h2>
-        <form class="mb-4" (ngSubmit)="buscarMiembro()" #buscarForm="ngForm">
-            <div class="row">
-                <div class="col-md-4 mb-2">
-                    <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control"
-                        placeholder="ID, Cédula o Nombre del miembro" required>
-                </div>
-                <div class="col-md-2 mb-2">
-                    <button type="submit" class="btn btn-info w-100">Buscar</button>
-                </div>
-            </div>
-        </form>
 
+        <!-- Buscador + Combobox -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body">
+            <div class="row g-2 align-items-center">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                  </span>
+                  <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control border-start-0"
+                         placeholder="ID, cédula o nombre..." (input)="filtrarMiembros()" style="box-shadow: none;">
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <select class="form-select" [(ngModel)]="selectedMiembroId" name="miembroSelect" (change)="onSelectChange()">
+                  <option [ngValue]="null">-- Seleccione un miembro --</option>
+                  <option *ngFor="let m of miembrosFiltrados" [ngValue]="m.id_miembro">
+                    {{ m.cedula }} — {{ m.nombre }} {{ m.apellido1 }} {{ m.apellido2 }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="col-md-2">
+                <button class="btn btn-info w-100" (click)="buscarMiembro()">Buscar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulario: se rellena al seleccionar -->
         <form *ngIf="miembro" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
             <div class="row">
                 <div class="col-md-6">

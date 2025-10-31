@@ -15,67 +15,54 @@ export class MiembrosDetalleComponent implements OnInit {
     private miembrosService = inject(MiembrosService);
 
     filtro: string = '';
-    miembros: Miembro[] = [];
-    miembrosFiltrados: Miembro[] = []; // inicialmente vacío: no mostrar nada hasta buscar
-    selectedMiembroId: number | null = null;
+  miembros: Miembro[] = [];
+  miembrosFiltrados: Miembro[] = []; // lista visible según búsqueda
 
-    mostrarModal = false;
-    miembroSeleccionado: Miembro | null = null;
+  mostrarModal = false;
+  miembroSeleccionado: Miembro | null = null;
 
-    ngOnInit(): void {
-        // cargamos todos los miembros en memoria, pero no mostramos nada hasta que el usuario busque
-        this.miembrosService.getMiembros().subscribe({
-            next: (data) => {
-                this.miembros = data || [];
-                this.miembrosFiltrados = []; // asegurar vacío al inicio
-            },
-            error: () => {
-                this.miembros = [];
-                this.miembrosFiltrados = [];
-            }
-        });
+  ngOnInit(): void {
+    this.miembrosService.getMiembros().subscribe({
+      next: (data) => {
+        this.miembros = data || [];
+        this.miembrosFiltrados = []; // vacío hasta que el usuario busque
+      },
+      error: () => {
+        this.miembros = [];
+        this.miembrosFiltrados = [];
+      }
+    });
+  }
+
+  filtrarMiembros(): void {
+    const q = (this.filtro || '').trim().toLowerCase();
+    if (!q) {
+      this.miembrosFiltrados = [];
+      return;
     }
+    this.miembrosFiltrados = this.miembros.filter(m =>
+      (m.cedula || '').toString().toLowerCase().includes(q) ||
+      (m.nombre || '').toString().toLowerCase().includes(q) ||
+      (m.apellido1 || '').toString().toLowerCase().includes(q) ||
+      (m.apellido2 || '').toString().toLowerCase().includes(q)
+    );
+  }
 
-    abrirModal(miembro: Miembro) {
-        this.miembroSeleccionado = miembro;
-        this.mostrarModal = true;
-    }
+  abrirModal(miembro: Miembro): void {
+    this.miembroSeleccionado = miembro;
+    this.mostrarModal = true;
+  }
 
-    cerrarModal() {
-        this.mostrarModal = false;
-        this.miembroSeleccionado = null;
-    }
+  cerrarModal(): void {
+    this.miembroSeleccionado = null;
+    this.mostrarModal = false;
+  }
 
-    filtrarMiembros(): void {
-        const q = (this.filtro || '').trim().toLowerCase();
-        if (!q) {
-            // no hay búsqueda: mantener la lista vacía
-            this.miembrosFiltrados = [];
-            this.selectedMiembroId = null;
-            return;
-        }
-
-        this.miembrosFiltrados = this.miembros.filter(m =>
-            (m.nombre || '').toString().toLowerCase().includes(q) ||
-            (m.apellido1 || '').toString().toLowerCase().includes(q) ||
-            (m.apellido2 || '').toString().toLowerCase().includes(q) ||
-            (m.cedula || '').toString().toLowerCase().includes(q) ||
-            (m.id_miembro != null && m.id_miembro.toString().includes(q))
-        );
-
-        // opcional: si hay solo un resultado, seleccionarlo
-        if (this.miembrosFiltrados.length === 1) {
-            this.selectedMiembroId = this.miembrosFiltrados[0].id_miembro || null;
-        } else {
-            this.selectedMiembroId = null;
-        }
-    }
-
-    onSelectChange(): void {
-        const id = this.selectedMiembroId;
-        if (!id) return;
-        const miembro = this.miembrosFiltrados.find(m => m.id_miembro === id);
-        if (miembro) this.abrirModal(miembro);
-    }
+  formatearFecha(d: string | Date | null | undefined): string {
+    if (!d) return '';
+    const date = new Date(d);
+    const pad = (n: number) => n < 10 ? '0' + n : '' + n;
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
+  }
 }
 
