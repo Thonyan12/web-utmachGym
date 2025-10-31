@@ -18,7 +18,7 @@
             <table class="table table-hover table-bordered align-middle mb-0">
               <thead style="background-color: #14213d; color: #fff;">
                 <tr>
-                  <!--<th scope="col">ID</th>-->
+                  <th scope="col">Cédula</th>
                   <th scope="col">Nombre</th>
                   <th scope="col">Apellido</th>
                   <th scope="col">Email</th>
@@ -28,7 +28,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let miembro of miembros" class="align-middle">
-                  <!--<td class="fw-bold text-center">{{ miembro.id_miembro }}</td>-->
+                  <td>{{ miembro.cedula }}</td>
                   <td>{{ miembro.nombre }}</td>
                   <td>{{ miembro.apellido1 }} {{ miembro.apellido2 }}</td>
                   <td>{{ miembro.correo }}</td>
@@ -40,7 +40,9 @@
                       <option [ngValue]="false">Inactivo</option>
                     </select>
                   </td>
-                  <td class="text-center">{{ miembro.f_registro }}</td>
+                  <td class="text-center">
+                    {{ miembro.f_registro | date:'dd/MM/yyyy' }}
+                  </td>
                 </tr>
                 <tr *ngIf="miembros.length === 0">
                   <td colspan="6" class="text-center text-muted py-4">

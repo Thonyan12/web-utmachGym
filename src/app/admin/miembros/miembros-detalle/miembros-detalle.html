@@ -1,78 +1,100 @@
 <div class="d-flex" style="min-height: 100vh;">
-    <app-miembros-sidebar></app-miembros-sidebar>
-    <div class="container mt-4">
-        <h2 class="mb-4">Lista de Miembros</h2>
-        <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, cédula o ID..."
-            [(ngModel)]="filtro" (input)="filtrarMiembros()" name="filtro">
+  <app-miembros-sidebar></app-miembros-sidebar>
 
-        <div *ngIf="miembrosFiltrados.length === 0" class="alert alert-warning">
-            No se encontraron miembros.
-        </div>
+  <div class="container mt-4">
+    <h2 class="mb-4">Lista de Miembros</h2>
 
-        <ul class="list-group shadow-sm">
-            <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
-                *ngFor="let miembro of miembrosFiltrados">
-                <div>
-                    <span class="fw-bold">{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</span>
-                    <span class="badge bg-secondary ms-2">{{ miembro.cedula }}</span>
-                </div>
-                <div class="text-muted small">
-                    <span><strong>ID:</strong> {{ miembro.id_miembro }}</span> |
-                    <span><strong>Edad:</strong> {{ miembro.edad }}</span> |
-                    <span><strong>Sexo:</strong> {{ miembro.sexo === 'M' ? 'Masculino' : 'Femenino' }}</span> |
-                    <span><strong>Estado:</strong>
-                        <span [ngClass]="miembro.estado ? 'text-success' : 'text-danger'">
-                            {{ miembro.estado ? 'Activo' : 'Inactivo' }}
-                        </span>
-                    </span>
-                </div>
-                <div class="text-end mt-2 mt-md-0">
-                    <span class="badge bg-light text-dark">Registrado: {{ miembro.f_registro | date:'shortDate'
-                        }}</span>
-                </div>
-                <div class="mt-2 mt-md-0">
-                    <button type="button" class="btn btn-sm btn-outline-info me-2" (click)="abrirModal(miembro)">
-                        <i class="bi bi-search"></i> Ver
-                    </button>
-                    </div>
-            </li>
-        </ul>
+    <div class="row mb-3 g-2 align-items-center">
+      <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Buscar por cédula o nombre..."
+               [(ngModel)]="filtro" (input)="filtrarMiembros()" name="filtro">
+      </div>
 
-        <!-- Modal simple -->
-        <div class="modal fade" tabindex="-1" [ngClass]="{show: mostrarModal}"
-            [ngStyle]="{display: mostrarModal ? 'block' : 'none'}" style="background:rgba(0,0,0,0.5)">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Detalle de Miembro</h5>
-                        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
-                    </div>
-                    <div class="modal-body" *ngIf="miembroSeleccionado">
-                        <p><strong>ID:</strong> {{ miembroSeleccionado.id_miembro }}</p>
-                        <p><strong>Cédula:</strong> {{ miembroSeleccionado.cedula }}</p>
-                        <p><strong>Nombre:</strong> {{ miembroSeleccionado.nombre }} {{ miembroSeleccionado.apellido1 }}
-                            {{ miembroSeleccionado.apellido2 }}</p>
-                        <p><strong>Edad:</strong> {{ miembroSeleccionado.edad }}</p>
-                        <p><strong>Sexo:</strong> {{ miembroSeleccionado.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
-                        <p><strong>Correo:</strong> {{ miembroSeleccionado.correo }}</p>
-                        <p><strong>Dirección:</strong> {{ miembroSeleccionado.direccion }}</p>
-                        <p><strong>Altura:</strong> {{ miembroSeleccionado.altura }}</p>
-                        <p><strong>Peso:</strong> {{ miembroSeleccionado.peso }}</p>
-                        <p><strong>Contextura:</strong> {{ miembroSeleccionado.contextura }}</p>
-                        <p><strong>Objetivo:</strong> {{ miembroSeleccionado.objetivo }}</p>
-                        <p><strong>Estado:</strong>
-                            <span [ngClass]="miembroSeleccionado.estado ? 'text-success' : 'text-danger'">
-                                {{ miembroSeleccionado.estado ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </p>
-                        <p><strong>Fecha de Registro:</strong> {{ miembroSeleccionado.f_registro | date:'shortDate' }}
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div class="col-md-4">
+        <!-- Select inicialmente vacío; se llena solo después de buscar -->
+        <select class="form-select" [(ngModel)]="selectedMiembroId" (change)="onSelectChange()" name="miembroSelect">
+          <option [ngValue]="null">-- Seleccione un miembro --</option>
+          <option *ngFor="let m of miembrosFiltrados" [ngValue]="m.id_miembro">
+            {{ m.cedula }} — {{ m.nombre }} {{ m.apellido1 }} {{ m.apellido2 }}
+          </option>
+        </select>
+      </div>
     </div>
+
+    <div class="card bg-white border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-bordered align-middle mb-0 bg-white">
+            <thead>
+              <tr>
+                <th>Cédula / Nombre</th>
+                <th style="width:130px">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let miembro of miembrosFiltrados">
+                <td>
+                  <div><strong>{{ miembro.cedula }}</strong></div>
+                  <div>{{ miembro.nombre }} {{ miembro.apellido1 }} {{ miembro.apellido2 }}</div>
+                </td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-outline-info" (click)="abrirModal(miembro)">
+                    <i class="bi bi-eye"></i> Ver
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="miembrosFiltrados.length === 0">
+                <td colspan="2" class="text-center text-muted py-4">
+                  <i class="bi bi-search"></i> Realiza una búsqueda para ver resultados.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal detalle -->
+    <div class="modal" tabindex="-1" [ngClass]="{show: mostrarModal}" [ngStyle]="{display: mostrarModal ? 'block' : 'none', background: 'rgba(0,0,0,0.5)'}">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Detalle de Miembro</h5>
+            <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+          </div>
+          <div class="modal-body" *ngIf="miembroSeleccionado">
+            <div class="row">
+              <div class="col-md-6">
+                <p><strong>Cédula:</strong> {{ miembroSeleccionado.cedula }}</p>
+                <p><strong>Nombre:</strong> {{ miembroSeleccionado.nombre }}</p>
+                <p><strong>Apellido 1:</strong> {{ miembroSeleccionado.apellido1 }}</p>
+                <p><strong>Apellido 2:</strong> {{ miembroSeleccionado.apellido2 }}</p>
+                <p><strong>Edad:</strong> {{ miembroSeleccionado.edad }}</p>
+                <p><strong>Sexo:</strong> {{ miembroSeleccionado.sexo === 'M' ? 'Masculino' : 'Femenino' }}</p>
+              </div>
+              <div class="col-md-6">
+                <p><strong>Correo:</strong> {{ miembroSeleccionado.correo }}</p>
+                <p><strong>Dirección:</strong> {{ miembroSeleccionado.direccion }}</p>
+                <p><strong>Altura:</strong> {{ miembroSeleccionado.altura }}</p>
+                <p><strong>Peso:</strong> {{ miembroSeleccionado.peso }}</p>
+                <p><strong>Contextura:</strong> {{ miembroSeleccionado.contextura }}</p>
+                <p><strong>Objetivo:</strong> {{ miembroSeleccionado.objetivo }}</p>
+                <p><strong>Estado:</strong>
+                  <span [ngClass]="miembroSeleccionado.estado ? 'text-success' : 'text-danger'">
+                    {{ miembroSeleccionado.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </p>
+                <p><strong>Fecha de Registro:</strong> {{ miembroSeleccionado.f_registro | date:'dd/MM/yyyy' }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>

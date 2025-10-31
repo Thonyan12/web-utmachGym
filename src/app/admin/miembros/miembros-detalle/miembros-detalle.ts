@@ -16,19 +16,25 @@ export class MiembrosDetalleComponent implements OnInit {
 
     filtro: string = '';
     miembros: Miembro[] = [];
-    miembrosFiltrados: Miembro[] = [];
+    miembrosFiltrados: Miembro[] = []; // inicialmente vacío: no mostrar nada hasta buscar
+    selectedMiembroId: number | null = null;
+
+    mostrarModal = false;
+    miembroSeleccionado: Miembro | null = null;
 
     ngOnInit(): void {
+        // cargamos todos los miembros en memoria, pero no mostramos nada hasta que el usuario busque
         this.miembrosService.getMiembros().subscribe({
             next: (data) => {
-                this.miembros = data;
-                this.filtrarMiembros();
+                this.miembros = data || [];
+                this.miembrosFiltrados = []; // asegurar vacío al inicio
+            },
+            error: () => {
+                this.miembros = [];
+                this.miembrosFiltrados = [];
             }
         });
     }
-    // ...existing code...
-    mostrarModal = false;
-    miembroSeleccionado: Miembro | null = null;
 
     abrirModal(miembro: Miembro) {
         this.miembroSeleccionado = miembro;
@@ -39,17 +45,37 @@ export class MiembrosDetalleComponent implements OnInit {
         this.mostrarModal = false;
         this.miembroSeleccionado = null;
     }
-    
-    // ...existing code...
+
     filtrarMiembros(): void {
-        const filtroLower = this.filtro.toLowerCase();
+        const q = (this.filtro || '').trim().toLowerCase();
+        if (!q) {
+            // no hay búsqueda: mantener la lista vacía
+            this.miembrosFiltrados = [];
+            this.selectedMiembroId = null;
+            return;
+        }
+
         this.miembrosFiltrados = this.miembros.filter(m =>
-            m.nombre.toLowerCase().includes(filtroLower) ||
-            m.apellido1.toLowerCase().includes(filtroLower) ||
-            m.apellido2.toLowerCase().includes(filtroLower) ||
-            m.cedula.toLowerCase().includes(filtroLower) ||
-            (m.id_miembro && m.id_miembro.toString().includes(filtroLower))
+            (m.nombre || '').toString().toLowerCase().includes(q) ||
+            (m.apellido1 || '').toString().toLowerCase().includes(q) ||
+            (m.apellido2 || '').toString().toLowerCase().includes(q) ||
+            (m.cedula || '').toString().toLowerCase().includes(q) ||
+            (m.id_miembro != null && m.id_miembro.toString().includes(q))
         );
+
+        // opcional: si hay solo un resultado, seleccionarlo
+        if (this.miembrosFiltrados.length === 1) {
+            this.selectedMiembroId = this.miembrosFiltrados[0].id_miembro || null;
+        } else {
+            this.selectedMiembroId = null;
+        }
+    }
+
+    onSelectChange(): void {
+        const id = this.selectedMiembroId;
+        if (!id) return;
+        const miembro = this.miembrosFiltrados.find(m => m.id_miembro === id);
+        if (miembro) this.abrirModal(miembro);
     }
 }
 
