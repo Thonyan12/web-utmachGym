@@ -36,14 +36,23 @@ ngOnInit(): void {
     next: (data) => {
       // Filtra productos nulos o undefined
       this.productos = (data || []).filter(prod => !!prod);
-      this.productosFiltrados = this.productos;
+      // Inicialmente no muestra ningún producto hasta que se busque
+      this.productosFiltrados = [];
     },
     error: (error) => console.log('Error al obtener productos', error)
   });
 }
 
 filtrarProductos() {
-  const filtroLower = this.filtro.toLowerCase();
+  const filtroLower = this.filtro.trim().toLowerCase();
+  
+  // Si el campo está vacío, no mostrar productos
+  if (!filtroLower) {
+    this.productosFiltrados = [];
+    return;
+  }
+  
+  // Filtrar productos según el texto ingresado
   this.productosFiltrados = this.productos.filter(prod =>
     !!prod && (
       (prod.nombre_prod || '').toLowerCase().includes(filtroLower) ||
@@ -51,5 +60,17 @@ filtrarProductos() {
       String(prod.id_producto || '').includes(filtroLower)
     )
   );
+}
+
+// Formatear fecha a formato DIA-MES-AÑO
+formatearFecha(fecha: string): string {
+  if (!fecha) return 'Sin fecha';
+  
+  const date = new Date(fecha);
+  const dia = date.getDate().toString().padStart(2, '0');
+  const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+  const anio = date.getFullYear();
+  
+  return `${dia}-${mes}-${anio}`;
 }
 }

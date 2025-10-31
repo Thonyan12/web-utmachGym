@@ -29,21 +29,20 @@
             </thead>
             <tbody>
               <tr *ngFor="let prod of productos" class="align-middle">
-                <!--<td class="fw-bold text-center">{{ prod.id_producto }}</td>-->
                 <td>{{ prod.nombre_prod }}</td>
                 <td>
-                  <span class="badge rounded-pill" style="background-color: #fca311; color: #14213d;">
+                  <span class="text-muted" style="font-weight: 500;">
                     {{ prod.tipo_prod }}
                   </span>
                 </td>
                 <td class="text-end">${{ prod.precio_prod }}</td>
                 <td class="text-center">{{ prod.stock }}</td>
                 <td class="text-center">
-                  <span [class]="'badge rounded-pill px-3 ' + (prod.estado ? 'bg-success' : 'bg-danger')">
+                  <span [style.color]="prod.estado ? '#28a745' : '#6c757d'" style="font-weight: 500;">
                     {{ prod.estado ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
-                <td class="text-center">{{ prod.f_registro }}</td>
+                <td class="text-center">{{ formatearFecha(prod.f_registro) }}</td>
               </tr>
               <tr *ngIf="productos.length === 0">
                 <td colspan="7" class="text-center text-muted py-4">
