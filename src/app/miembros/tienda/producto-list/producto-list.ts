@@ -28,15 +28,18 @@ export class ProductoListComponent implements OnInit {
 
   ngOnInit() {
     this.productoSvc.getProductos().subscribe(productos => {
-      // ✅ Ordenar alfabéticamente por nombre
-      this.productos = productos.sort((a, b) => 
+      // Filtrar solo productos activos (estado = true)
+      const productosActivos = productos.filter(p => p.estado === true);
+      
+      // Ordenar alfabéticamente por nombre
+      this.productos = productosActivos.sort((a, b) => 
         a.nombre_prod.localeCompare(b.nombre_prod)
       );
       
-      // ✅ Extraer categorías únicas
-      this.categorias = [...new Set(productos.map(p => p.tipo_prod))].sort();
+      // Extraer categorías únicas solo de productos activos
+      this.categorias = [...new Set(productosActivos.map(p => p.tipo_prod))].sort();
       
-      // ✅ Mostrar todos inicialmente
+      // Mostrar todos los productos activos inicialmente
       this.productosFiltrados = this.productos;
     });
   }
