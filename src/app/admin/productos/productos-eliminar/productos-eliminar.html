@@ -3,8 +3,9 @@
   <div class="container mt-4">
     <h2 class="mb-3">Eliminar Producto</h2>
     <div class="mb-3">
-      <label class="form-label">ID del Producto</label>
-      <input [(ngModel)]="idProducto" name="idProducto" type="number" class="form-control" required>
+      <label class="form-label">Nombre del Producto</label>
+      <input [(ngModel)]="nombreProducto" name="nombreProducto" type="text" class="form-control" 
+             placeholder="Escribe el nombre del producto..." required>
     </div>
     <button class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
     <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!producto">Eliminar</button>
