@@ -1,35 +1,184 @@
 <div class="d-flex" style="min-height: 100vh;">
   <app-productos-sidebar></app-productos-sidebar>
-  <div class="container mt-4">
-    <h2 class="mb-4">Lista de Productos</h2>
-    <input type="text" class="form-control mb-3" placeholder="Buscar por nombre, tipo o ID..." [(ngModel)]="filtro"
-      (input)="filtrarProductos()" name="filtro">
-
-    <div *ngIf="productosFiltrados.length === 0" class="alert alert-warning">
-      No se encontraron productos.
+  
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold m-0" style="color: #14213d;">
+        <i class="bi bi-search me-2"></i> Lista de Productos
+      </h3>
     </div>
 
-    <ul class="list-group shadow-sm">
-      <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
-          *ngFor="let prod of productosFiltrados">
-        <div>
-          <span class="fw-bold">{{ prod.nombre_prod || 'Sin nombre' }}</span>
-          <span class="badge bg-secondary ms-2">{{ prod.tipo_prod || 'Sin tipo' }}</span>
-        </div>
-        <div class="text-muted small">
-          <span><strong>ID:</strong> {{ prod.id_producto || 'N/A' }}</span> |
-          <span><strong>Precio:</strong> ${{ prod.precio_prod || '0' }}</span> |
-          <span><strong>Stock:</strong> {{ prod.stock || '0' }}</span> |
-          <span><strong>Estado:</strong>
-            <span [ngClass]="prod.estado ? 'text-success' : 'text-danger'">
-              {{ prod.estado ? 'Activo' : 'Inactivo' }}
-            </span>
+    <!-- Buscador -->
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
           </span>
+          <input 
+            type="text" 
+            class="form-control border-start-0" 
+            placeholder="Buscar por nombre, tipo o ID..." 
+            [(ngModel)]="filtro"
+            (input)="filtrarProductos()" 
+            name="filtro"
+            style="box-shadow: none;">
         </div>
-        <div class="text-end mt-2 mt-md-0">
-          <span class="badge bg-light text-dark">Registrado: {{ prod.f_registro | date:'shortDate' }}</span>
+      </div>
+    </div>
+
+    <!-- Tabla de productos -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="background-color: #14213d; color: #fff;">
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Tipo</th>
+                <th scope="col" class="text-end">Precio</th>
+                <th scope="col" class="text-center">Stock</th>
+                <th scope="col" class="text-center">Estado</th>
+                <th scope="col" class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let prod of productosFiltrados">
+                <td class="fw-medium">{{ prod.nombre_prod || 'Sin nombre' }}</td>
+                <td>
+                  <span class="text-muted" style="font-weight: 500;">
+                    {{ prod.tipo_prod || 'Sin tipo' }}
+                  </span>
+                </td>
+                <td class="text-end">${{ prod.precio_prod || '0' }}</td>
+                <td class="text-center">{{ prod.stock || '0' }}</td>
+                <td class="text-center">
+                  <span [style.color]="prod.estado ? '#28a745' : '#6c757d'" style="font-weight: 500;">
+                    {{ prod.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button 
+                    class="btn btn-sm" 
+                    style="background-color: #fca311; color: #0a1a2e;"
+                    (click)="abrirModal(prod)"
+                    title="Ver detalles">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="productosFiltrados.length === 0">
+                <td colspan="6" class="text-center text-muted py-5">
+                  <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                  <p class="mb-0 mt-3" *ngIf="!filtro">Escribe en el buscador para encontrar productos...</p>
+                  <p class="mb-0 mt-3" *ngIf="filtro">No se encontraron productos con "{{ filtro }}"</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </li>
-    </ul>
+      </div>
+    </div>
   </div>
-</div>  
+</div>
+
+<!-- Modal de detalles del producto -->
+<div *ngIf="mostrarModal" class="modal fade show d-block" tabindex="-1" 
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <!-- Header -->
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-box-seam me-2"></i>Detalles del Producto
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+      
+      <!-- Body -->
+      <div class="modal-body p-4" *ngIf="productoSeleccionado">
+        <div class="row g-3">
+          <!-- ID -->
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">ID del Producto</small>
+              <span class="fw-bold" style="color: #14213d; font-size: 1.1rem;">
+                #{{ productoSeleccionado.id_producto || 'N/A' }}
+              </span>
+            </div>
+          </div>
+          
+          <!-- Estado -->
+          <div class="col-md-6">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Estado</small>
+              <span [style.color]="productoSeleccionado.estado ? '#28a745' : '#dc3545'" 
+                    class="fw-bold" style="font-size: 1.1rem;">
+                <i [class]="productoSeleccionado.estado ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill'"></i>
+                {{ productoSeleccionado.estado ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Nombre -->
+          <div class="col-12">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Nombre del Producto</small>
+              <span class="fw-bold" style="color: #14213d; font-size: 1.2rem;">
+                {{ productoSeleccionado.nombre_prod || 'Sin nombre' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Tipo -->
+          <div class="col-md-4">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Tipo</small>
+              <span class="fw-medium" style="color: #14213d;">
+                {{ productoSeleccionado.tipo_prod || 'Sin tipo' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Precio -->
+          <div class="col-md-4">
+            <div class="p-3 rounded" style="background-color: #fff3cd; border: 1px solid #fca311;">
+              <small class="text-muted d-block mb-1">Precio</small>
+              <span class="fw-bold" style="color: #0a1a2e; font-size: 1.3rem;">
+                ${{ productoSeleccionado.precio_prod || '0' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Stock -->
+          <div class="col-md-4">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Stock Disponible</small>
+              <span class="fw-bold" style="color: #14213d; font-size: 1.3rem;">
+                {{ productoSeleccionado.stock || '0' }} unidades
+              </span>
+            </div>
+          </div>
+
+          <!-- Fecha de registro -->
+          <div class="col-12">
+            <div class="p-3 rounded" style="background-color: #f8f9fa;">
+              <small class="text-muted d-block mb-1">Fecha de Registro</small>
+              <span class="fw-medium" style="color: #14213d;">
+                <i class="bi bi-calendar-event me-2"></i>
+                {{ formatearFecha(productoSeleccionado.f_registro) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Footer -->
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn" style="background-color: #14213d; color: white;" (click)="cerrarModal()">
+          <i class="bi bi-x-lg me-2"></i>Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
