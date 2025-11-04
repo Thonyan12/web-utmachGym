@@ -32,7 +32,7 @@
             </div>
           </div>
           <div class="col-md-3 d-flex align-items-end">
-            <button class="btn btn-primary w-100" (click)="buscar()">
+            <button class="btn btn-search-dark w-100" (click)="buscar()" [disabled]="!nombreProducto.trim()">
               <i class="bi bi-search"></i> Buscar
             </button>
           </div>

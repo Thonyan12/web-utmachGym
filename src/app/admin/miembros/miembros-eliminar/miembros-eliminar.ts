@@ -12,29 +12,78 @@ import { Miembro, MiembrosService } from '../services/miembros';
 })
 export class MiembrosEliminarComponent {
   private service = inject(MiembrosService);
-  idMiembro: number = 0;
+  busqueda: string = '';
   miembro: Miembro | null = null;
   mensaje: string = '';
   mostrarConfirmacion: boolean = false;
+  todosLosMiembros: Miembro[] = [];
+  miembrosFiltrados: Miembro[] = [];
+  mostrarSugerencias: boolean = false;
+
+  ngOnInit() {
+    if ((this.service as any).getMiembros) {
+      (this.service as any).getMiembros().subscribe({
+        next: (data: Miembro[]) => this.todosLosMiembros = data || [],
+        error: (err: any) => {
+          console.error('Error cargando miembros:', err);
+          this.todosLosMiembros = [];
+        }
+      });
+    }
+  }
+
+  filtrarMiembros(): void {
+    const textoBusqueda = this.busqueda.trim().toLowerCase();
+    
+    if (!textoBusqueda) {
+      this.miembrosFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+
+    this.miembrosFiltrados = this.todosLosMiembros.filter(m =>
+      (m.cedula || '').toString().toLowerCase().includes(textoBusqueda) ||
+      (m.nombre || '').toString().toLowerCase().includes(textoBusqueda) ||
+      (m.apellido1 || '').toString().toLowerCase().includes(textoBusqueda) ||
+      (m.apellido2 || '').toString().toLowerCase().includes(textoBusqueda) ||
+      (`${m.nombre} ${m.apellido1} ${m.apellido2}`).toLowerCase().includes(textoBusqueda)
+    ).slice(0, 10);
+
+    this.mostrarSugerencias = this.miembrosFiltrados.length > 0;
+  }
+
+  seleccionarMiembro(miembro: Miembro): void {
+    this.busqueda = `${miembro.nombre} ${miembro.apellido1} ${miembro.apellido2}`;
+    this.mostrarSugerencias = false;
+    this.miembro = { ...miembro };
+    this.mensaje = '';
+    this.mostrarConfirmacion = false;
+  }
 
   buscar(): void {
-    if (this.idMiembro <= 0) {
-      this.mensaje = 'El ID del miembro debe ser un número positivo.';
+    if (!this.busqueda.trim()) {
+      this.mensaje = 'Por favor ingresa cédula o nombre para buscar.';
       this.miembro = null;
       return;
     }
-    this.service.getById(this.idMiembro).subscribe({
-      next: (data) => {
-        this.miembro = data;
-        this.mensaje = '';
-        this.mostrarConfirmacion = false;
-      },
-      error: () => {
-        this.miembro = null;
-        this.mensaje = 'No se encontró un miembro con ese ID.';
-        this.mostrarConfirmacion = false;
-      }
-    });
+
+    this.mostrarSugerencias = false;
+    const valor = this.busqueda.trim().toLowerCase();
+    
+    const encontrado = this.todosLosMiembros.find(m =>
+      (m.cedula || '').toString().toLowerCase() === valor ||
+      (`${m.nombre} ${m.apellido1} ${m.apellido2}`).toLowerCase() === valor
+    );
+
+    if (encontrado) {
+      this.miembro = encontrado;
+      this.mensaje = '';
+      this.mostrarConfirmacion = false;
+    } else {
+      this.miembro = null;
+      this.mensaje = `No se encontró un miembro con "${this.busqueda}".`;
+      this.mostrarConfirmacion = false;
+    }
   }
 
   confirmarEliminar(): void {
@@ -46,21 +95,36 @@ export class MiembrosEliminarComponent {
   }
 
   eliminar(): void {
-    if (!this.miembro) {
+    if (!this.miembro || !this.miembro.id_miembro) {
       this.mensaje = 'Primero busque un miembro válido para eliminar.';
       return;
     }
-    this.service.delete(this.idMiembro).subscribe({
+    
+    this.service.delete(this.miembro.id_miembro).subscribe({
       next: () => {
-        this.mensaje = 'Miembro eliminado correctamente.';
+        this.mensaje = `Miembro "${this.miembro?.nombre} ${this.miembro?.apellido1}" eliminado correctamente.`;
         this.miembro = null;
-        this.idMiembro = 0;
+        this.busqueda = '';
         this.mostrarConfirmacion = false;
+        if ((this.service as any).getMiembros) {
+          (this.service as any).getMiembros().subscribe({
+            next: (data: Miembro[]) => this.todosLosMiembros = data || []
+          });
+        }
       },
       error: () => {
         this.mensaje = 'Error al eliminar el miembro.';
         this.mostrarConfirmacion = false;
       }
     });
+  }
+
+  limpiarFormulario(): void {
+    this.miembro = null;
+    this.busqueda = '';
+    this.mensaje = '';
+    this.miembrosFiltrados = [];
+    this.mostrarSugerencias = false;
+    this.mostrarConfirmacion = false;
   }
 }

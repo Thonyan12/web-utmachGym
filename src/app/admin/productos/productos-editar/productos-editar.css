@@ -41,6 +41,30 @@
   color: white;
 }
 
+/* Botón de búsqueda estilo oscuro */
+.btn-search-dark {
+  background-color: #14213d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.btn-search-dark:hover:not(:disabled) {
+  background-color: #0a1a2e;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(20, 33, 61, 0.3);
+}
+
+.btn-search-dark:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #6c757d;
+}
+
 /* Campo ID (readonly) */
 .id-field-readonly {
   background-color: #e9ecef;

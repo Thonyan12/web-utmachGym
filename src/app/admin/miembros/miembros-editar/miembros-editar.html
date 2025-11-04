@@ -1,176 +1,178 @@
 <div class="d-flex" style="min-height: 100vh;">
-    <app-miembros-sidebar></app-miembros-sidebar>
-    <div class="container mt-4">
-        <h2>Editar Miembro</h2>
+  <app-miembros-sidebar></app-miembros-sidebar>
+  <div class="container mt-4">
+    <h2 class="mb-4">
+      <i class="bi bi-pencil-square"></i> Editar Miembro
+    </h2>
 
-        <!-- Buscador + Combobox -->
-        <div class="card border-0 shadow-sm mb-3">
-          <div class="card-body">
-            <div class="row g-2 align-items-center">
-              <div class="col-md-6">
-                <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0">
-                    <i class="bi bi-search text-muted"></i>
-                  </span>
-                  <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control border-start-0"
-                         placeholder="ID, cédula o nombre..." (input)="filtrarMiembros()" style="box-shadow: none;">
+    <div class="card shadow-sm mb-3">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-9">
+            <label class="form-label fw-semibold">Buscar por Cédula o Nombre</label>
+            <div style="position: relative;">
+              <input 
+                [(ngModel)]="busqueda" 
+                (input)="filtrarMiembros()"
+                name="busqueda" 
+                type="text" 
+                class="form-control" 
+                placeholder="Escribe para buscar..."
+                autocomplete="off">
+              
+              <div *ngIf="mostrarSugerencias" class="suggestions-dropdown">
+                <div 
+                  *ngFor="let m of miembrosFiltrados"
+                  class="suggestion-item"
+                  (click)="seleccionarMiembro(m)">
+                  <div class="fw-semibold">{{ m.nombre }} {{ m.apellido1 }} {{ m.apellido2 }}</div>
+                  <small class="text-muted">Cédula: {{ m.cedula }} - ID: {{ m.id_miembro }}</small>
                 </div>
               </div>
-
-              <div class="col-md-4">
-                <select class="form-select" [(ngModel)]="selectedMiembroId" name="miembroSelect" (change)="onSelectChange()">
-                  <option [ngValue]="null">-- Seleccione un miembro --</option>
-                  <option *ngFor="let m of miembrosFiltrados" [ngValue]="m.id_miembro">
-                    {{ m.cedula }} — {{ m.nombre }} {{ m.apellido1 }} {{ m.apellido2 }}
-                  </option>
-                </select>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-search-dark w-100" (click)="buscarMiembro()" [disabled]="!busqueda.trim()">
+              <i class="bi bi-search"></i> Buscar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form *ngIf="miembro" (ngSubmit)="actualizar()" #form="ngForm" novalidate class="card shadow-sm">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">ID del Miembro</label>
+              <input [(ngModel)]="miembro.id_miembro" name="id_miembro" type="number" class="form-control id-field-readonly" readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Cédula</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.cedula" name="cedula" required maxlength="20" #cedula="ngModel">
+              <div class="text-danger" *ngIf="cedula.invalid && (cedula.dirty || cedula.touched)">
+                <span *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</span>
               </div>
-
-              <div class="col-md-2">
-                <button class="btn btn-info w-100" (click)="buscarMiembro()">Buscar</button>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.nombre" name="nombre" required minlength="3" #nombre="ngModel">
+              <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
+                <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
+                <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Primer Apellido</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.apellido1" name="apellido1" required #apellido1="ngModel">
+              <div class="text-danger" *ngIf="apellido1.invalid && (apellido1.dirty || apellido1.touched)">
+                <span *ngIf="apellido1.errors?.['required']">El primer apellido es obligatorio.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Segundo Apellido</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.apellido2" name="apellido2" required #apellido2="ngModel">
+              <div class="text-danger" *ngIf="apellido2.invalid && (apellido2.dirty || apellido2.touched)">
+                <span *ngIf="apellido2.errors?.['required']">El segundo apellido es obligatorio.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Correo</label>
+              <input type="email" class="form-control" [(ngModel)]="miembro.correo" name="correo" required email #correo="ngModel">
+              <div class="text-danger" *ngIf="correo.invalid && (correo.dirty || correo.touched)">
+                <span *ngIf="correo.errors?.['required']">El correo es obligatorio.</span>
+                <span *ngIf="correo.errors?.['email']">Debe ser un correo válido.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Dirección</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.direccion" name="direccion" required #direccion="ngModel">
+              <div class="text-danger" *ngIf="direccion.invalid && (direccion.dirty || direccion.touched)">
+                <span *ngIf="direccion.errors?.['required']">La dirección es obligatoria.</span>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label">Edad</label>
+              <input type="number" class="form-control" [(ngModel)]="miembro.edad" name="edad" required min="1" #edad="ngModel">
+              <div class="text-danger" *ngIf="edad.invalid && (edad.dirty || edad.touched)">
+                <span *ngIf="edad.errors?.['required']">La edad es obligatoria.</span>
+                <span *ngIf="edad.errors?.['min']">Debe ser mayor a 0.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Altura (m)</label>
+              <input type="number" class="form-control" [(ngModel)]="miembro.altura" name="altura" required min="0.5" step="0.01" #altura="ngModel">
+              <div class="text-danger" *ngIf="altura.invalid && (altura.dirty || altura.touched)">
+                <span *ngIf="altura.errors?.['required']">La altura es obligatoria.</span>
+                <span *ngIf="altura.errors?.['min']">Debe ser mayor a 0.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Peso (kg)</label>
+              <input type="number" class="form-control" [(ngModel)]="miembro.peso" name="peso" required min="1" step="0.01" #peso="ngModel">
+              <div class="text-danger" *ngIf="peso.invalid && (peso.dirty || peso.touched)">
+                <span *ngIf="peso.errors?.['required']">El peso es obligatorio.</span>
+                <span *ngIf="peso.errors?.['min']">Debe ser mayor a 0.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Contextura</label>
+              <input type="text" class="form-control" [(ngModel)]="miembro.contextura" name="contextura" required #contextura="ngModel">
+              <div class="text-danger" *ngIf="contextura.invalid && (contextura.dirty || contextura.touched)">
+                <span *ngIf="contextura.errors?.['required']">La contextura es obligatoria.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Sexo</label>
+              <select class="form-control" [(ngModel)]="miembro.sexo" name="sexo" required #sexo="ngModel">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+              <div class="text-danger" *ngIf="sexo.invalid && (sexo.dirty || sexo.touched)">
+                <span *ngIf="sexo.errors?.['required']">El sexo es obligatorio.</span>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Estado</label>
+              <select [(ngModel)]="miembro.estado" name="estado" class="form-control" required #estado="ngModel">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+              <div class="text-danger" *ngIf="estado.invalid && (estado.dirty || estado.touched)">
+                El estado es obligatorio.
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Objetivo</label>
+              <textarea class="form-control" [(ngModel)]="miembro.objetivo" name="objetivo" required #objetivo="ngModel"></textarea>
+              <div class="text-danger" *ngIf="objetivo.invalid && (objetivo.dirty || objetivo.touched)">
+                <span *ngIf="objetivo.errors?.['required']">El objetivo es obligatorio.</span>
               </div>
             </div>
           </div>
         </div>
+        
+        <div class="d-flex gap-2 mt-3">
+          <button type="submit" class="btn btn-update" [disabled]="form.invalid">
+            <i class="bi bi-check-circle"></i> Actualizar Miembro
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="limpiarFormulario()">
+            <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+          </button>
+        </div>
+      </div>
+    </form>
 
-        <!-- Formulario: se rellena al seleccionar -->
-        <form *ngIf="miembro" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">ID del Miembro</label>
-                        <input [(ngModel)]="miembro.id_miembro" name="id_miembro" type="number" class="form-control"
-                            readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label>Cédula</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.cedula" name="cedula" required
-                            maxlength="20" #cedula="ngModel">
-                        <div class="text-danger" *ngIf="cedula.invalid && (cedula.dirty || cedula.touched)">
-                            <span *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Nombre</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.nombre" name="nombre" required
-                            minlength="3" #nombre="ngModel">
-                        <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
-                            <span *ngIf="nombre.errors?.['required']">El nombre es obligatorio.</span>
-                            <span *ngIf="nombre.errors?.['minlength']">Debe tener al menos 3 caracteres.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Primer Apellido</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.apellido1" name="apellido1"
-                            required #apellido1="ngModel">
-                        <div class="text-danger" *ngIf="apellido1.invalid && (apellido1.dirty || apellido1.touched)">
-                            <span *ngIf="apellido1.errors?.['required']">El primer apellido es obligatorio.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Segundo Apellido</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.apellido2" name="apellido2"
-                            required #apellido2="ngModel">
-                        <div class="text-danger" *ngIf="apellido2.invalid && (apellido2.dirty || apellido2.touched)">
-                            <span *ngIf="apellido2.errors?.['required']">El segundo apellido es obligatorio.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Correo</label>
-                        <input type="email" class="form-control" [(ngModel)]="miembro.correo" name="correo" required
-                            email #correo="ngModel">
-                        <div class="text-danger" *ngIf="correo.invalid && (correo.dirty || correo.touched)">
-                            <span *ngIf="correo.errors?.['required']">El correo es obligatorio.</span>
-                            <span *ngIf="correo.errors?.['email']">Debe ser un correo válido.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Dirección</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.direccion" name="direccion"
-                            required #direccion="ngModel">
-                        <div class="text-danger" *ngIf="direccion.invalid && (direccion.dirty || direccion.touched)">
-                            <span *ngIf="direccion.errors?.['required']">La dirección es obligatoria.</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label>Edad</label>
-                        <input type="number" class="form-control" [(ngModel)]="miembro.edad" name="edad" required
-                            min="1" #edad="ngModel">
-                        <div class="text-danger" *ngIf="edad.invalid && (edad.dirty || edad.touched)">
-                            <span *ngIf="edad.errors?.['required']">La edad es obligatoria.</span>
-                            <span *ngIf="edad.errors?.['min']">Debe ser mayor a 0.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Altura (m)</label>
-                        <input type="number" class="form-control" [(ngModel)]="miembro.altura" name="altura" required
-                            min="0.5" step="0.01" #altura="ngModel">
-                        <div class="text-danger" *ngIf="altura.invalid && (altura.dirty || altura.touched)">
-                            <span *ngIf="altura.errors?.['required']">La altura es obligatoria.</span>
-                            <span *ngIf="altura.errors?.['min']">Debe ser mayor a 0.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Peso (kg)</label>
-                        <input type="number" class="form-control" [(ngModel)]="miembro.peso" name="peso" required
-                            min="1" step="0.01" #peso="ngModel">
-                        <div class="text-danger" *ngIf="peso.invalid && (peso.dirty || peso.touched)">
-                            <span *ngIf="peso.errors?.['required']">El peso es obligatorio.</span>
-                            <span *ngIf="peso.errors?.['min']">Debe ser mayor a 0.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Contextura</label>
-                        <input type="text" class="form-control" [(ngModel)]="miembro.contextura" name="contextura"
-                            required #contextura="ngModel">
-                        <div class="text-danger" *ngIf="contextura.invalid && (contextura.dirty || contextura.touched)">
-                            <span *ngIf="contextura.errors?.['required']">La contextura es obligatoria.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Sexo</label>
-                        <select class="form-control" [(ngModel)]="miembro.sexo" name="sexo" required #sexo="ngModel">
-                            <option value="M">Masculino</option>
-                            <option value="F">Femenino</option>
-                        </select>
-                        <div class="text-danger" *ngIf="sexo.invalid && (sexo.dirty || sexo.touched)">
-                            <span *ngIf="sexo.errors?.['required']">El sexo es obligatorio.</span>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Estado</label>
-                        <select [(ngModel)]="miembro.estado" name="estado" class="form-control" required
-                            #estado="ngModel">
-                            <option [ngValue]="true">Activo</option>
-                            <option [ngValue]="false">Inactivo</option>
-                        </select>
-                        <div class="text-danger" *ngIf="estado.invalid && (estado.dirty || estado.touched)">
-                            El estado es obligatorio.
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label>Objetivo</label>
-                        <textarea class="form-control" [(ngModel)]="miembro.objetivo" name="objetivo" required
-                            #objetivo="ngModel"></textarea>
-                        <div class="text-danger" *ngIf="objetivo.invalid && (objetivo.dirty || objetivo.touched)">
-                            <span *ngIf="objetivo.errors?.['required']">El objetivo es obligatorio.</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
-        </form>
-
-        <div *ngIf="mensaje" class="alert alert-info mt-3">
-            {{ mensaje }}
-        </div>
-        <div *ngIf="!miembro && mensaje && !cargando" class="text-danger mt-3">
-            No se encontró el miembro.
-        </div>
-        <div *ngIf="cargando" class="text-secondary mt-3">
-            Buscando miembro...
-        </div>
+    <div *ngIf="mensaje" [class]="mensaje.includes('✅') ? 'alert alert-success mt-3' : 'alert alert-danger mt-3'">
+      {{ mensaje }}
     </div>
+    
+    <div *ngIf="cargando" class="text-center mt-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Cargando...</span>
+      </div>
+    </div>
+  </div>
 </div>
