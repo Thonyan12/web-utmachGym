@@ -1,72 +1,200 @@
-<div class="d-flex" style="min-height: 100vh;">
+<div class="d-flex main-container">
   <app-productos-sidebar></app-productos-sidebar>
-  <div class="container mt-4">
-    <h2>Editar Producto</h2>
-    <form class="mb-4" (ngSubmit)="buscarProducto()" #buscarForm="ngForm">
-      <div class="row">
-        <div class="col-md-4 mb-2">
-          <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID o Nombre del producto" required>
-        </div>
-        <div class="col-md-2 mb-2">
-          <button type="submit" class="btn btn-info w-100">Buscar</button>
-        </div>
-      </div>
-    </form>
+  
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="mb-4">
+      <h3 class="fw-bold page-title">
+        <i class="bi bi-pencil-square me-2"></i> Editar Producto
+      </h3>
+    </div>
 
-    <form *ngIf="producto" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
-      <div class="mb-3">
-        <label class="form-label">ID del Producto</label>
-        <input [(ngModel)]="producto.id_producto" name="id_producto" type="number" class="form-control" readonly>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form (ngSubmit)="buscarProducto()" #buscarForm="ngForm">
+          <div class="row align-items-end">
+            <div class="col-md-8 mb-3 mb-md-0">
+              <label class="form-label form-label-custom">
+                Nombre del Producto
+              </label>
+              <div class="search-input-container">
+                <input 
+                  [(ngModel)]="busqueda" 
+                  name="busqueda" 
+                  type="text" 
+                  class="form-control"
+                  placeholder="Escribe para buscar..."
+                  (input)="filtrarProductos()"
+                  (focus)="mostrarSugerencias = true"
+                  autocomplete="off"
+                  required>
+                
+                <div *ngIf="mostrarSugerencias && productosFiltrados.length > 0" 
+                     class="list-group position-absolute w-100 shadow-lg suggestions-dropdown">
+                  <button 
+                    type="button"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center suggestion-item"
+                    *ngFor="let p of productosFiltrados"
+                    (click)="seleccionarProducto(p)">
+                    <div>
+                      <strong>{{ p.nombre_prod }}</strong>
+                      <small class="text-muted d-block">{{ p.tipo_prod }}</small>
+                    </div>
+                    <span class="badge" 
+                          [ngClass]="p.estado ? 'badge-active' : 'badge-inactive'">
+                      {{ p.estado ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <button 
+                type="submit" 
+                class="btn btn-search w-100" 
+                [disabled]="!busqueda.trim()">
+                <i class="bi bi-search me-2"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Nombre</label>
-        <input [(ngModel)]="producto.nombre_prod" name="nombre_prod" type="text" class="form-control" required #nombre="ngModel">
-        <div class="text-danger" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
-          El nombre es obligatorio.
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Tipo</label>
-        <input [(ngModel)]="producto.tipo_prod" name="tipo_prod" type="text" class="form-control" required #tipo="ngModel">
-        <div class="text-danger" *ngIf="tipo.invalid && (tipo.dirty || tipo.touched)">
-          El tipo es obligatorio.
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Precio</label>
-        <input [(ngModel)]="producto.precio_prod" name="precio_prod" type="number" class="form-control" required step="0.01" min="0.01" #precio="ngModel">
-        <div class="text-danger" *ngIf="precio.invalid && (precio.dirty || precio.touched)">
-          El precio es obligatorio y debe ser mayor a 0.
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Stock</label>
-        <input [(ngModel)]="producto.stock" name="stock" type="number" class="form-control" required min="0" #stock="ngModel">
-        <div class="text-danger" *ngIf="stock.invalid && (stock.dirty || stock.touched)">
-          El stock es obligatorio y no puede ser negativo.
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">Estado</label>
-        <select [(ngModel)]="producto.estado" name="estado" class="form-control" required #estado="ngModel">
-          <option [ngValue]="true">Activo</option>
-          <option [ngValue]="false">Inactivo</option>
-        </select>
-        <div class="text-danger" *ngIf="estado.invalid && (estado.dirty || estado.touched)">
-          El estado es obligatorio.
-        </div>
-      </div>
-      <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
-    </form>
+    </div>
 
-    <div *ngIf="mensaje" class="alert alert-info mt-3">
+    <div class="card border-0 shadow-sm" *ngIf="producto">
+      <div class="card-body">
+        <form (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                ID del Producto
+              </label>
+              <input 
+                [(ngModel)]="producto.id_producto" 
+                name="id_producto" 
+                type="number" 
+                class="form-control id-field-readonly" 
+                readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Estado
+              </label>
+              <select 
+                [(ngModel)]="producto.estado" 
+                name="estado" 
+                class="form-select" 
+                required 
+                #estado="ngModel">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+              <div class="text-danger small mt-1" *ngIf="estado.invalid && (estado.dirty || estado.touched)">
+                El estado es obligatorio.
+              </div>
+            </div>
+
+            <div class="col-12 mb-3">
+              <label class="form-label form-label-custom">
+                Nombre del Producto
+              </label>
+              <input 
+                [(ngModel)]="producto.nombre_prod" 
+                name="nombre_prod" 
+                type="text" 
+                class="form-control" 
+                required 
+                #nombre="ngModel">
+              <div class="text-danger small mt-1" *ngIf="nombre.invalid && (nombre.dirty || nombre.touched)">
+                El nombre es obligatorio.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Tipo de Producto
+              </label>
+              <input 
+                [(ngModel)]="producto.tipo_prod" 
+                name="tipo_prod" 
+                type="text" 
+                class="form-control" 
+                required 
+                #tipo="ngModel">
+              <div class="text-danger small mt-1" *ngIf="tipo.invalid && (tipo.dirty || tipo.touched)">
+                El tipo es obligatorio.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Precio
+              </label>
+              <div class="input-group">
+                <span class="input-group-text price-symbol">$</span>
+                <input 
+                  [(ngModel)]="producto.precio_prod" 
+                  name="precio_prod" 
+                  type="number" 
+                  class="form-control" 
+                  required 
+                  step="0.01" 
+                  min="0.01" 
+                  #precio="ngModel">
+              </div>
+              <div class="text-danger small mt-1" *ngIf="precio.invalid && (precio.dirty || precio.touched)">
+                El precio es obligatorio y debe ser mayor a 0.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label class="form-label form-label-custom">
+                Stock Disponible
+              </label>
+              <input 
+                [(ngModel)]="producto.stock" 
+                name="stock" 
+                type="number" 
+                class="form-control" 
+                required 
+                min="0" 
+                #stock="ngModel">
+              <div class="text-danger small mt-1" *ngIf="stock.invalid && (stock.dirty || stock.touched)">
+                El stock es obligatorio y no puede ser negativo.
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button 
+              type="submit" 
+              class="btn btn-update"
+              [disabled]="form.invalid">
+              <i class="bi bi-check-circle me-2"></i> Actualizar Producto
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              (click)="limpiarFormulario()">
+              <i class="bi bi-x-circle me-2"></i> Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div *ngIf="mensaje" class="alert mt-3" 
+         [ngClass]="{'alert-success': mensaje.includes('éxito'), 'alert-danger': !mensaje.includes('éxito')}">
+      <i class="bi" [ngClass]="{'bi-check-circle': mensaje.includes('éxito'), 'bi-exclamation-triangle': !mensaje.includes('éxito')}"></i>
       {{ mensaje }}
     </div>
-    <div *ngIf="!producto && mensaje && !cargando" class="text-danger mt-3">
-      No se encontró el producto.
-    </div>
-    <div *ngIf="cargando" class="text-secondary mt-3">
-      Buscando producto...
+
+    <div *ngIf="cargando" class="text-center mt-4">
+      <div class="spinner-border spinner-custom" role="status">
+        <span class="visually-hidden">Buscando producto...</span>
+      </div>
+      <p class="mt-2 text-muted">Buscando producto...</p>
     </div>
   </div>
 </div>

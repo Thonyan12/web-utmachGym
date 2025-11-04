@@ -1,34 +1,91 @@
 <div class="d-flex" style="min-height: 100vh;">
   <app-productos-sidebar></app-productos-sidebar>
   <div class="container mt-4">
-    <h2 class="mb-3">Eliminar Producto</h2>
-    <div class="mb-3">
-      <label class="form-label">Nombre del Producto</label>
-      <input [(ngModel)]="nombreProducto" name="nombreProducto" type="text" class="form-control" 
-             placeholder="Escribe el nombre del producto..." required>
-    </div>
-    <button class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
-    <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!producto">Eliminar</button>
+    <h2 class="mb-4">
+      <i class="bi bi-trash"></i> Eliminar Producto
+    </h2>
 
-    <div *ngIf="producto" class="mt-3">
-      <strong>Producto encontrado:</strong>
-      <div>Nombre: {{ producto.nombre_prod }}</div>
-      <div>Tipo: {{ producto.tipo_prod }}</div>
-      <div>Precio: ${{ producto.precio_prod }}</div>
-      <div>Stock: {{ producto.stock }}</div>
-      <div>Estado: {{ producto.estado ? 'Activo' : 'Inactivo' }}</div>
-    </div>
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-9">
+            <label class="form-label fw-semibold">Nombre del Producto</label>
+            <div style="position: relative;">
+              <input 
+                [(ngModel)]="nombreProducto" 
+                (input)="filtrarProductos()"
+                name="nombreProducto" 
+                type="text" 
+                class="form-control" 
+                placeholder="Escribe para buscar..."
+                autocomplete="off">
+              
+              <div *ngIf="mostrarSugerencias" class="suggestions-dropdown">
+                <div 
+                  *ngFor="let p of productosFiltrados"
+                  class="suggestion-item"
+                  (click)="seleccionarProducto(p)">
+                  <div class="fw-semibold">{{ p.nombre_prod }}</div>
+                  <small class="text-muted">{{ p.tipo_prod }} - ${{ p.precio_prod }}</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-primary w-100" (click)="buscar()">
+              <i class="bi bi-search"></i> Buscar
+            </button>
+          </div>
+        </div>
 
-    <!-- Confirmación antes de eliminar -->
-    <div *ngIf="mostrarConfirmacion" class="alert alert-warning mt-3">
-      <strong>¿Estás seguro de que deseas eliminar este producto?</strong>
-      <br>
-      <button class="btn btn-danger me-2" (click)="eliminar()">Sí, eliminar</button>
-      <button class="btn btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
-    </div>
+        <div *ngIf="producto" class="alert alert-light border">
+          <h5 class="mb-3"><i class="bi bi-info-circle"></i> Producto encontrado:</h5>
+          <div class="row">
+            <div class="col-md-6">
+              <p class="mb-2"><strong>ID:</strong> {{ producto.id_producto }}</p>
+              <p class="mb-2"><strong>Nombre:</strong> {{ producto.nombre_prod }}</p>
+              <p class="mb-2"><strong>Tipo:</strong> {{ producto.tipo_prod }}</p>
+            </div>
+            <div class="col-md-6">
+              <p class="mb-2"><strong>Precio:</strong> ${{ producto.precio_prod }}</p>
+              <p class="mb-2"><strong>Stock:</strong> {{ producto.stock }} unidades</p>
+              <p class="mb-2">
+                <strong>Estado:</strong> 
+                <span [class]="producto.estado ? 'badge bg-success' : 'badge bg-secondary'">
+                  {{ producto.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
 
-    <div *ngIf="mensaje" class="alert alert-info mt-3">
-      {{ mensaje }}
+        <div *ngIf="mostrarConfirmacion" class="alert alert-warning border-warning">
+          <h5 class="mb-3">
+            <i class="bi bi-exclamation-triangle-fill"></i> 
+            ¿Estás seguro de que deseas eliminar este producto?
+          </h5>
+          <p class="mb-3">Esta acción no se puede deshacer. El producto "{{ producto?.nombre_prod }}" será eliminado permanentemente.</p>
+          <button class="btn btn-danger me-2" (click)="eliminar()">
+            <i class="bi bi-trash"></i> Sí, eliminar
+          </button>
+          <button class="btn btn-secondary" (click)="cancelarEliminar()">
+            <i class="bi bi-x-circle"></i> Cancelar
+          </button>
+        </div>
+
+        <div *ngIf="mensaje" [class]="mensaje.includes('✅') ? 'alert alert-success' : 'alert alert-danger'" class="mt-3">
+          {{ mensaje }}
+        </div>
+
+        <div class="mt-3 d-flex gap-2">
+          <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!producto">
+            <i class="bi bi-trash"></i> Eliminar Producto
+          </button>
+          <button class="btn btn-secondary" (click)="limpiarFormulario()">
+            <i class="bi bi-arrow-counterclockwise"></i> Limpiar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>

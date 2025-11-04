@@ -1,0 +1,94 @@
+/* Contenedor principal */
+.main-container {
+  min-height: 100vh;
+}
+
+/* Encabezado */
+.page-title {
+  color: #14213d;
+}
+
+/* Campo de búsqueda */
+.search-input-container {
+  position: relative;
+}
+
+/* Dropdown de sugerencias */
+.suggestions-dropdown {
+  z-index: 1000;
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 0.375rem;
+}
+
+.suggestion-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Botón de búsqueda */
+.btn-search {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-search:hover {
+  background-color: #138496;
+  color: white;
+}
+
+/* Campo ID (readonly) */
+.id-field-readonly {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+  color: #6c757d;
+}
+
+/* Precio con símbolo */
+.price-symbol {
+  background-color: #fca311;
+  color: #0a1a2e;
+}
+
+/* Botón actualizar */
+.btn-update {
+  background-color: #fca311;
+  color: #0a1a2e;
+  font-weight: 600;
+}
+
+.btn-update:hover {
+  background-color: #e39210;
+  color: #0a1a2e;
+}
+
+.btn-update:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner de carga */
+.spinner-custom {
+  color: #fca311;
+}
+
+/* Labels */
+.form-label-custom {
+  color: #14213d;
+  font-weight: 500;
+}
+
+/* Badge de estado en sugerencias */
+.badge-active {
+  background-color: #28a745;
+  color: white;
+}
+
+.badge-inactive {
+  background-color: #6c757d;
+  color: white;
+}

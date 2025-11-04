@@ -12,23 +12,76 @@ import { CommonModule } from '@angular/common';
   styleUrl: './productos-editar.css'
 })
 export class ProductosEditar {
-private service = inject(Productos);
+  private service = inject(Productos);
   private route = inject(ActivatedRoute);
 
   producto: Producto | null = null;
   mensaje: string = '';
+  busqueda: string = '';
+  cargando: boolean = false;
+  todosLosProductos: Producto[] = [];
+  productosFiltrados: Producto[] = [];
+  mostrarSugerencias: boolean = false;
 
   ngOnInit() {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (id) {
-      this.service.getById(id).subscribe({
-        next: (data) => {
-          this.producto = data;
-        },
-        error: () => {
-          this.mensaje = 'Error al obtener el producto';
-        }
-      });
+    this.service.getProductos().subscribe({
+      next: (productos) => {
+        this.todosLosProductos = productos;
+      },
+      error: () => {
+        console.error('Error al cargar productos');
+      }
+    });
+  }
+
+  filtrarProductos(): void {
+    const textoBusqueda = this.busqueda.trim().toLowerCase();
+    
+    if (!textoBusqueda) {
+      this.productosFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+
+    this.productosFiltrados = this.todosLosProductos.filter(p =>
+      p.nombre_prod.toLowerCase().includes(textoBusqueda) ||
+      p.tipo_prod.toLowerCase().includes(textoBusqueda)
+    ).slice(0, 10);
+
+    this.mostrarSugerencias = this.productosFiltrados.length > 0;
+  }
+
+  seleccionarProducto(producto: Producto): void {
+    this.busqueda = producto.nombre_prod;
+    this.mostrarSugerencias = false;
+    this.producto = { ...producto };
+    this.mensaje = '';
+  }
+
+  buscarProducto(): void {
+    this.mensaje = '';
+    this.cargando = true;
+    this.mostrarSugerencias = false;
+    
+    const valor = this.busqueda.trim();
+    
+    if (!valor) {
+      this.mensaje = 'Por favor ingresa el nombre del producto.';
+      this.cargando = false;
+      return;
+    }
+
+    const encontrado = this.todosLosProductos.find(p => 
+      p.nombre_prod.toLowerCase() === valor.toLowerCase()
+    );
+
+    if (encontrado) {
+      this.producto = { ...encontrado };
+      this.cargando = false;
+    } else {
+      this.producto = null;
+      this.mensaje = `No se encontró un producto con el nombre "${valor}".`;
+      this.cargando = false;
     }
   }
 
@@ -37,6 +90,9 @@ private service = inject(Productos);
       this.service.update(this.producto).subscribe({
         next: () => {
           this.mensaje = 'Producto actualizado con éxito';
+          this.service.getProductos().subscribe(productos => {
+            this.todosLosProductos = productos;
+          });
         },
         error: () => {
           this.mensaje = 'Error al actualizar el producto';
@@ -44,49 +100,12 @@ private service = inject(Productos);
       });
     }
   }
-  
-busqueda: string = '';
-cargando: boolean = false;
 
-buscarProducto(): void {
-  this.mensaje = '';
-  this.producto = null;
-  this.cargando = true;
-  const valor = this.busqueda.trim();
-  if (!valor) {
-    this.mensaje = 'Ingrese un ID o nombre para buscar.';
-    this.cargando = false;
-    return;
+  limpiarFormulario(): void {
+    this.producto = null;
+    this.busqueda = '';
+    this.mensaje = '';
+    this.productosFiltrados = [];
+    this.mostrarSugerencias = false;
   }
-  // Verificar si el valor es un número
-  const id = Number(valor);
-  if (!isNaN(id)) {
-    this.service.getById(id).subscribe({
-      next: (data) => {
-        this.producto = data;
-        this.cargando = false;
-      },
-      error: () => {
-        this.mensaje = 'No se encontró el producto.';
-        this.cargando = false;
-      }
-    });
-  } else {
-    this.service.getProductos().subscribe({
-      next: (productos) => {
-        const encontrado = productos.find(p => p.nombre_prod.toLowerCase() === valor.toLowerCase());
-        if (encontrado) {
-          this.producto = encontrado;
-        } else {
-          this.mensaje = 'No se encontró el producto.';
-        }
-        this.cargando = false;
-      },
-      error: () => {
-        this.mensaje = 'Error al buscar el producto.';
-        this.cargando = false;
-      }
-    });
-  }
-}
 }

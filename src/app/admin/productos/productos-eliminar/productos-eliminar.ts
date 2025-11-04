@@ -16,6 +16,45 @@ export class ProductosEliminar {
   producto: Producto | null = null;
   mensaje: string = '';
   mostrarConfirmacion: boolean = false;
+  todosLosProductos: Producto[] = [];
+  productosFiltrados: Producto[] = [];
+  mostrarSugerencias: boolean = false;
+
+  ngOnInit() {
+    this.service.getProductos().subscribe({
+      next: (productos) => {
+        this.todosLosProductos = productos;
+      },
+      error: () => {
+        console.error('Error al cargar productos');
+      }
+    });
+  }
+
+  filtrarProductos(): void {
+    const textoBusqueda = this.nombreProducto.trim().toLowerCase();
+    
+    if (!textoBusqueda) {
+      this.productosFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+
+    this.productosFiltrados = this.todosLosProductos.filter(p =>
+      p.nombre_prod.toLowerCase().includes(textoBusqueda) ||
+      p.tipo_prod.toLowerCase().includes(textoBusqueda)
+    ).slice(0, 10);
+
+    this.mostrarSugerencias = this.productosFiltrados.length > 0;
+  }
+
+  seleccionarProducto(producto: Producto): void {
+    this.nombreProducto = producto.nombre_prod;
+    this.mostrarSugerencias = false;
+    this.producto = { ...producto };
+    this.mensaje = '';
+    this.mostrarConfirmacion = false;
+  }
 
   buscar(): void {
     if (!this.nombreProducto.trim()) {
@@ -24,30 +63,21 @@ export class ProductosEliminar {
       return;
     }
 
-    // Obtener todos los productos y buscar por nombre
-    this.service.getProductos().subscribe({
-      next: (productos) => {
-        const nombreBuscado = this.nombreProducto.trim().toLowerCase();
-        const productoEncontrado = productos.find(p => 
-          p.nombre_prod.toLowerCase() === nombreBuscado
-        );
+    this.mostrarSugerencias = false;
+    const nombreBuscado = this.nombreProducto.trim().toLowerCase();
+    const productoEncontrado = this.todosLosProductos.find(p => 
+      p.nombre_prod.toLowerCase() === nombreBuscado
+    );
 
-        if (productoEncontrado) {
-          this.producto = productoEncontrado;
-          this.mensaje = '';
-          this.mostrarConfirmacion = false;
-        } else {
-          this.producto = null;
-          this.mensaje = `No se encontró un producto con el nombre "${this.nombreProducto}".`;
-          this.mostrarConfirmacion = false;
-        }
-      },
-      error: () => {
-        this.producto = null;
-        this.mensaje = 'Error al buscar el producto.';
-        this.mostrarConfirmacion = false;
-      }
-    });
+    if (productoEncontrado) {
+      this.producto = productoEncontrado;
+      this.mensaje = '';
+      this.mostrarConfirmacion = false;
+    } else {
+      this.producto = null;
+      this.mensaje = `No se encontró un producto con el nombre "${this.nombreProducto}".`;
+      this.mostrarConfirmacion = false;
+    }
   }
 
   confirmarEliminar(): void {
@@ -70,11 +100,23 @@ export class ProductosEliminar {
         this.producto = null;
         this.nombreProducto = '';
         this.mostrarConfirmacion = false;
+        this.service.getProductos().subscribe(productos => {
+          this.todosLosProductos = productos;
+        });
       },
       error: () => {
         this.mensaje = 'Error al eliminar el producto.';
         this.mostrarConfirmacion = false;
       }
     });
+  }
+
+  limpiarFormulario(): void {
+    this.producto = null;
+    this.nombreProducto = '';
+    this.mensaje = '';
+    this.productosFiltrados = [];
+    this.mostrarSugerencias = false;
+    this.mostrarConfirmacion = false;
   }
 }
