@@ -7,11 +7,12 @@ import { of } from 'rxjs';
 import { Mensualidad, Mensualidades } from '../services/mensualidades';
 import { MensualidadSidebar } from '../mensualidad-sidebar/mensualidad-sidebar';
 import { environment } from '../../../../environments/environment';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-mensualidad-editar',
   standalone: true,
-  imports: [CommonModule, FormsModule, MensualidadSidebar, HttpClientModule],
+  imports: [CommonModule, FormsModule, MensualidadSidebar, HttpClientModule, RouterLink],
   templateUrl: './mensualidad-editar.html',
   styleUrl: './mensualidad-editar.css'
 })
@@ -19,20 +20,18 @@ export class MensualidadEditarComponent implements OnInit {
   private mensualidadesService = inject(Mensualidades);
   private http = inject(HttpClient);
 
-  // búsqueda y estado
   busqueda: string = '';
   cargando = false;
   mensaje = '';
-
-  // datos cargados
   mensualidad: Mensualidad | null = null;
   members: any[] = [];
+  miembrosFiltrados: any[] = [];
   memberMap: Record<number, { nombre: string; cedula?: string }> = {};
   memberNameSelected = '';
+  mostrarSugerencias = false;
 
   ngOnInit(): void {
     this.loadMembers();
-    // opcional: pre-cargar mensualidades (no usado directamente aquí)
     this.mensualidadesService.getMensualidades()
       .pipe(catchError(() => of([])))
       .subscribe();
@@ -61,6 +60,29 @@ export class MensualidadEditarComponent implements OnInit {
       });
   }
 
+  filtrarMiembros(): void {
+    const query = this.busqueda.toLowerCase().trim();
+    if (!query) {
+      this.miembrosFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+
+    this.miembrosFiltrados = this.members.filter(m => {
+      const nombre = `${m.nombre || ''} ${m.apellido1 || ''} ${m.apellido2 || ''}`.toLowerCase();
+      const cedula = (m.cedula || '').toLowerCase();
+      return nombre.includes(query) || cedula.includes(query);
+    }).slice(0, 5);
+
+    this.mostrarSugerencias = this.miembrosFiltrados.length > 0;
+  }
+
+  seleccionarMiembro(miembro: any): void {
+    this.busqueda = `${miembro.nombre} ${miembro.apellido1}`.trim();
+    this.mostrarSugerencias = false;
+    this.buscarMensualidad();
+  }
+
   buscarMensualidad(): void {
     this.mensaje = '';
     this.mensualidad = null;
@@ -68,22 +90,22 @@ export class MensualidadEditarComponent implements OnInit {
 
     const raw = (this.busqueda || '').trim();
     if (!raw) {
-      this.mensaje = 'Ingrese la cédula para buscar.';
+      this.mensaje = 'Ingrese la cédula o nombre para buscar.';
       return;
     }
     const q = raw.toLowerCase();
 
     const getCedula = (m: any) => String(m.cedula ?? m.identificacion ?? m.dni ?? '').trim().toLowerCase();
+    const getNombre = (m: any) => `${m.nombre || ''} ${m.apellido1 || ''} ${m.apellido2 || ''}`.trim().toLowerCase();
 
-    // Buscar exactamente por cédula
-    const member = this.members.find(m => getCedula(m) === q);
+    const member = this.members.find(m => getCedula(m) === q || getNombre(m).includes(q));
     if (!member) {
-      this.mensaje = 'No se encontró ningún miembro con esa cédula.';
+      this.mensaje = 'No se encontró ningún miembro con esa información.';
       return;
     }
 
     const memberId = member.id_miembro ?? member.id ?? member._id;
-    this.memberNameSelected = (member.nombre_completo ?? (((`${member.nombre || ''} ${member.apellido1 || member.apellido || ''}`).trim()) || '')).toString();
+    this.memberNameSelected = `${member.nombre || ''} ${member.apellido1 || ''} ${member.apellido2 || ''}`.trim();
 
     if (memberId == null) {
       this.mensaje = 'El miembro encontrado no tiene id válido.';
@@ -93,12 +115,10 @@ export class MensualidadEditarComponent implements OnInit {
     this.cargando = true;
     const endpoints = [
       `${environment.apiUrl}/api/mensualidades/id_miembro/${memberId}`
-      
     ];
 
     const tryEndpoint = (i: number) => {
       if (i >= endpoints.length) {
-        // fallback: obtener todas y filtrar localmente
         this.http.get<any[]>(`${environment.apiUrl}/api/mensualidades`)
           .pipe(catchError(err => {
             this.cargando = false;
@@ -150,7 +170,6 @@ export class MensualidadEditarComponent implements OnInit {
       estado: res.estado ?? true,
       f_registro: res.f_registro ?? (new Date().toISOString().split('T')[0])
     };
-    // mostrar nombre en el campo readonly del HTML
     const info = this.memberMap[Number(this.mensualidad.id_miembro)];
     this.memberNameSelected = info?.nombre ?? this.memberNameSelected ?? (`Miembro #${this.mensualidad.id_miembro}`);
     this.mensaje = '';

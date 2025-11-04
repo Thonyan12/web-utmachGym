@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MiembrosService, Miembro } from '../services/miembros';
 import { MiembrosSidebarComponent } from "../miembros-sidebar/miembros-sidebar";
 
 @Component({
     selector: 'app-miembros-crear',
     standalone: true,
-    imports: [CommonModule, FormsModule, MiembrosSidebarComponent],
+    imports: [CommonModule, FormsModule, MiembrosSidebarComponent, RouterLink],
     templateUrl: './miembros-crear.html'
 })
 export class MiembrosCrearComponent {

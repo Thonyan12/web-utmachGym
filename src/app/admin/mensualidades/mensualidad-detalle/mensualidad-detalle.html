@@ -1,56 +1,170 @@
 <!-- ...existing code... -->
 <div class="d-flex" style="min-height: 100vh;">
-    <!-- Sidebar reutilizable para Mensualidades -->
-    <app-mensualidad-sidebar></app-mensualidad-sidebar>
+  <app-mensualidad-sidebar></app-mensualidad-sidebar>
   
-    <!-- Contenido principal del listado -->
-    <div class="flex-grow-1 p-4 bg-light">
-      <div class="container mt-4">
-        <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
-          <i class="bi bi-list-ul me-2"></i> Listado de Mensualidades
-        </h3>
-  
-        <!-- Campo de búsqueda/filtrado por cédula o nombre -->
-        <input
-          type="text"
-          class="form-control mb-3 rounded-md"
-          placeholder="Buscar por cédula, nombre, estado, fecha o monto..."
-          [(ngModel)]="filtro"
-          (input)="filtrarMensualidades()"
-          name="filtro"
-        >
-  
-        <!-- Mensaje si no se encuentran mensualidades -->
-        <div *ngIf="mensualidadesFiltradas.length === 0" class="alert alert-warning text-center rounded-md">
-          <i class="bi bi-box"></i> No se encontraron mensualidades.
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold m-0" style="color: #14213d;">
+        <i class="bi bi-search me-2"></i> Lista de Mensualidades
+      </h3>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control border-start-0" 
+            placeholder="Buscar por miembro, cédula, estado o monto..." 
+            [(ngModel)]="filtro"
+            (input)="filtrarMensualidades()" 
+            name="filtro"
+            style="box-shadow: none;">
         </div>
-  
-        <!-- Lista de mensualidades -->
-        <ul class="list-group shadow-sm">
-          <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2 rounded-md"
-              *ngFor="let mensualidad of mensualidadesFiltradas">
-            <div>
-              <span class="fw-bold">ID Mensualidad: {{ mensualidad.id_mensualidad }}</span>
-              <span class="badge bg-secondary ms-2">
-                Miembro: {{ getMemberName(mensualidad.id_miembro) }}
-              </span>
-            </div>
-            <div class="text-muted small">
-              <span><strong>Inicio:</strong> {{ mensualidad.fecha_inicio }}</span> |
-              <span><strong>Fin:</strong> {{ mensualidad.fecha_fin }}</span> |
-              <span><strong>Monto:</strong> ${{ mensualidad.monto | number:'1.2-2' }}</span> |
-              <span><strong>Estado:</strong>
-                <span [class]="'badge rounded-pill px-2 ' + (mensualidad.estado_mensualidad === 'Pagada' ? 'bg-success' : 'bg-warning')">
-                  {{ mensualidad.estado_mensualidad }}
-                </span>
-              </span>
-            </div>
-            <div class="text-end mt-2 mt-md-0">
-              <span class="badge bg-light text-dark rounded-md">Registrado: {{ mensualidad.f_registro }}</span>
-            </div>
-          </li>
-        </ul>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="background-color: #14213d; color: #fff;">
+              <tr>
+                <th scope="col">Cédula</th>
+                <th scope="col">Miembro</th>
+                <th scope="col">Fecha Inicio</th>
+                <th scope="col">Fecha Fin</th>
+                <th scope="col" class="text-end">Monto</th>
+                <th scope="col" class="text-center">Estado</th>
+                <th scope="col" class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let mensualidad of mensualidadesFiltradas" [hidden]="!filtro">
+                <td class="fw-medium">{{ getMemberCedula(mensualidad.id_miembro) }}</td>
+                <td class="fw-medium">{{ getMemberName(mensualidad.id_miembro) }}</td>
+                <td>{{ formatearFecha(mensualidad.fecha_inicio) }}</td>
+                <td>{{ formatearFecha(mensualidad.fecha_fin) }}</td>
+                <td class="text-end">${{ mensualidad.monto }}</td>
+                <td class="text-center">
+                  <span [style.color]="mensualidad.estado_mensualidad === 'Pagada' ? '#28a745' : '#fca311'" style="font-weight: 500;">
+                    {{ mensualidad.estado_mensualidad }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button 
+                    class="btn btn-sm" 
+                    style="background-color: #fca311; color: #0a1a2e;"
+                    (click)="abrirModal(mensualidad)"
+                    title="Ver detalles">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="mensualidadesFiltradas.length === 0 || !filtro">
+                <td colspan="7" class="text-center text-muted py-5">
+                  <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                  <p class="mb-0 mt-3" *ngIf="!filtro">Escribe en el buscador para encontrar mensualidades...</p>
+                  <p class="mb-0 mt-3" *ngIf="filtro && mensualidadesFiltradas.length === 0">No se encontraron mensualidades con "{{ filtro }}"</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="mostrarModal" class="modal fade show d-block" tabindex="-1" 
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-calendar-check me-2"></i>Detalles de la Mensualidad
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+      
+      <div class="modal-body p-4" *ngIf="mensualidadSeleccionada">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">ID Mensualidad</small>
+              <span class="detail-value">
+                #{{ mensualidadSeleccionada.id_mensualidad || 'N/A' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Estado</small>
+              <span [style.color]="mensualidadSeleccionada.estado_mensualidad === 'Pagada' ? '#28a745' : '#fca311'" 
+                    class="fw-bold" style="font-size: 1.1rem;">
+                <i [class]="mensualidadSeleccionada.estado_mensualidad === 'Pagada' ? 'bi bi-check-circle-fill' : 'bi bi-clock-fill'"></i>
+                {{ mensualidadSeleccionada.estado_mensualidad }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Miembro</small>
+              <span class="detail-value-large">
+                {{ getMemberName(mensualidadSeleccionada.id_miembro) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Fecha Inicio</small>
+              <span class="detail-value-medium">
+                {{ formatearFecha(mensualidadSeleccionada.fecha_inicio) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Fecha Fin</small>
+              <span class="detail-value-medium">
+                {{ formatearFecha(mensualidadSeleccionada.fecha_fin) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card-highlight">
+              <small class="text-muted d-block mb-1">Monto</small>
+              <span class="detail-price">
+                ${{ mensualidadSeleccionada.monto }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Fecha Registro</small>
+              <span class="detail-value-medium">
+                {{ formatearFecha(mensualidadSeleccionada.f_registro) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+          <i class="bi bi-x-circle me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- ...existing code... -->

@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Productos, Producto } from '../services/productos';
 import { ProductosSidebar } from "../productos-sidebar/productos-sidebar";
 
 @Component({
   selector: 'app-productos-crear',
   standalone: true,
-  imports: [CommonModule, FormsModule, ProductosSidebar],
+  imports: [CommonModule, FormsModule, ProductosSidebar, RouterLink],
   templateUrl: './productos-crear.html'
 })
 export class ProductosCrearComponent {

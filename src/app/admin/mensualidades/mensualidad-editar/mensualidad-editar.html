@@ -1,90 +1,191 @@
-<!-- ...existing code... -->
-<div class="d-flex" style="min-height: 100vh;">
-  <!-- Sidebar reutilizable para Mensualidades -->
+<div class="d-flex main-container">
   <app-mensualidad-sidebar></app-mensualidad-sidebar>
 
   <div class="flex-grow-1 p-4 bg-light">
-    <div class="container mt-4">
-      <h3 class="fw-bold m-0 mb-4" style="color: #14213d;">
+    <div class="mb-4">
+      <h3 class="fw-bold page-title">
         <i class="bi bi-pencil-square me-2"></i> Editar Mensualidad
       </h3>
+    </div>
 
-      <!-- Búsqueda por cédula o nombre -->
-      <form class="mb-4" (ngSubmit)="buscarMensualidad()" #buscarForm="ngForm">
-        <div class="row">
-          <div class="col-md-8 mb-2">
-            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="Cédula o nombre del miembro" required>
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form (ngSubmit)="buscarMensualidad()" #buscarForm="ngForm">
+          <div class="row align-items-end">
+            <div class="col-md-8 mb-3 mb-md-0">
+              <label class="form-label form-label-custom">
+                Miembro (Nombre o Cédula)
+              </label>
+              <div class="search-input-container">
+                <input 
+                  [(ngModel)]="busqueda" 
+                  name="busqueda" 
+                  type="text" 
+                  class="form-control"
+                  placeholder="Escribe para buscar..."
+                  (input)="filtrarMiembros()"
+                  (focus)="mostrarSugerencias = true"
+                  autocomplete="off"
+                  required>
+                
+                <div *ngIf="mostrarSugerencias && miembrosFiltrados.length > 0" 
+                     class="list-group position-absolute w-100 shadow-lg suggestions-dropdown">
+                  <button 
+                    type="button"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center suggestion-item"
+                    *ngFor="let m of miembrosFiltrados"
+                    (click)="seleccionarMiembro(m)">
+                    <div>
+                      <strong>{{ m.nombre }} {{ m.apellido1 }}</strong>
+                      <small class="text-muted d-block">Cédula: {{ m.cedula || 'N/A' }}</small>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <button 
+                type="submit" 
+                class="btn btn-search-dark w-100" 
+                [disabled]="!busqueda.trim()">
+                <i class="bi bi-search me-2"></i> Buscar
+              </button>
+            </div>
           </div>
-          <div class="col-md-2 mb-2">
-            <button type="submit" class="btn btn-info w-100" [disabled]="cargando">
-              {{ cargando ? 'Buscando...' : 'Buscar' }}
+        </form>
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" *ngIf="mensualidad">
+      <div class="card-body">
+        <form (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                ID Mensualidad
+              </label>
+              <input 
+                [(ngModel)]="mensualidad.id_mensualidad" 
+                name="id_mensualidad" 
+                type="number" 
+                class="form-control id-field-readonly" 
+                readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Miembro
+              </label>
+              <input 
+                type="text" 
+                class="form-control id-field-readonly" 
+                [value]="memberNameSelected" 
+                readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Fecha Inicio
+              </label>
+              <input 
+                [(ngModel)]="mensualidad.fecha_inicio" 
+                name="fecha_inicio" 
+                type="date" 
+                class="form-control" 
+                required 
+                #fechaInicio="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)">
+                La fecha de inicio es obligatoria.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Fecha Fin
+              </label>
+              <input 
+                [(ngModel)]="mensualidad.fecha_fin" 
+                name="fecha_fin" 
+                type="date" 
+                class="form-control" 
+                required 
+                #fechaFin="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)">
+                La fecha de fin es obligatoria.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Monto
+              </label>
+              <input 
+                [(ngModel)]="mensualidad.monto" 
+                name="monto" 
+                type="number" 
+                class="form-control" 
+                required 
+                step="0.01" 
+                min="0.01" 
+                #monto="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="monto.invalid && (monto.dirty || monto.touched)">
+                El monto es obligatorio y debe ser mayor a 0.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Estado de la Mensualidad
+              </label>
+              <select 
+                [(ngModel)]="mensualidad.estado_mensualidad" 
+                name="estado_mensualidad" 
+                class="form-control" 
+                required 
+                #estadoMensualidad="ngModel">
+                <option value="" disabled>Seleccione un estado</option>
+                <option value="Pagada">Pagada</option>
+                <option value="Pendiente">Pendiente</option>
+              </select>
+              <div class="invalid-feedback-custom" *ngIf="estadoMensualidad.invalid && (estadoMensualidad.dirty || estadoMensualidad.touched)">
+                El estado de la mensualidad es obligatorio.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Fecha de Registro
+              </label>
+              <input 
+                [(ngModel)]="mensualidad.f_registro" 
+                name="f_registro" 
+                type="text" 
+                class="form-control id-field-readonly" 
+                readonly>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button 
+              type="button" 
+              class="btn btn-volver" 
+              routerLink="/admin/mensualidades">
+              <i class="bi bi-arrow-left me-1"></i> Volver
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-actualizar" 
+              [disabled]="form.invalid">
+              <i class="bi bi-check-circle me-1"></i> Actualizar
             </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
+    </div>
 
-      <!-- Formulario de edición (se muestra si se encuentra una mensualidad) -->
-      <form *ngIf="mensualidad" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
-        <!-- ID Mensualidad oculto: se mantiene en el objeto pero no se muestra -->
-        <!-- Mostrar nombre del miembro en lugar del ID -->
-        <div class="mb-3">
-          <label class="form-label">Miembro</label>
-          <input type="text" class="form-control" [value]="memberNameSelected" readonly>
-        </div>
-
-        <!-- Fecha de Inicio -->
-        <div class="mb-3">
-          <label class="form-label">Fecha Inicio</label>
-          <input [(ngModel)]="mensualidad.fecha_inicio" name="fecha_inicio" type="date" class="form-control" required #fechaInicio="ngModel">
-          <div class="text-danger" *ngIf="fechaInicio.invalid && (fechaInicio.dirty || fechaInicio.touched)">
-            La fecha de inicio es obligatoria.
-          </div>
-        </div>
-        <!-- Fecha de Fin -->
-        <div class="mb-3">
-          <label class="form-label">Fecha Fin</label>
-          <input [(ngModel)]="mensualidad.fecha_fin" name="fecha_fin" type="date" class="form-control" required #fechaFin="ngModel">
-          <div class="text-danger" *ngIf="fechaFin.invalid && (fechaFin.dirty || fechaFin.touched)">
-            La fecha de fin es obligatoria.
-          </div>
-        </div>
-        <!-- Monto -->
-        <div class="mb-3">
-          <label class="form-label">Monto</label>
-          <input [(ngModel)]="mensualidad.monto" name="monto" type="number" class="form-control" required step="0.01" min="0.01" #monto="ngModel">
-          <div class="text-danger" *ngIf="monto.invalid && (monto.dirty || monto.touched)">
-            El monto es obligatorio y debe ser mayor a 0.
-          </div>
-        </div>
-        <!-- Estado de la Mensualidad -->
-        <div class="mb-3">
-          <label class="form-label">Estado de la Mensualidad</label>
-          <select [(ngModel)]="mensualidad.estado_mensualidad" name="estado_mensualidad" class="form-control" required #estadoMensualidad="ngModel">
-            <option value="" disabled selected>Seleccione un estado</option>
-            <option value="Pagada">Pagada</option>
-            <option value="Pendiente">Pendiente</option>
-          </select>
-          <div class="text-danger" *ngIf="estadoMensualidad.invalid && (estadoMensualidad.dirty || estadoMensualidad.touched)">
-            El estado de la mensualidad es obligatorio.
-          </div>
-        </div>
-
-        <!-- Fecha de Registro (solo lectura) -->
-        <div class="mb-3">
-          <label class="form-label">Fecha de Registro</label>
-          <input [(ngModel)]="mensualidad.f_registro" name="f_registro" type="text" class="form-control" readonly>
-        </div>
-
-        <!-- Botón de Actualizar y Volver -->
-        <div class="d-flex gap-2">
-          <button type="button" class="btn btn-secondary" routerLink="/admin/mensualidades">Volver</button>
-          <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
-        </div>
-      </form>
-
-      <!-- Mensajes -->
-      <div *ngIf="mensaje" class="alert alert-info mt-3">{{ mensaje }}</div>
+    <div *ngIf="mensaje" class="alert alert-custom mt-3">
+      <i class="bi bi-info-circle me-2"></i>{{ mensaje }}
     </div>
   </div>
 </div>
-<!-- ...existing code... -->

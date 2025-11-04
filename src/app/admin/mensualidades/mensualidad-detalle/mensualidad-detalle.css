@@ -1,0 +1,52 @@
+.detail-card {
+  background: #f8f9fa;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #fca311;
+}
+
+.detail-card-highlight {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  padding: 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid #fca311;
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #14213d;
+}
+
+.detail-value-medium {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #14213d;
+}
+
+.detail-value-large {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #14213d;
+}
+
+.detail-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fca311;
+}
+
+.modal-content {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

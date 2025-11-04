@@ -19,18 +19,16 @@ export class MensualidadEliminarComponent implements OnInit {
   private service = inject(Mensualidades);
   private http = inject(HttpClient);
 
-  // búsqueda por cédula o nombre
   consulta: string = '';
   cargando = false;
   mensaje: string = '';
-
-  // miembros y resultados
   members: any[] = [];
+  miembrosFiltrados: any[] = [];
   mensualidad: Mensualidad | null = null;
   mensualidadesEncontradas: Mensualidad[] = [];
   mostrarConfirmacion: boolean = false;
+  mostrarSugerencias = false;
 
-  // Getter seguro para evitar acceso directo a .length en la plantilla
   get foundCount(): number {
     return (this.mensualidadesEncontradas ?? []).length;
   }
@@ -51,7 +49,29 @@ export class MensualidadEliminarComponent implements OnInit {
       });
   }
 
-  // Helper: devolver miembro o null
+  filtrarMiembros(): void {
+    const query = this.consulta.toLowerCase().trim();
+    if (!query) {
+      this.miembrosFiltrados = [];
+      this.mostrarSugerencias = false;
+      return;
+    }
+
+    this.miembrosFiltrados = this.members.filter(m => {
+      const nombre = `${m.nombre || ''} ${m.apellido1 || ''} ${m.apellido2 || ''}`.toLowerCase();
+      const cedula = (m.cedula || '').toLowerCase();
+      return nombre.includes(query) || cedula.includes(query);
+    }).slice(0, 5);
+
+    this.mostrarSugerencias = this.miembrosFiltrados.length > 0;
+  }
+
+  seleccionarMiembro(miembro: any): void {
+    this.consulta = `${miembro.nombre} ${miembro.apellido1}`.trim();
+    this.mostrarSugerencias = false;
+    this.buscarPorCedulaONombre();
+  }
+
   getMemberById(id: number | string | undefined | null) {
     if (id == null) return null;
     return this.members.find(m => {
@@ -60,7 +80,6 @@ export class MensualidadEliminarComponent implements OnInit {
     }) || null;
   }
 
-  // Helper: devolver nombre desplegable seguro
   getMemberDisplayName(id: number | string | undefined | null): string {
     const m = this.getMemberById(id);
     if (!m) return `Miembro #${id ?? ''}`.trim();
@@ -68,10 +87,6 @@ export class MensualidadEliminarComponent implements OnInit {
     return nombreCompleto || (m.username ?? `Miembro #${id ?? ''}`);
   }
 
-  /**
-   * Busca mensualidades asociadas a la cédula o nombre de miembro.
-   * Si hay varias mensualidades toma la primera por defecto y avisa al usuario.
-   */
   buscarPorCedulaONombre(): void {
     this.mensaje = '';
     this.mensualidad = null;
@@ -88,14 +103,11 @@ export class MensualidadEliminarComponent implements OnInit {
     const getCedula = (m: any) => String(m.cedula ?? m.identificacion ?? m.dni ?? '').trim().toLowerCase();
     const getFullName = (m: any) => String(m.nombre_completo ?? ((`${m.nombre || ''} ${m.apellido1 || m.apellido || ''}`).trim()) ?? '').trim().toLowerCase();
 
-    // buscar exacto por cédula primero
     let matchedMember = this.members.find(m => getCedula(m) === q);
     if (!matchedMember) {
-      // luego buscar nombre exacto
       matchedMember = this.members.find(m => getFullName(m) === q);
     }
     if (!matchedMember) {
-      // fallback: búsqueda parcial en nombre o cédula
       matchedMember = this.members.find(m => {
         const name = getFullName(m);
         const ced = getCedula(m);
@@ -115,7 +127,6 @@ export class MensualidadEliminarComponent implements OnInit {
     }
 
     this.cargando = true;
-    // obtener todas las mensualidades y filtrar por id_miembro (compatibilidad con cualquier backend)
     this.service.getMensualidades()
       .pipe(
         catchError(err => {
@@ -133,7 +144,7 @@ export class MensualidadEliminarComponent implements OnInit {
           return;
         }
         this.mensualidadesEncontradas = encontrados;
-        this.mensualidad = encontrados[0]; // seleccionar la primera por defecto
+        this.mensualidad = encontrados[0];
         if (encontrados.length > 1) {
           this.mensaje = `Se encontraron ${encontrados.length} mensualidades; se cargó la primera.`;
         } else {

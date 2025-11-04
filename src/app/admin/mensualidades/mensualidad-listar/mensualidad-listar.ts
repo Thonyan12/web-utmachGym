@@ -3,7 +3,7 @@ import { MensualidadSidebar } from '../mensualidad-sidebar/mensualidad-sidebar';
 import { Mensualidad, Mensualidades } from '../services/mensualidades';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
+import { RouterLink } from '@angular/router';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
@@ -11,53 +11,38 @@ import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-mensualidad-listar',
-  imports: [ MensualidadSidebar, CommonModule, FormsModule ],
+  imports: [ MensualidadSidebar, CommonModule, FormsModule, RouterLink ],
   templateUrl: './mensualidad-listar.html',
   styleUrl: './mensualidad-listar.css'
 })
 export class MensualidadListar implements OnInit {
   mensualidades: Mensualidad[] = [];
   searchText: string = '';
-
-  // mapa id_miembro -> nombre
-  memberMap: Record<number, string> = {};
+  memberMap: Record<number, { nombre: string; cedula: string }> = {};
 
   constructor(private mensualidadesService: Mensualidades, private http: HttpClient) { }
 
   ngOnInit(): void {
-    console.log('🔄 Iniciando carga de mensualidades...');
-    console.log('🔑 Token:', localStorage.getItem('token') ? 'Presente' : 'No presente');
-    
+    this.loadMembers();
+    this.loadMensualidades();
+  }
+
+  private loadMensualidades(): void {
     this.mensualidadesService.getMensualidades()
       .pipe(
         catchError((error) => {
-          console.error('❌ Error al obtener las mensualidades:', error);
-          console.error('Status:', error.status);
-          console.error('Message:', error.message);
-          console.error('Error completo:', error);
-          return of([]); // Devuelve un array vacío en caso de error
+          console.error('Error al obtener las mensualidades:', error);
+          return of([]);
         })
       )
       .subscribe({
         next: (data) => {
-          console.log('✅ Mensualidades obtenidas del backend:', data);
-          console.log('📊 Cantidad de mensualidades:', data?.length || 0);
           this.mensualidades = data || [];
-          console.log('📋 Mensualidades asignadas al componente:', this.mensualidades);
-        },
-        error: (err) => {
-          console.error('❌ Error en suscripción:', err);
-        },
-        complete: () => {
-          console.log('✔️ Suscripción completada');
         }
       });
-
-    this.loadMembers();
   }
 
-  private loadMembers() {
-    // Ajusta la ruta según tu API
+  private loadMembers(): void {
     this.http.get<any[]>(`${environment.apiUrl}/api/miembros`)
       .pipe(
         catchError(err => {
@@ -66,16 +51,39 @@ export class MensualidadListar implements OnInit {
         })
       )
       .subscribe(members => {
-        // Espera que cada miembro tenga id_miembro y nombre_completo
         members.forEach(m => {
-          this.memberMap[m.id_miembro] = m.nombre_completo || `${m.nombre || ''} ${m.apellido || ''}`.trim();
+          const nombreCompleto = `${m.nombre || ''} ${m.apellido1 || ''} ${m.apellido2 || ''}`.trim();
+          const cedula = m.cedula || m.identificacion || 'N/A';
+          this.memberMap[m.id_miembro] = {
+            nombre: nombreCompleto || 'Sin nombre',
+            cedula: cedula
+          };
         });
       });
   }
 
   getMemberName(id?: number | string | null): string {
-    if (id == null) return ''; // maneja undefined o null
+    if (id == null) return 'Sin asignar';
     const key = Number(id);
-    return this.memberMap[key] || String(key);
+    const info = this.memberMap[key];
+    return info ? info.nombre : `ID: ${key}`;
+  }
+
+  getMemberCedula(id?: number | string | null): string {
+    if (id == null) return 'N/A';
+    const key = Number(id);
+    const info = this.memberMap[key];
+    return info?.cedula || 'N/A';
+  }
+
+  formatearFecha(fecha: string): string {
+    if (!fecha) return '';
+    
+    const date = new Date(fecha);
+    const dia = date.getDate().toString().padStart(2, '0');
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    const anio = date.getFullYear();
+    
+    return `${dia}-${mes}-${anio}`;
   }
 }

@@ -18,8 +18,8 @@
             <table class="table table-hover table-bordered align-middle mb-0">
               <thead style="background-color: #14213d; color: #fff;">
                 <tr>
-                  <!--<th scope="col">ID</th>-->
-                  <th scope="col">ID Miembro</th>
+                  <th scope="col">Cédula</th>
+                  <th scope="col">Miembro</th>
                   <th scope="col">Fecha Inicio</th>
                   <th scope="col">Fecha Fin</th>
                   <th scope="col">Monto</th>
@@ -29,17 +29,17 @@
               </thead>
               <tbody>
                 <tr *ngFor="let mensualidad of mensualidades" class="align-middle">
-                  <!--<td class="fw-bold text-center">{{ mensualidad.id_mensualidad }}</td>-->
-                  <td class="text-center">{{ getMemberName(mensualidad.id_miembro) }}</td>
-                  <td class="text-center">{{ mensualidad.fecha_inicio }}</td>
-                  <td class="text-center">{{ mensualidad.fecha_fin }}</td>
+                  <td>{{ getMemberCedula(mensualidad.id_miembro) }}</td>
+                  <td>{{ getMemberName(mensualidad.id_miembro) }}</td>
+                  <td class="text-center">{{ formatearFecha(mensualidad.fecha_inicio) }}</td>
+                  <td class="text-center">{{ formatearFecha(mensualidad.fecha_fin) }}</td>
                   <td class="text-end">${{ mensualidad.monto }}</td>
                   <td class="text-center">
-                    <span [class]="'badge rounded-pill px-3 ' + (mensualidad.estado_mensualidad === 'Pagada' ? 'bg-success' : 'bg-warning')">
+                    <span [style.color]="mensualidad.estado_mensualidad === 'Pagada' ? '#28a745' : '#fca311'" style="font-weight: 500;">
                       {{ mensualidad.estado_mensualidad }}
                     </span>
                   </td>
-                  <td class="text-center">{{ mensualidad.f_registro }}</td>
+                  <td class="text-center">{{ formatearFecha(mensualidad.f_registro) }}</td>
                 </tr>
                 <tr *ngIf="mensualidades.length === 0">
                   <td colspan="7" class="text-center text-muted py-4">
