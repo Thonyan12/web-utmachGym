@@ -1,72 +1,234 @@
-<div class="d-flex" style="min-height: 100vh;">
-    <app-facturas-sidebar></app-facturas-sidebar>
-    <div class="container mt-4">
-      <h2>Editar Factura</h2>
-      <form class="mb-4" (ngSubmit)="buscarFactura()" #buscarForm="ngForm">
-        <div class="row">
-          <div class="col-md-4 mb-2">
-            <input [(ngModel)]="busqueda" name="busqueda" type="text" class="form-control" placeholder="ID de la factura" required>
+<div class="d-flex main-container">
+  <app-facturas-sidebar></app-facturas-sidebar>
+
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="mb-4">
+      <h3 class="fw-bold page-title">
+        <i class="bi bi-pencil-square me-2"></i> Editar Factura
+      </h3>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form (ngSubmit)="buscarFactura()" #buscarForm="ngForm">
+          <div class="row align-items-end">
+            <div class="col-md-8 mb-3 mb-md-0">
+              <label class="form-label form-label-custom">
+                Miembro (Nombre o Cédula)
+              </label>
+              <div class="search-input-container">
+                <input 
+                  [(ngModel)]="busqueda" 
+                  name="busqueda" 
+                  type="text" 
+                  class="form-control"
+                  placeholder="Escribe para buscar..."
+                  (input)="filtrarMiembros()"
+                  (focus)="mostrarSugerencias = true"
+                  autocomplete="off"
+                  required>
+                
+                <div *ngIf="mostrarSugerencias && miembrosFiltrados.length > 0" 
+                     class="list-group position-absolute w-100 shadow-lg suggestions-dropdown">
+                  <button 
+                    type="button"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center suggestion-item"
+                    *ngFor="let m of miembrosFiltrados"
+                    (click)="seleccionarMiembro(m)">
+                    <div>
+                      <strong>{{ m.nombre }} {{ m.apellido1 }}</strong>
+                      <small class="text-muted d-block">Cédula: {{ m.cedula || 'N/A' }}</small>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <button 
+                type="submit" 
+                class="btn btn-search-dark w-100" 
+                [disabled]="!busqueda.trim()">
+                <i class="bi bi-search me-2"></i> Buscar
+              </button>
+            </div>
           </div>
-          <div class="col-md-2 mb-2">
-            <button type="submit" class="btn btn-info w-100">Buscar</button>
-          </div>
-        </div>
-      </form>
-  
-      <form *ngIf="factura" (ngSubmit)="actualizar()" #form="ngForm" novalidate>
-        <div class="mb-3">
-          <label class="form-label">ID de la Factura</label>
-          <input [(ngModel)]="factura.id_factura" name="id_factura" type="number" class="form-control" readonly>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">ID Miembro</label>
-          <input [(ngModel)]="factura.id_miembro" name="id_miembro" type="number" class="form-control" required #idMiembro="ngModel">
-          <div class="text-danger" *ngIf="idMiembro.invalid && (idMiembro.dirty || idMiembro.touched)">
-            El ID del miembro es obligatorio.
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">ID Administrador</label>
-          <input [(ngModel)]="factura.id_admin" name="id_admin" type="number" class="form-control" required #idAdmin="ngModel">
-          <div class="text-danger" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
-            El ID del administrador es obligatorio.
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Fecha de Emisión</label>
-          <input [(ngModel)]="factura.fecha_emision" name="fecha_emision" type="date" class="form-control" required #fechaEmision="ngModel">
-          <div class="text-danger" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
-            La fecha de emisión es obligatoria.
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Total</label>
-          <input [(ngModel)]="factura.total" name="total" type="number" class="form-control" required step="0.01" min="0.01" #total="ngModel">
-          <div class="text-danger" *ngIf="total.invalid && (total.dirty || total.touched)">
-            El total es obligatorio y debe ser mayor a 0.
-          </div>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">Estado</label>
-          <select [(ngModel)]="factura.estado_registro" name="estado_registro" class="form-control" required #estadoRegistro="ngModel">
-            <option [ngValue]="true">Activo</option>
-            <option [ngValue]="false">Inactivo</option>
-          </select>
-          <div class="text-danger" *ngIf="estadoRegistro.invalid && (estadoRegistro.dirty || estadoRegistro.touched)">
-            El estado es obligatorio.
-          </div>
-        </div>
-        <button type="submit" class="btn btn-warning" [disabled]="form.invalid">Actualizar</button>
-      </form>
-  
-      <div *ngIf="mensaje" class="alert alert-info mt-3">
-        {{ mensaje }}
+        </form>
       </div>
-      <div *ngIf="!factura && mensaje && !cargando" class="text-danger mt-3">
-        No se encontró la factura.
+    </div>
+
+    <div class="card border-0 shadow-sm" *ngIf="factura">
+      <div class="card-body">
+        <form (ngSubmit)="actualizar()" #form="ngForm" novalidate>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                ID Factura
+              </label>
+              <input 
+                [(ngModel)]="factura.id_factura" 
+                name="id_factura" 
+                type="number" 
+                class="form-control id-field-readonly" 
+                readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Miembro
+              </label>
+              <input 
+                type="text" 
+                class="form-control id-field-readonly" 
+                [value]="getMemberName(factura.id_miembro)" 
+                readonly>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Fecha de Emisión
+              </label>
+              <input 
+                [(ngModel)]="factura.fecha_emision" 
+                name="fecha_emision" 
+                type="date" 
+                class="form-control" 
+                required 
+                #fechaEmision="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="fechaEmision.invalid && (fechaEmision.dirty || fechaEmision.touched)">
+                La fecha de emisión es obligatoria.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Total
+              </label>
+              <input 
+                [(ngModel)]="factura.total" 
+                name="total" 
+                type="number" 
+                class="form-control" 
+                required 
+                step="0.01" 
+                min="0.01" 
+                #total="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="total.invalid && (total.dirty || total.touched)">
+                El total es obligatorio y debe ser mayor a 0.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                ID Administrador
+              </label>
+              <input 
+                [(ngModel)]="factura.id_admin" 
+                name="id_admin" 
+                type="number" 
+                class="form-control" 
+                required 
+                #idAdmin="ngModel">
+              <div class="invalid-feedback-custom" *ngIf="idAdmin.invalid && (idAdmin.dirty || idAdmin.touched)">
+                El ID del administrador es obligatorio.
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label class="form-label form-label-custom">
+                Estado
+              </label>
+              <select 
+                [(ngModel)]="factura.estado_registro" 
+                name="estado_registro" 
+                class="form-control" 
+                required 
+                #estadoRegistro="ngModel">
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
+              <div class="invalid-feedback-custom" *ngIf="estadoRegistro.invalid && (estadoRegistro.dirty || estadoRegistro.touched)">
+                El estado es obligatorio.
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button 
+              type="button" 
+              class="btn btn-volver" 
+              routerLink="/admin/facturas">
+              <i class="bi bi-arrow-left me-1"></i> Volver
+            </button>
+            <button 
+              type="submit" 
+              class="btn btn-actualizar" 
+              [disabled]="form.invalid">
+              <i class="bi bi-check-circle me-1"></i> Actualizar
+            </button>
+          </div>
+        </form>
       </div>
-      <div *ngIf="cargando" class="text-secondary mt-3">
-        Buscando factura...
+    </div>
+
+    <div *ngIf="mensaje" class="alert alert-custom mt-3">
+      <i class="bi bi-info-circle me-2"></i>{{ mensaje }}
+    </div>
+  </div>
+</div>
+
+<div *ngIf="mostrarModalSeleccion" class="modal fade show d-block" tabindex="-1" 
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-list-check me-2"></i>Seleccione una Factura
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalSeleccion()"></button>
+      </div>
+      
+      <div class="modal-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead style="background-color: #f8f9fa;">
+              <tr>
+                <th scope="col">ID Factura</th>
+                <th scope="col">Fecha Emisión</th>
+                <th scope="col" class="text-end">Total</th>
+                <th scope="col" class="text-center">Estado</th>
+                <th scope="col" class="text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of facturasDisponibles" class="align-middle">
+                <td class="fw-bold">#{{ f.id_factura }}</td>
+                <td>{{ formatearFecha(f.fecha_emision) }}</td>
+                <td class="text-end">${{ f.total }}</td>
+                <td class="text-center">
+                  <span [style.color]="f.estado_registro ? '#28a745' : '#dc3545'" style="font-weight: 500;">
+                    {{ f.estado_registro ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button 
+                    class="btn btn-sm" 
+                    style="background-color: #fca311; color: #0a1a2e;"
+                    (click)="seleccionarFactura(f)">
+                    <i class="bi bi-check-circle me-1"></i> Seleccionar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalSeleccion()">
+          <i class="bi bi-x-circle me-1"></i> Cancelar
+        </button>
       </div>
     </div>
   </div>
+</div>

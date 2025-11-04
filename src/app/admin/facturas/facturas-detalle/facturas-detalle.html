@@ -1,43 +1,167 @@
 <div class="d-flex" style="min-height: 100vh;">
-    <app-facturas-sidebar></app-facturas-sidebar>
-    <div class="container mt-4">
-      <h2 class="mb-4">Detalles de Facturas</h2>
-      <input type="text" class="form-control mb-3" placeholder="Buscar por ID Miembro, ID Admin o Total..." [(ngModel)]="filtro"
-        (input)="filtrarFacturas()" name="filtro">
+  <app-facturas-sidebar></app-facturas-sidebar>
   
-      <div *ngIf="facturasFiltradas.length === 0" class="alert alert-warning">
-        No se encontraron facturas.
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h3 class="fw-bold m-0" style="color: #14213d;">
+        <i class="bi bi-search me-2"></i> Lista de Facturas
+      </h3>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0">
+            <i class="bi bi-search text-muted"></i>
+          </span>
+          <input 
+            type="text" 
+            class="form-control border-start-0" 
+            placeholder="Buscar por miembro, cédula, total o estado..." 
+            [(ngModel)]="filtro"
+            (input)="filtrarFacturas()" 
+            name="filtro"
+            style="box-shadow: none;">
+        </div>
       </div>
-  
-      <div class="mb-3">
-        <label for="tipoDetalle" class="form-label">Tipo de Detalle</label>
-        <select [(ngModel)]="tipoDetalle" name="tipoDetalle" id="tipoDetalle" class="form-select">
-          <option value="" disabled selected>Seleccione tipo de detalle</option>
-          <option *ngFor="let tipo of detalleTipos" [value]="tipo">{{ tipo }}</option>
-        </select>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead style="background-color: #14213d; color: #fff;">
+              <tr>
+                <th scope="col">Cédula</th>
+                <th scope="col">Miembro</th>
+                <th scope="col">Fecha Emisión</th>
+                <th scope="col" class="text-end">Total</th>
+                <th scope="col" class="text-center">Estado</th>
+                <th scope="col" class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let factura of facturasFiltradas" [hidden]="!filtro">
+                <td class="fw-medium">{{ getMemberCedula(factura.id_miembro) }}</td>
+                <td class="fw-medium">{{ getMemberName(factura.id_miembro) }}</td>
+                <td>{{ formatearFecha(factura.fecha_emision) }}</td>
+                <td class="text-end">${{ factura.total }}</td>
+                <td class="text-center">
+                  <span [style.color]="factura.estado_registro ? '#28a745' : '#dc3545'" style="font-weight: 500;">
+                    {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button 
+                    class="btn btn-sm" 
+                    style="background-color: #fca311; color: #0a1a2e;"
+                    (click)="abrirModal(factura)"
+                    title="Ver detalles">
+                    <i class="bi bi-eye"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="facturasFiltradas.length === 0 || !filtro">
+                <td colspan="6" class="text-center text-muted py-5">
+                  <i class="bi bi-search" style="font-size: 3rem; opacity: 0.3;"></i>
+                  <p class="mb-0 mt-3" *ngIf="!filtro">Escribe en el buscador para encontrar facturas...</p>
+                  <p class="mb-0 mt-3" *ngIf="filtro && facturasFiltradas.length === 0">No se encontraron facturas con "{{ filtro }}"</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-  
-      <ul class="list-group shadow-sm">
-        <li class="list-group-item d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-2"
-            *ngFor="let factura of facturasFiltradas">
-          <div>
-            <span class="fw-bold">Factura ID: {{ factura.id_factura || 'N/A' }}</span>
-            <span class="badge bg-secondary ms-2">Admin ID: {{ factura.id_admin || 'N/A' }}</span>
-          </div>
-          <div class="text-muted small">
-            <span><strong>ID Miembro:</strong> {{ factura.id_miembro || 'N/A' }}</span> |
-            <span><strong>Total:</strong> ${{ factura.total || '0' }}</span> |
-            <span><strong>Estado:</strong>
-              <span [ngClass]="factura.estado_registro ? 'text-success' : 'text-danger'">
-                {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}
-              </span>
-            </span>
-          </div>
-          <div class="text-end mt-2 mt-md-0">
-            <span class="badge bg-light text-dark">Fecha de Emisión: {{ factura.fecha_emision | date:'shortDate' }}</span>
-            <span class="badge bg-light text-dark">Registrado: {{ factura.f_registro | date:'shortDate' }}</span>
-          </div>
-        </li>
-      </ul>
     </div>
   </div>
+</div>
+
+<div *ngIf="mostrarModal" class="modal fade show d-block" tabindex="-1" 
+     style="background: rgba(0,0,0,0.5); z-index: 1050;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header border-0" style="background: linear-gradient(135deg, #0a1a2e 0%, #14213d 100%);">
+        <h5 class="modal-title text-white fw-bold">
+          <i class="bi bi-receipt me-2"></i>Detalles de la Factura
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModal()"></button>
+      </div>
+      
+      <div class="modal-body p-4" *ngIf="facturaSeleccionada">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">ID Factura</small>
+              <span class="detail-value">
+                #{{ facturaSeleccionada.id_factura || 'N/A' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Estado</small>
+              <span [style.color]="facturaSeleccionada.estado_registro ? '#28a745' : '#dc3545'" 
+                    class="fw-bold" style="font-size: 1.1rem;">
+                <i [class]="facturaSeleccionada.estado_registro ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill'"></i>
+                {{ facturaSeleccionada.estado_registro ? 'Activo' : 'Inactivo' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Miembro</small>
+              <span class="detail-value-large">
+                {{ getMemberName(facturaSeleccionada.id_miembro) }}
+              </span>
+              <small class="text-muted d-block mt-1">Cédula: {{ getMemberCedula(facturaSeleccionada.id_miembro) }}</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Fecha Emisión</small>
+              <span class="detail-value-medium">
+                {{ formatearFecha(facturaSeleccionada.fecha_emision) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card-highlight">
+              <small class="text-muted d-block mb-1">Total</small>
+              <span class="detail-price">
+                ${{ facturaSeleccionada.total }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">ID Admin</small>
+              <span class="detail-value-medium">
+                {{ facturaSeleccionada.id_admin || 'N/A' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="detail-card">
+              <small class="text-muted d-block mb-1">Fecha Registro</small>
+              <span class="detail-value-medium">
+                {{ formatearFecha(facturaSeleccionada.f_registro) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer border-0 bg-light">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">
+          <i class="bi bi-x-circle me-1"></i> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

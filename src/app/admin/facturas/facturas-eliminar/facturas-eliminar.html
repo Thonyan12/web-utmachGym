@@ -1,33 +1,236 @@
-<div class="d-flex" style="min-height: 100vh;">
-    <app-facturas-sidebar></app-facturas-sidebar>
-    <div class="container mt-4">
-      <h2 class="mb-3">Eliminar Factura</h2>
-      <div class="mb-3">
-        <label class="form-label">ID de la Factura</label>
-        <input [(ngModel)]="idFactura" name="idFactura" type="number" class="form-control" required>
+<div class="d-flex main-container">
+  <app-facturas-sidebar></app-facturas-sidebar>
+
+  <div class="flex-grow-1 p-4 bg-light">
+    <div class="mb-4">
+      <h3 class="fw-bold page-title">
+        <i class="bi bi-trash me-2"></i> Eliminar Factura
+      </h3>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-body">
+        <form (ngSubmit)="buscar()" #buscarForm="ngForm">
+          <div class="row align-items-end">
+            <div class="col-md-8 mb-3 mb-md-0">
+              <label class="form-label form-label-custom">
+                Miembro (Nombre o Cédula)
+              </label>
+              <div class="search-input-container">
+                <input 
+                  [(ngModel)]="busqueda" 
+                  name="busqueda" 
+                  type="text" 
+                  class="form-control"
+                  placeholder="Escribe para buscar..."
+                  (input)="filtrarMiembros()"
+                  (focus)="mostrarSugerencias = true"
+                  autocomplete="off"
+                  required>
+                
+                <div *ngIf="mostrarSugerencias && miembrosFiltrados.length > 0" 
+                     class="list-group position-absolute w-100 shadow-lg suggestions-dropdown">
+                  <button 
+                    type="button"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center suggestion-item"
+                    *ngFor="let m of miembrosFiltrados"
+                    (click)="seleccionarMiembro(m)">
+                    <div>
+                      <strong>{{ m.nombre }} {{ m.apellido1 }}</strong>
+                      <small class="text-muted d-block">Cédula: {{ m.cedula || 'N/A' }}</small>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-4">
+              <button 
+                type="submit" 
+                class="btn btn-search-dark w-100" 
+                [disabled]="!busqueda.trim()">
+                <i class="bi bi-search me-2"></i> Buscar
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
-      <button class="btn btn-primary me-2" (click)="buscar()">Buscar</button>
-      <button class="btn btn-danger" (click)="confirmarEliminar()" [disabled]="!factura">Eliminar</button>
-  
-      <div *ngIf="factura" class="mt-3">
-        <strong>Factura encontrada:</strong>
-        <div>ID Miembro: {{ factura.id_miembro }}</div>
-        <div>ID Administrador: {{ factura.id_admin }}</div>
-        <div>Fecha de Emisión: {{ factura.fecha_emision }}</div>
-        <div>Total: ${{ factura.total }}</div>
-        <div>Estado: {{ factura.estado_registro ? 'Activo' : 'Inactivo' }}</div>
-      </div>
-  
-      <!-- Confirmación antes de eliminar -->
-      <div *ngIf="mostrarConfirmacion" class="alert alert-warning mt-3">
-        <strong>¿Estás seguro de que deseas eliminar esta factura?</strong>
-        <br>
-        <button class="btn btn-danger me-2" (click)="eliminar()">Sí, eliminar</button>
-        <button class="btn btn-secondary" (click)="cancelarEliminar()">Cancelar</button>
-      </div>
-  
-      <div *ngIf="mensaje" class="alert alert-info mt-3">
-        {{ mensaje }}
+    </div>
+
+    <div *ngIf="mensaje" class="alert alert-custom mb-3">
+      <i class="bi bi-info-circle me-2"></i>{{ mensaje }}
+    </div>
+
+    <div class="card border-0 shadow-sm" *ngIf="factura">
+      <div class="card-body">
+        <h5 class="card-title mb-4" style="color: #14213d;">
+          <i class="bi bi-exclamation-triangle me-2"></i>Detalle de Factura a Eliminar
+        </h5>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              ID Factura
+            </label>
+            <input 
+              type="number" 
+              class="form-control id-field-readonly" 
+              [value]="factura.id_factura" 
+              readonly>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              Miembro
+            </label>
+            <input 
+              type="text" 
+              class="form-control id-field-readonly" 
+              [value]="getMemberName(factura.id_miembro)" 
+              readonly>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              Fecha Emisión
+            </label>
+            <input 
+              type="text" 
+              class="form-control id-field-readonly" 
+              [value]="formatearFecha(factura.fecha_emision)" 
+              readonly>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              Total
+            </label>
+            <input 
+              type="text" 
+              class="form-control id-field-readonly" 
+              [value]="'$' + factura.total" 
+              readonly>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              ID Administrador
+            </label>
+            <input 
+              type="number" 
+              class="form-control id-field-readonly" 
+              [value]="factura.id_admin" 
+              readonly>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <label class="form-label form-label-custom">
+              Estado
+            </label>
+            <input 
+              type="text" 
+              class="form-control id-field-readonly" 
+              [value]="factura.estado_registro ? 'Activo' : 'Inactivo'" 
+              readonly>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-4">
+          <button 
+            type="button" 
+            class="btn btn-volver" 
+            (click)="factura = null; busqueda = ''">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-eliminar" 
+            (click)="confirmarEliminar()" 
+            [disabled]="mostrarConfirmacion">
+            <i class="bi bi-trash me-1"></i> Eliminar
+          </button>
+        </div>
+
+        <div *ngIf="mostrarConfirmacion" class="alert alert-warning-custom mt-3">
+          <div class="d-flex align-items-center mb-3">
+            <i class="bi bi-exclamation-triangle-fill me-2" style="font-size: 1.5rem; color: #dc3545;"></i>
+            <strong>¿Confirma que desea eliminar esta factura?</strong>
+          </div>
+          <div class="d-flex gap-2 justify-content-end">
+            <button 
+              type="button" 
+              class="btn btn-secondary" 
+              (click)="cancelarEliminar()">
+              <i class="bi bi-x-circle me-1"></i> Cancelar
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-danger" 
+              (click)="eliminar()">
+              <i class="bi bi-check-circle me-1"></i> Confirmar Eliminar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
+
+<div *ngIf="mostrarModalSeleccion" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #14213d; color: white;">
+        <h5 class="modal-title">
+          <i class="bi bi-list-ul me-2"></i>Seleccionar Factura
+        </h5>
+        <button type="button" class="btn-close btn-close-white" (click)="cerrarModalSeleccion()"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted mb-3">
+          <i class="bi bi-info-circle me-1"></i>
+          Este miembro tiene múltiples facturas. Seleccione la que desea eliminar:
+        </p>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead style="background-color: #f8f9fa;">
+              <tr>
+                <th>ID Factura</th>
+                <th>Fecha Emisión</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th class="text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let f of facturasDisponibles">
+                <td>{{ f.id_factura }}</td>
+                <td>{{ formatearFecha(f.fecha_emision) }}</td>
+                <td>${{ f.total }}</td>
+                <td>
+                  <span [class]="f.estado_registro ? 'badge bg-success' : 'badge bg-secondary'">
+                    {{ f.estado_registro ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <button 
+                    type="button" 
+                    class="btn btn-sm" 
+                    style="background-color: #14213d; color: white;"
+                    (click)="seleccionarFactura(f)">
+                    <i class="bi bi-check-circle me-1"></i> Seleccionar
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModalSeleccion()">
+          <i class="bi bi-x-circle me-1"></i> Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
