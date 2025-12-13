@@ -34,9 +34,12 @@ export class Login implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Limpiar cualquier sesión anterior al cargar la página de login
-    console.log('🧹 Limpiando sesión anterior...');
-    this.authService.logout();
+    // Si ya está autenticado como miembro, redirigir al dashboard
+    const user = this.authService.getCurrentUser();
+    if (user && this.authService.isAuthenticated() && user.rol === 'miembro') {
+      console.log('Miembro ya autenticado, redirigiendo...');
+      this.router.navigate(['/miembros/dashboard']);
+    }
   }
 
   // ========================================
@@ -121,9 +124,12 @@ export class Login implements OnInit, OnDestroy {
           console.log('[Login 2FA] Respuesta del backend:', response);
           
           if (response.success && response.token && response.usuario) {
-            // Guardar token y usuario
+            // Guardar token
             localStorage.setItem('token', response.token);
-            localStorage.setItem('currentUser', JSON.stringify(response.usuario));
+            
+            // Actualizar usuario en AuthService (actualiza localStorage Y BehaviorSubject)
+            this.authService.setCurrentUser(response.usuario);
+            console.log('[Login 2FA] Usuario actualizado en AuthService');
             
             // Validar rol
             if (response.usuario.rol === 'miembro') {

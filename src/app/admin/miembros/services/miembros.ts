@@ -28,9 +28,8 @@ export interface Miembro {
 })
 export class MiembrosService {
     private http = inject(HttpClient);
-    // Use environment.apiUrl so requests go through the gateway.
-    // Gateway maps `/api/members` -> members-service (backend), so use that prefix.
-    private apiUrl = `${environment.apiUrl}/api/members`;
+    // Usar la ruta correcta del backend
+    private apiUrl = `${environment.apiUrl}/api/miembros`;
 
     getMiembros(): Observable<Miembro[]> {
         return this.http.get<Miembro[]>(this.apiUrl);

@@ -34,9 +34,16 @@ export class StaffLogin implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    // Limpiar cualquier sesión anterior al cargar la página de login
-    console.log('🧹 Limpiando sesión anterior...');
-    this.authService.logout();
+    // Si ya está autenticado, redirigir según rol
+    const user = this.authService.getCurrentUser();
+    if (user && this.authService.isAuthenticated()) {
+      console.log('Usuario ya autenticado, redirigiendo...', user.rol);
+      if (user.rol === 'admin') {
+        this.router.navigate(['/admin/dashboard']);
+      } else if (user.rol === 'entrenador') {
+        this.router.navigate(['/entrenadores/dashboard']);
+      }
+    }
   }
 
   // ========================================
@@ -152,10 +159,12 @@ export class StaffLogin implements OnInit, OnDestroy {
   private completarLoginStaff(token: string, usuario: any) {
     console.log('[Staff 2FA] completarLoginStaff llamado:', { token, usuario });
     
-    // Guardar token y usuario
+    // Guardar token
     localStorage.setItem('token', token);
-    localStorage.setItem('currentUser', JSON.stringify(usuario));
-    console.log('[Staff 2FA] Token y usuario guardados en localStorage');
+    
+    // Actualizar usuario en AuthService (esto actualiza localStorage Y BehaviorSubject)
+    this.authService.setCurrentUser(usuario);
+    console.log('[Staff 2FA] Token y usuario guardados en localStorage y BehaviorSubject actualizado');
     
     // Validar rol y redirigir
     console.log('[Staff 2FA] Validando rol:', usuario.rol);

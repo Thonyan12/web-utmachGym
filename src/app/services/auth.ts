@@ -89,6 +89,16 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
+  // Establecer usuario actual (usado después de 2FA)
+  setCurrentUser(user: User | null): void {
+    if (user) {
+      localStorage.setItem('currentUser', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('currentUser');
+    }
+    this.currentUserSubject.next(user);
+  }
+
   // Verificar rol específico
   hasRole(role: string): boolean {
     const user = this.getCurrentUser();
