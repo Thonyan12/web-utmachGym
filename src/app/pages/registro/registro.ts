@@ -1,15 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { 
   AbstractControl, 
   FormBuilder, 
   FormGroup, 
   ReactiveFormsModule, 
+  FormsModule,
   Validators 
 } from '@angular/forms';
 import { RouterLink, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { Auth2FAService } from '../../services/auth-2fa.service';
 
 
 interface RegistroResponse {
@@ -31,11 +33,11 @@ interface RegistroResponse {
 @Component({
   selector: 'app-registro',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, RouterLink],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink, FormsModule],
   templateUrl: './registro.html',
   styleUrls: ['./registro.css']
 })
-export class Registro {
+export class Registro implements OnDestroy {
   registroForm: FormGroup;
   loading = false;
   error = '';
@@ -43,10 +45,22 @@ export class Registro {
   showPassword = false;
   datosRegistroExitoso: any = null;
 
+  // ========================================
+  // NUEVO: Estados para 2FA
+  // ========================================
+  paso: 'formulario' | 'verificacion' = 'formulario';
+  codigoEnviado = false;
+  codigoVerificacion = '';
+  emailRegistro = '';
+  mensajeExito = '';
+  countdown = 0; // Contador para reenvío
+  private countdownInterval: any;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private auth2FAService: Auth2FAService
   ) {
     this.registroForm = this.fb.group({
       cedula: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -78,6 +92,10 @@ export class Registro {
   get contextura() { return this.registroForm.get('contextura'); }
   get objetivo() { return this.registroForm.get('objetivo'); }
 
+  // ========================================
+  // NUEVO: Flujo de registro con 2FA
+  // ========================================
+  
   onSubmit() {
     if (this.registroForm.invalid) {
       this.markFormGroupTouched();
@@ -86,79 +104,151 @@ export class Registro {
 
     this.loading = true;
     this.error = '';
+    this.emailRegistro = this.registroForm.value.correo;
 
-    this.http.post<any>(`${environment.apiUrl}/api/members/register`, this.registroForm.value)
+    // 1️⃣ Enviar código de verificación al correo
+    this.auth2FAService.enviarCodigoRegistro(this.emailRegistro)
       .subscribe({
         next: (response) => {
           this.loading = false;
-          const body = response as any;
-
-          // Caso A: backend retorna { success: true, data: { ... } }
-          if (body && body.success === true) {
-            const data = body.data || {};
-            
-            // Normalizar credenciales si vienen en formato diferente
-            if (data.usuario || data.contrasenia) {
-              data.credenciales = data.credenciales || { usuario: data.usuario || '', contrasenia: data.contrasenia || '' };
-            }
-            
-            // Asegurar que existe nombre_completo
-            data.nombre_completo = data.nombre_completo || `${data.nombre || ''} ${data.apellido1 || ''}`.trim();
-            
-            this.datosRegistroExitoso = data;
-            this.showSuccessModal = true;
-            return;
-          }
-
-          // Caso B: backend retorna el objeto del miembro directamente
-          if (body && (body.id_miembro || body.data?.id_miembro)) {
-            this.datosRegistroExitoso = body.data || {
-              id_miembro: body.id_miembro || body.data?.id_miembro,
-              nombre_completo: `${body.nombre} ${body.apellido1 || ''}`.trim(),
-              credenciales: { usuario: '', contrasenia: '' },
-              mensaje_principal: 'Registro completado',
-              instrucciones: []
-            };
-            this.showSuccessModal = true;
-            return;
-          }
-
-          // Si hay algún error en la respuesta
-          this.error = (body && (body.error || body.message)) || 'Error en el registro';
-          
-          // Intentar obtener credenciales si se creó el usuario pero no llegaron
-          const maybeId = body?.data?.id_miembro || body?.id_miembro;
-          if (maybeId) {
-            this.tryFetchCredentials(maybeId).catch(() => {});
+          if (response.success) {
+            this.paso = 'verificacion';
+            this.codigoEnviado = true;
+            this.mensajeExito = '✉️ Hemos enviado un código de 6 dígitos a tu correo';
+            this.iniciarCountdown();
+          } else {
+            this.error = response.message || 'No se pudo enviar el código';
           }
         },
         error: (error) => {
           this.loading = false;
-          console.error('Error al registrar:', error);
-
-          // Manejo de errores específicos del backend
-          const errMsg = error?.error?.message || error?.error?.error || null;
-          const errString = typeof errMsg === 'string' ? errMsg.toLowerCase() : '';
+          console.error('Error al enviar código:', error);
           
-          if (errMsg === 'CEDULA_DUPLICADA' || errString.includes('cedula') || errString.includes('duplicate key') && errString.includes('cedula')) {
-            this.error = '❌ Esta cédula ya está registrada en nuestro sistema. Si ya eres miembro, inicia sesión.';
-          } else if (errMsg === 'CORREO_DUPLICADO' || errString.includes('correo') || errString.includes('email')) {
-            this.error = '❌ Este correo electrónico ya está en uso. Por favor, utiliza otro correo.';
-          } else if (errString.includes('duplicate') || errString.includes('duplicada') || errString.includes('ya existe')) {
-            this.error = '❌ Los datos que ingresaste ya están registrados. Verifica tu cédula o correo e intenta nuevamente.';
-          } else if (errMsg === 'CAMPOS_REQUERIDOS') {
-            this.error = '❌ Por favor completa todos los campos obligatorios del formulario.';
-          } else if (error?.status === 400) {
-            this.error = error.error?.error || '❌ Los datos ingresados no son válidos. Por favor revisa el formulario.';
-          } else if (error?.status === 500) {
-            this.error = '❌ Hubo un problema en el servidor. Por favor intenta nuevamente en unos momentos.';
+          const errMsg = error?.error?.message || '';
+          if (errMsg.includes('ya está registrado') || errMsg.includes('correo')) {
+            this.error = '❌ Este correo ya está registrado. Por favor, inicia sesión o usa otro correo.';
           } else if (error?.status === 0) {
             this.error = '❌ No se pudo conectar con el servidor. Verifica tu conexión a internet.';
           } else {
-            this.error = error.error?.error || '❌ No se pudo completar el registro. Por favor intenta nuevamente.';
+            this.error = error.error?.message || '❌ No se pudo enviar el código de verificación.';
           }
         }
       });
+  }
+
+  // 2️⃣ Verificar código y completar registro
+  verificarCodigo() {
+    if (!this.codigoVerificacion || this.codigoVerificacion.length !== 6) {
+      this.error = '⚠️ Por favor ingresa el código de 6 dígitos';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+
+    const datosCompletos = {
+      correo: this.emailRegistro,
+      codigo: this.codigoVerificacion,
+      ...this.registroForm.value
+    };
+
+    this.auth2FAService.verificarCodigoRegistro(datosCompletos)
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          if (response.success && response.data) {
+            // Preparar datos para el modal de éxito
+            this.datosRegistroExitoso = {
+              id_miembro: response.data.id_miembro,
+              id_usuario: response.data.id_usuario,
+              nombre_completo: `${this.registroForm.value.nombre} ${this.registroForm.value.apellido1}`.trim(),
+              credenciales: response.data.credenciales,
+              mensaje_principal: '¡Registro exitoso!',
+              instrucciones: [
+                'Tu cuenta ha sido creada correctamente',
+                'Guarda tus credenciales en un lugar seguro',
+                'Usa estos datos para iniciar sesión'
+              ]
+            };
+            this.showSuccessModal = true;
+            this.detenerCountdown();
+          } else {
+            this.error = response.message || 'Error al verificar el código';
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          console.error('Error al verificar código:', error);
+          
+          const errMsg = error?.error?.message || '';
+          if (errMsg.includes('inválido') || errMsg.includes('expirado')) {
+            this.error = '❌ Código inválido o expirado. Solicita uno nuevo.';
+          } else {
+            this.error = error.error?.message || '❌ No se pudo verificar el código. Intenta nuevamente.';
+          }
+        }
+      });
+  }
+
+  // Reenviar código de verificación
+  reenviarCodigo() {
+    if (this.countdown > 0) return;
+
+    this.loading = true;
+    this.error = '';
+    this.mensajeExito = '';
+
+    this.auth2FAService.enviarCodigoRegistro(this.emailRegistro)
+      .subscribe({
+        next: (response) => {
+          this.loading = false;
+          if (response.success) {
+            this.mensajeExito = '✉️ Código reenviado correctamente';
+            this.codigoVerificacion = '';
+            this.iniciarCountdown();
+          } else {
+            this.error = response.message || 'No se pudo reenviar el código';
+          }
+        },
+        error: (error) => {
+          this.loading = false;
+          this.error = error.error?.message || '❌ Error al reenviar el código';
+        }
+      });
+  }
+
+  // Volver al formulario
+  volverAlFormulario() {
+    this.paso = 'formulario';
+    this.codigoEnviado = false;
+    this.codigoVerificacion = '';
+    this.error = '';
+    this.mensajeExito = '';
+    this.detenerCountdown();
+  }
+
+  // Iniciar countdown de 60 segundos para reenvío
+  private iniciarCountdown() {
+    this.countdown = 60;
+    this.detenerCountdown(); // Limpiar cualquier intervalo previo
+    
+    this.countdownInterval = setInterval(() => {
+      this.countdown--;
+      if (this.countdown <= 0) {
+        this.detenerCountdown();
+      }
+    }, 1000);
+  }
+
+  private detenerCountdown() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  }
+
+  ngOnDestroy() {
+    this.detenerCountdown();
   }
 
   // Intentar obtener credenciales desde varios endpoints posibles

@@ -12,13 +12,17 @@
       <img src="logomain.png" alt="Logo" width="80" class="mb-3 animate__animated animate__zoomIn">
       <h2 class="fw-bold" style="color: #14213d; position: relative;">
         <span style="display: inline-block; position: relative;">
-          Registro de Nuevo Miembro
+          <span *ngIf="paso === 'formulario'">Registro de Nuevo Miembro</span>
+          <span *ngIf="paso === 'verificacion'">Verificación de Email</span>
           <span style="position: absolute; bottom: -5px; left: 0; width: 100%; height: 2px; background: #fca311; border-radius: 3px;"></span>
         </span>
       </h2>
     </div>
-    
-    <form [formGroup]="registroForm" (ngSubmit)="onSubmit()">
+
+    <!-- ========================================
+         PASO 1: FORMULARIO DE REGISTRO
+         ======================================== -->
+    <form *ngIf="paso === 'formulario'" [formGroup]="registroForm" (ngSubmit)="onSubmit()">
       <div class="row">
         <!-- Cédula -->
         <div class="col-md-6 mb-4">
@@ -180,8 +184,82 @@
         <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
       </div>
     </form>
+
+    <!-- ========================================
+         PASO 2: VERIFICACIÓN DE CÓDIGO
+         ======================================== -->
+    <div *ngIf="paso === 'verificacion'" class="animate__animated animate__fadeIn">
+      <!-- Mensaje de éxito del envío -->
+      <div *ngIf="mensajeExito" class="alert alert-success text-center mb-4">
+        <i class="bi bi-envelope-check-fill me-2"></i>{{ mensajeExito }}
+      </div>
+
+      <!-- Información del email -->
+      <div class="text-center mb-4">
+        <p class="text-muted mb-2">Revisa tu correo electrónico:</p>
+        <p class="fw-bold" style="color: #14213d; font-size: 1.1rem;">{{ emailRegistro }}</p>
+        <p class="text-muted small">El código expira en 10 minutos</p>
+      </div>
+
+      <!-- Input para código -->
+      <div class="mb-4">
+        <label for="codigo" class="form-label fw-medium text-center w-100" style="color: #14213d;">
+          Ingresa el código de 6 dígitos
+        </label>
+        <input 
+          type="text" 
+          class="form-control form-control-lg text-center fw-bold border-2" 
+          id="codigo" 
+          [(ngModel)]="codigoVerificacion"
+          maxlength="6"
+          placeholder="000000"
+          [disabled]="loading"
+          style="border-color: #14213d; letter-spacing: 8px; font-size: 1.5rem;">
+      </div>
+
+      <!-- Botón verificar -->
+      <button type="button" class="btn w-100 py-2 mb-3" 
+              [disabled]="codigoVerificacion.length !== 6 || loading"
+              [style]="codigoVerificacion.length === 6 ? 
+                      'background-color: #fca311; color: #0a1a2e; font-weight: 600; border: none;' : 
+                      'background-color: #cccccc; color: #666666; font-weight: 600; border: none;'"
+              (click)="verificarCodigo()">
+        <span *ngIf="!loading">
+          <i class="bi bi-check-circle me-2"></i> Verificar Código
+        </span>
+        <span *ngIf="loading">
+          <span class="spinner-border spinner-border-sm me-2"></span> Verificando...
+        </span>
+      </button>
+
+      <!-- Reenviar código -->
+      <div class="text-center mb-3">
+        <button type="button" class="btn btn-link text-decoration-none" 
+                [disabled]="countdown > 0"
+                (click)="reenviarCodigo()"
+                style="color: #fca311;">
+          <i class="bi bi-arrow-clockwise me-1"></i>
+          <span *ngIf="countdown > 0">Reenviar código en {{ countdown }}s</span>
+          <span *ngIf="countdown === 0">Reenviar código</span>
+        </button>
+      </div>
+
+      <!-- Volver al formulario -->
+      <div class="text-center">
+        <button type="button" class="btn btn-sm" 
+                style="background-color: transparent; color: #14213d; border: 1px solid #14213d;"
+                (click)="volverAlFormulario()">
+          <i class="bi bi-arrow-left me-1"></i> Volver al formulario
+        </button>
+      </div>
+
+      <!-- Mostrar errores -->
+      <div *ngIf="error" class="alert alert-danger mt-3 text-center">
+        <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+      </div>
+    </div>
     
-    <div class="mt-4 text-center">
+    <div *ngIf="paso === 'formulario'" class="mt-4 text-center">
       <a routerLink="/auth" class="text-decoration-none fw-medium" style="color: #fca311;">
         <i class="bi bi-box-arrow-in-right me-1"></i> ¿Ya tienes cuenta? Inicia sesión
       </a>
