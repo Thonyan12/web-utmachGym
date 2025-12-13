@@ -127,7 +127,14 @@ export class Login implements OnInit, OnDestroy {
             
             // Validar rol
             if (response.usuario.rol === 'miembro') {
-              this.router.navigate(['/miembros/dashboard']);
+              console.log('[Login 2FA] Redirigiendo a /miembros/dashboard');
+              this.router.navigate(['/miembros/dashboard']).then(success => {
+                console.log('[Login 2FA] Navegación exitosa:', success);
+                if (!success) {
+                  console.error('[Login 2FA] La navegación falló, forzando recarga');
+                  window.location.href = '/miembros/dashboard';
+                }
+              });
             } else if (response.usuario.rol === 'admin' || response.usuario.rol === 'entrenador') {
               this.authService.logout();
               this.error = '🚫 Acceso denegado. Este portal es solo para miembros.';

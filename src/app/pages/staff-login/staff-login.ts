@@ -162,10 +162,22 @@ export class StaffLogin implements OnInit, OnDestroy {
     
     if (usuario.rol === 'admin') {
       console.log('[Staff 2FA] Redirigiendo a /admin/dashboard');
-      this.router.navigate(['/admin/dashboard']);
+      this.router.navigate(['/admin/dashboard']).then(success => {
+        console.log('[Staff 2FA] Navegación exitosa:', success);
+        if (!success) {
+          console.error('[Staff 2FA] La navegación falló, forzando recarga');
+          window.location.href = '/admin/dashboard';
+        }
+      });
     } else if (usuario.rol === 'entrenador') {
       console.log('[Staff 2FA] Redirigiendo a /entrenadores/dashboard');
-      this.router.navigate(['/entrenadores/dashboard']);
+      this.router.navigate(['/entrenadores/dashboard']).then(success => {
+        console.log('[Staff 2FA] Navegación exitosa:', success);
+        if (!success) {
+          console.error('[Staff 2FA] La navegación falló, forzando recarga');
+          window.location.href = '/entrenadores/dashboard';
+        }
+      });
     } else if (usuario.rol === 'miembro') {
       this.authService.logout();
       this.error = '🚫 Acceso denegado. Usted es un miembro. Use el portal de miembros.';
