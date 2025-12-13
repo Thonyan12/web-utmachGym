@@ -109,10 +109,16 @@ export class Login implements OnInit, OnDestroy {
     this.loading = true;
     this.error = '';
 
+    console.log('[Login 2FA] Verificando código:', {
+      email: this.usuario,
+      codigoLength: this.codigoVerificacion.length
+    });
+
     this.auth2FAService.verificarCodigo2FA(this.usuario, this.codigoVerificacion)
       .subscribe({
         next: (response) => {
           this.loading = false;
+          console.log('[Login 2FA] Respuesta del backend:', response);
           
           if (response.success && response.token && response.usuario) {
             // Guardar token y usuario
@@ -137,11 +143,15 @@ export class Login implements OnInit, OnDestroy {
         },
         error: (error) => {
           this.loading = false;
-          console.error('Error al verificar código 2FA:', error);
+          console.error('[Login 2FA] Error completo:', error);
+          console.error('[Login 2FA] Error response:', error.error);
+          console.error('[Login 2FA] Status:', error.status);
           
           const errMsg = error?.error?.message || '';
           if (errMsg.includes('inválido') || errMsg.includes('expirado')) {
             this.error = '❌ Código inválido o expirado. Solicita uno nuevo.';
+          } else if (error.status === 400) {
+            this.error = '❌ ' + (error.error?.message || 'Código inválido o expirado');
           } else {
             this.error = error.error?.message || '❌ No se pudo verificar el código.';
           }

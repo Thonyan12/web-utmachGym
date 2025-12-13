@@ -3,11 +3,18 @@
     <div class="card-body p-4">
       <div class="text-center mb-4">
         <img src="logomain.png" alt="Logo" width="60" class="mb-3">
-        <h3 class="fw-bold" style="color: #14213d;">Acceso Staff</h3>
-        <p class="text-muted">Solo Administradores y Entrenadores</p>
+        <h3 class="fw-bold" style="color: #14213d;">
+          <span *ngIf="paso === 'credenciales'">Acceso Staff</span>
+          <span *ngIf="paso === 'verificacion-2fa'">Verificación 2FA</span>
+        </h3>
+        <p class="text-muted" *ngIf="paso === 'credenciales'">Solo Administradores y Entrenadores</p>
+        <p class="text-muted" *ngIf="paso === 'verificacion-2fa'">Código enviado a tu correo</p>
       </div>
-      
-      <form (ngSubmit)="onSubmit()">
+
+      <!-- ========================================
+           PASO 1: CREDENCIALES
+           ======================================== -->
+      <form *ngIf="paso === 'credenciales'" (ngSubmit)="onSubmit()">
         <!-- Mostrar errores con mejor styling -->
         <div *ngIf="error" class="alert alert-danger d-flex align-items-center">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -48,9 +55,84 @@
           {{ loading ? 'Verificando...' : 'Ingresar' }}
         </button>
       </form>
+
+      <!-- ========================================
+           PASO 2: VERIFICACIÓN 2FA
+           ======================================== -->
+      <div *ngIf="paso === 'verificacion-2fa'" class="animate__animated animate__fadeIn">
+        <!-- Mensaje informativo -->
+        <div class="alert alert-info text-center mb-4">
+          <i class="bi bi-shield-lock-fill me-2"></i>
+          Se ha enviado un código de verificación a tu correo
+        </div>
+
+        <!-- Email ofuscado -->
+        <div class="text-center mb-4" *ngIf="emailOfuscado">
+          <p class="text-muted mb-1">Código enviado a:</p>
+          <p class="fw-bold" style="color: #14213d;">{{ emailOfuscado }}</p>
+          <p class="text-muted small">El código expira en 10 minutos</p>
+        </div>
+
+        <!-- Input para código -->
+        <div class="mb-4">
+          <label for="codigo2fa" class="form-label fw-medium text-center w-100" style="color: #14213d;">
+            Ingresa el código de 6 dígitos
+          </label>
+          <input 
+            type="text" 
+            class="form-control form-control-lg text-center fw-bold border-2" 
+            id="codigo2fa" 
+            [(ngModel)]="codigoVerificacion"
+            maxlength="6"
+            placeholder="000000"
+            [disabled]="loading"
+            style="border-color: #14213d; letter-spacing: 8px; font-size: 1.5rem;">
+        </div>
+
+        <!-- Botón verificar -->
+        <button type="button" class="btn w-100 py-2 mb-3" 
+                [disabled]="codigoVerificacion.length !== 6 || loading"
+                [style]="codigoVerificacion.length === 6 ? 
+                        'background-color: #fca311; color: #0a1a2e; font-weight: 600; border: none;' : 
+                        'background-color: #cccccc; color: #666666; font-weight: 600; border: none;'"
+                (click)="verificarCodigo2FA()">
+          <span *ngIf="!loading">
+            <i class="bi bi-check-circle me-2"></i> Verificar y Acceder
+          </span>
+          <span *ngIf="loading">
+            <span class="spinner-border spinner-border-sm me-2"></span> Verificando...
+          </span>
+        </button>
+
+        <!-- Reenviar código -->
+        <div class="text-center mb-3">
+          <button type="button" class="btn btn-link text-decoration-none" 
+                  [disabled]="countdown > 0"
+                  (click)="reenviarCodigo2FA()"
+                  style="color: #fca311;">
+            <i class="bi bi-arrow-clockwise me-1"></i>
+            <span *ngIf="countdown > 0">Reenviar código en {{ countdown }}s</span>
+            <span *ngIf="countdown === 0">Reenviar código</span>
+          </button>
+        </div>
+
+        <!-- Volver a credenciales -->
+        <div class="text-center">
+          <button type="button" class="btn btn-sm" 
+                  style="background-color: transparent; color: #14213d; border: 1px solid #14213d;"
+                  (click)="volverACredenciales()">
+            <i class="bi bi-arrow-left me-1"></i> Volver al login
+          </button>
+        </div>
+
+        <!-- Mostrar errores -->
+        <div *ngIf="error" class="alert alert-danger mt-3 text-center">
+          <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
+        </div>
+      </div>
       
-      <div class="text-center">
-        <a routerLink="/login" class="btn btn-outline-secondary btn-sm me-2">
+      <div *ngIf="paso === 'credenciales'" class="text-center">
+        <a routerLink="/auth" class="btn btn-outline-secondary btn-sm me-2">
           <i class="bi bi-person me-1"></i> Soy Miembro
         </a>
         <a routerLink="/" class="text-decoration-none" style="color: #14213d;">

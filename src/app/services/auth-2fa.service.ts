@@ -130,9 +130,15 @@ export class Auth2FAService {
    * Endpoint: POST /api/auth/login/verificar-2fa
    */
   verificarCodigo2FA(email: string, codigo: string): Observable<VerificarCodigo2FAResponse> {
-    return this.http.post<VerificarCodigo2FAResponse>(
-      `${this.apiUrl}/login/verificar-2fa`,
-      { email, codigo }
-    );
+    const url = `${this.apiUrl}/login/verificar-2fa`;
+    const body = { email, codigo };
+    
+    console.log('[Auth2FAService] verificarCodigo2FA:', {
+      url,
+      body,
+      apiUrl: this.apiUrl
+    });
+    
+    return this.http.post<VerificarCodigo2FAResponse>(url, body);
   }
 }
