@@ -114,10 +114,18 @@ export class StaffLogin implements OnInit, OnDestroy {
         next: (response) => {
           this.loading = false;
           console.log('[Staff 2FA] Respuesta del backend:', response);
+          console.log('[Staff 2FA] Verificando condiciones:', {
+            success: response.success,
+            hasToken: !!response.token,
+            hasUsuario: !!response.usuario,
+            usuario: response.usuario
+          });
           
           if (response.success && response.token && response.usuario) {
+            console.log('[Staff 2FA] ✅ Condiciones cumplidas, llamando completarLoginStaff');
             this.completarLoginStaff(response.token, response.usuario);
           } else {
+            console.log('[Staff 2FA] ❌ Condiciones NO cumplidas');
             this.error = response.message || 'Error al verificar el código';
           }
         },
@@ -142,14 +150,21 @@ export class StaffLogin implements OnInit, OnDestroy {
 
   // Completar login y redirigir según rol
   private completarLoginStaff(token: string, usuario: any) {
+    console.log('[Staff 2FA] completarLoginStaff llamado:', { token, usuario });
+    
     // Guardar token y usuario
     localStorage.setItem('token', token);
     localStorage.setItem('currentUser', JSON.stringify(usuario));
+    console.log('[Staff 2FA] Token y usuario guardados en localStorage');
     
     // Validar rol y redirigir
+    console.log('[Staff 2FA] Validando rol:', usuario.rol);
+    
     if (usuario.rol === 'admin') {
+      console.log('[Staff 2FA] Redirigiendo a /admin/dashboard');
       this.router.navigate(['/admin/dashboard']);
     } else if (usuario.rol === 'entrenador') {
+      console.log('[Staff 2FA] Redirigiendo a /entrenadores/dashboard');
       this.router.navigate(['/entrenadores/dashboard']);
     } else if (usuario.rol === 'miembro') {
       this.authService.logout();
