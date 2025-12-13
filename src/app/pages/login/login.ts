@@ -127,9 +127,20 @@ export class Login implements OnInit, OnDestroy {
             // Guardar token
             localStorage.setItem('token', response.token);
             
+            // Transformar respuesta del backend a estructura User
+            const user = {
+              id: response.usuario.id,
+              id_miembro: response.usuario.id_miembro,
+              id_coach: response.usuario.id_coach,
+              usuario: response.usuario.usuario || response.usuario.email || this.usuario,
+              rol: response.usuario.rol,
+              nombre_completo: response.usuario.nombre || '',
+              email: response.usuario.email || response.usuario.usuario || this.usuario
+            };
+            
             // Actualizar usuario en AuthService (actualiza localStorage Y BehaviorSubject)
-            this.authService.setCurrentUser(response.usuario);
-            console.log('[Login 2FA] Usuario actualizado en AuthService');
+            this.authService.setCurrentUser(user);
+            console.log('[Login 2FA] Usuario actualizado en AuthService:', user);
             
             // Validar rol
             if (response.usuario.rol === 'miembro') {

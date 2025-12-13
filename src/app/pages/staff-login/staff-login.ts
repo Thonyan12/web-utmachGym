@@ -162,8 +162,19 @@ export class StaffLogin implements OnInit, OnDestroy {
     // Guardar token
     localStorage.setItem('token', token);
     
+    // Transformar respuesta del backend a estructura User
+    const user = {
+      id: usuario.id,
+      id_miembro: usuario.id_miembro,
+      id_coach: usuario.id_coach,
+      usuario: usuario.usuario || usuario.email || this.usuario,
+      rol: usuario.rol,
+      nombre_completo: usuario.nombre || '',
+      email: usuario.email || usuario.usuario || this.usuario
+    };
+    
     // Actualizar usuario en AuthService (esto actualiza localStorage Y BehaviorSubject)
-    this.authService.setCurrentUser(usuario);
+    this.authService.setCurrentUser(user);
     console.log('[Staff 2FA] Token y usuario guardados en localStorage y BehaviorSubject actualizado');
     
     // Validar rol y redirigir

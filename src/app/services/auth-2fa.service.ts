@@ -57,6 +57,11 @@ export interface ValidarLoginResponse {
     id: number;
     nombre: string;
     rol: string;
+    id_miembro?: number;
+    id_coach?: number;
+    usuario?: string;
+    email?: string;
+    nombre_completo?: string;
   };
 }
 
@@ -73,6 +78,11 @@ export interface VerificarCodigo2FAResponse {
     id: number;
     nombre: string;
     rol: string;
+    id_miembro?: number;
+    id_coach?: number;
+    usuario?: string;
+    email?: string;
+    nombre_completo?: string;
   };
 }
 
